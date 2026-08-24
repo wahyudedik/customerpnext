@@ -32,7 +32,7 @@ Frappe Framework
 
 ```bash
 bench get-app qalcuity
-bench --site site-name install-app qalcuity
+bench --site qalcuity.com install-app qalcuity
 ```
 
 ## Configuration
@@ -57,7 +57,7 @@ Default data will be automatically loaded via Frappe fixtures:
 
 To manually seed data, run:
 ```bash
-bench --site [site-name] execute qalcuity.qalcuity.tasks.seed_initial_data
+bench --site qalcuity.com execute qalcuity.qalcuity.tasks.seed_initial_data
 ```
 
 ## Branding
