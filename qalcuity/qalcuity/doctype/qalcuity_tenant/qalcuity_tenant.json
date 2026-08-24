@@ -1,0 +1,142 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "field:tenant_id",
+    "creation": "2026-08-22 15:57:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "tenant_id",
+        "customer",
+        "subscription",
+        "status",
+        "column_break_01",
+        "site_name",
+        "provisioned_on",
+        "last_activity",
+        "storage_used_gb"
+    ],
+    "fields": [
+        {
+            "fieldname": "tenant_id",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Tenant ID",
+            "reqd": 1,
+            "unique": 1
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Customer",
+            "options": "Customer",
+            "reqd": 1
+        },
+        {
+            "fieldname": "subscription",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Subscription",
+            "options": "Qalcuity Subscription"
+        },
+        {
+            "default": "Active",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "options": "Active\nSuspended\nTerminated",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "site_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Site Name"
+        },
+        {
+            "fieldname": "provisioned_on",
+            "fieldtype": "Datetime",
+            "label": "Provisioned On",
+            "read_only": 1
+        },
+        {
+            "fieldname": "last_activity",
+            "fieldtype": "Datetime",
+            "label": "Last Activity",
+            "read_only": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "storage_used_gb",
+            "fieldtype": "Float",
+            "label": "Storage Used (GB)",
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2026-08-22 15:57:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Tenant",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 0
+        },
+        {
+            "role": "Customer",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        }
+    ],
+    "search_fields": "tenant_id,customer,site_name",
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [
+        {
+            "color": "green",
+            "title": "Active"
+        },
+        {
+            "color": "orange",
+            "title": "Suspended"
+        },
+        {
+            "color": "red",
+            "title": "Terminated"
+        }
+    ],
+    "title_field": "tenant_id",
+    "track_changes": 1
+}

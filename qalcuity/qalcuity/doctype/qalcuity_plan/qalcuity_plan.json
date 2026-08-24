@@ -1,0 +1,186 @@
+{
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "field:plan_name",
+    "creation": "2026-08-22 15:57:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "plan_name",
+        "description",
+        "is_active",
+        "is_trial",
+        "column_break_01",
+        "price",
+        "currency",
+        "billing_period",
+        "section_break_features",
+        "features",
+        "section_break_limits",
+        "max_users",
+        "max_storage_gb",
+        "column_break_limits2",
+        "sort_order",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "fieldname": "plan_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Plan Name",
+            "reqd": 1,
+            "unique": 1
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Long Text",
+            "label": "Description"
+        },
+        {
+            "default": "1",
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "in_list_view": 1,
+            "label": "Is Active"
+        },
+        {
+            "default": "0",
+            "fieldname": "is_trial",
+            "fieldtype": "Check",
+            "in_list_view": 1,
+            "label": "Is Trial"
+        },
+        {
+            "fieldname": "column_break_01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "price",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Price",
+            "options": "currency",
+            "reqd": 1
+        },
+        {
+            "default": "IDR",
+            "fieldname": "currency",
+            "fieldtype": "Link",
+            "label": "Currency",
+            "options": "Currency"
+        },
+        {
+            "default": "Monthly",
+            "fieldname": "billing_period",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Billing Period",
+            "options": "Monthly\nQuarterly\nAnnual"
+        },
+        {
+            "fieldname": "section_break_features",
+            "fieldtype": "Section Break",
+            "label": "Features"
+        },
+        {
+            "fieldname": "features",
+            "fieldtype": "Table",
+            "label": "Features",
+            "options": "Qalcuity Plan Feature"
+        },
+        {
+            "fieldname": "section_break_limits",
+            "fieldtype": "Section Break",
+            "label": "Limits"
+        },
+        {
+            "default": "1",
+            "fieldname": "max_users",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Max Users"
+        },
+        {
+            "default": "1",
+            "fieldname": "max_storage_gb",
+            "fieldtype": "Int",
+            "label": "Max Storage (GB)"
+        },
+        {
+            "fieldname": "column_break_limits2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "sort_order",
+            "fieldtype": "Int",
+            "label": "Sort Order"
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Qalcuity Plan",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [
+        {
+            "link_doctype": "Qalcuity Subscription",
+            "link_fieldname": "plan"
+        }
+    ],
+    "modified": "2026-08-22 15:57:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Plan",
+    "naming_rule": "By fieldname",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 0
+        },
+        {
+            "role": "Guest",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        },
+        {
+            "role": "Customer",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        }
+    ],
+    "search_fields": "plan_name,description",
+    "sort_field": "sort_order",
+    "sort_order": "ASC",
+    "states": [],
+    "title_field": "plan_name",
+    "track_changes": 1
+}

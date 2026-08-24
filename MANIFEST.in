@@ -1,0 +1,15 @@
+include MANIFEST.in
+include requirements.txt
+include *.md
+include LICENSE.txt
+recursive-include qalcuity/public *
+recursive-include qalcuity/templates *
+recursive-include qalcuity *.py
+recursive-include qalcuity *.json
+recursive-include qalcuity *.js
+recursive-include qalcuity *.css
+recursive-include qalcuity *.html
+recursive-include qalcuity *.txt
+recursive-include qalcuity *.png
+recursive-include qalcuity *.ico
+recursive-include qalcuity *.svg

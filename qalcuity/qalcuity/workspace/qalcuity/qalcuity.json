@@ -1,0 +1,336 @@
+{
+    "app": "qalcuity",
+    "charts": [
+        {
+            "chart_name": "Revenue Overview",
+            "chart_type": "Line",
+            "color": "#2490EF",
+            "custom_options": "",
+            "document_type": "Qalcuity Payment",
+            "dynamic_filters_json": "",
+            "filters_json": "[\"qalcuity_payment\",\"status\",\"=\",\"Approved\",false]",
+            "group_by_type": "By Value",
+            "name": "Revenue Overview",
+            "time_interval": "Monthly",
+            "timespan": "Last Year",
+            "x_field": "payment_date",
+            "y_axis": [
+                {
+                    "field": "amount",
+                    "filters": "[\"qalcuity_payment\",\"status\",\"=\",\"Approved\",false]"
+                }
+            ]
+        },
+        {
+            "chart_name": "Subscription Status Distribution",
+            "chart_type": "Donut",
+            "color": "#00897B",
+            "custom_options": "",
+            "document_type": "Qalcuity Subscription",
+            "dynamic_filters_json": "",
+            "filters_json": "[]",
+            "group_by_type": "By Value",
+            "name": "Subscription Status Distribution",
+            "time_interval": "",
+            "timespan": "",
+            "x_field": "status",
+            "y_axis": [
+                {
+                    "field": "name",
+                    "filters": ""
+                }
+            ]
+        },
+        {
+            "chart_name": "New Subscriptions Trend",
+            "chart_type": "Bar",
+            "color": "#2490EF",
+            "custom_options": "",
+            "document_type": "Qalcuity Subscription",
+            "dynamic_filters_json": "",
+            "filters_json": "[]",
+            "group_by_type": "By Value",
+            "name": "New Subscriptions Trend",
+            "time_interval": "Monthly",
+            "timespan": "Last Year",
+            "x_field": "creation",
+            "y_axis": [
+                {
+                    "field": "name",
+                    "filters": ""
+                }
+            ]
+        }
+    ],
+    "content": "[{\"id\":\"qwcHdr001\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Qalcuity ERP Dashboard</b></span>\",\"col\":12}},{\"id\":\"qwcHdr002\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"text-muted\\\">SaaS ERP Management Hub</span>\",\"col\":12}},{\"id\":\"qwcNc001\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Subscriptions\",\"col\":3}},{\"id\":\"qwcNc002\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pending Payments\",\"col\":3}},{\"id\":\"qwcNc003\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Revenue\",\"col\":3}},{\"id\":\"qwcNc004\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Active Tenants\",\"col\":3}},{\"id\":\"qwcSpc001\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qwcHdr003\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\",\"col\":12}},{\"id\":\"qwcSht001\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Qalcuity Dashboard\",\"col\":3}},{\"id\":\"qwcSht002\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Qalcuity Plan\",\"col\":3}},{\"id\":\"qwcSht003\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Qalcuity Subscription\",\"col\":3}},{\"id\":\"qwcSht004\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Qalcuity Payment\",\"col\":3}},{\"id\":\"qwcSht005\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Qalcuity Tenant\",\"col\":3}},{\"id\":\"qwcSht006\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Qalcuity Settings\",\"col\":3}},{\"id\":\"qwcSpc002\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qwcHdr004\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Analytics</b></span>\",\"col\":12}},{\"id\":\"qwcChrt01\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Revenue Overview\",\"col\":6}},{\"id\":\"qwcChrt02\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Subscription Status Distribution\",\"col\":3}},{\"id\":\"qwcChrt03\",\"type\":\"chart\",\"data\":{\"chart_name\":\"New Subscriptions Trend\",\"col\":3}},{\"id\":\"qwcSpc003\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qwcHdr005\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Modules</b></span>\",\"col\":12}},{\"id\":\"qwcCrd001\",\"type\":\"card\",\"data\":{\"card_name\":\"Subscriptions & Plans\",\"col\":4}},{\"id\":\"qwcCrd002\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"qwcCrd003\",\"type\":\"card\",\"data\":{\"card_name\":\"Tenants\",\"col\":4}},{\"id\":\"qwcCrd004\",\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+    "creation": "2026-08-22 16:15:00.000000",
+    "custom_blocks": [],
+    "docstatus": 0,
+    "doctype": "Workspace",
+    "for_user": "",
+    "hide_custom": 0,
+    "icon": "octicon octicon-zap",
+    "idx": 0,
+    "is_hidden": 0,
+    "label": "Qalcuity ERP",
+    "links": [
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Subscriptions & Plans",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Qalcuity Plan",
+            "link_count": 0,
+            "link_to": "Qalcuity Plan",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Qalcuity Subscription",
+            "link_count": 0,
+            "link_to": "Qalcuity Subscription",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Payments",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Qalcuity Payment",
+            "link_count": 0,
+            "link_to": "Qalcuity Payment",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Tenants",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Qalcuity Tenant",
+            "link_count": 0,
+            "link_to": "Qalcuity Tenant",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Settings",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Qalcuity Settings",
+            "link_count": 0,
+            "link_to": "Qalcuity Settings",
+            "link_type": "DocType",
+            "onboard": 0,
+            "type": "Link"
+        }
+    ],
+    "modified": "2026-08-22 16:15:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity",
+    "number_cards": [
+        {
+            "card_name": "Active Subscriptions",
+            "filters_json": "[\"Qalcuity Subscription\",\"status\",\"=\",\"Active\",false]",
+            "label": "Active Subscriptions",
+            "name": "Active Subscriptions"
+        },
+        {
+            "card_name": "Pending Payments",
+            "filters_json": "[\"Qalcuity Payment\",\"status\",\"=\",\"Pending\",false]",
+            "label": "Pending Payments",
+            "name": "Pending Payments"
+        },
+        {
+            "card_name": "Total Revenue",
+            "filters_json": "[\"Qalcuity Payment\",\"status\",\"=\",\"Approved\",false]",
+            "label": "Total Revenue",
+            "name": "Total Revenue"
+        },
+        {
+            "card_name": "Active Tenants",
+            "filters_json": "[\"Qalcuity Tenant\",\"status\",\"=\",\"Active\",false]",
+            "label": "Active Tenants",
+            "name": "Active Tenants"
+        }
+    ],
+    "owner": "Administrator",
+    "parent_page": "",
+    "public": 1,
+    "quick_lists": [],
+    "restrict_to_domain": "",
+    "roles": [],
+    "sequence_id": 1.0,
+    "shortcuts": [
+        {
+            "color": "Blue",
+            "label": "Qalcuity Dashboard",
+            "link_to": "Qalcuity",
+            "type": "Workspace"
+        },
+        {
+            "color": "Teal",
+            "label": "Qalcuity Plan",
+            "link_to": "Qalcuity Plan",
+            "type": "DocType"
+        },
+        {
+            "color": "Green",
+            "label": "Qalcuity Subscription",
+            "link_to": "Qalcuity Subscription",
+            "stats_filter": "{\n    \"status\": \"Active\"\n}",
+            "type": "DocType"
+        },
+        {
+            "color": "Orange",
+            "label": "Qalcuity Payment",
+            "link_to": "Qalcuity Payment",
+            "stats_filter": "{\n    \"status\": \"Pending\"\n}",
+            "type": "DocType"
+        },
+        {
+            "color": "Purple",
+            "label": "Qalcuity Tenant",
+            "link_to": "Qalcuity Tenant",
+            "type": "DocType"
+        },
+        {
+            "color": "Gray",
+            "label": "Qalcuity Settings",
+            "link_to": "Qalcuity Settings",
+            "type": "DocType"
+        }
+    ],
+    "sidebar_items": [
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-zap",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Dashboard",
+            "link_to": "Qalcuity",
+            "link_type": "Workspace",
+            "open_in_new_tab": 0,
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-tag",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Qalcuity Plan",
+            "link_to": "Qalcuity Plan",
+            "link_type": "DocType",
+            "open_in_new_tab": 0,
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-package",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Qalcuity Subscription",
+            "link_to": "Qalcuity Subscription",
+            "link_type": "DocType",
+            "open_in_new_tab": 0,
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-credit-card",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Qalcuity Payment",
+            "link_to": "Qalcuity Payment",
+            "link_type": "DocType",
+            "open_in_new_tab": 0,
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-organization",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Qalcuity Tenant",
+            "link_to": "Qalcuity Tenant",
+            "link_type": "DocType",
+            "open_in_new_tab": 0,
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "database",
+            "indent": 1,
+            "keep_closed": 1,
+            "label": "Setup",
+            "link_type": "DocType",
+            "open_in_new_tab": 0,
+            "show_arrow": 0,
+            "type": "Section Break"
+        },
+        {
+            "child": 1,
+            "collapsible": 1,
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Qalcuity Settings",
+            "link_to": "Qalcuity Settings",
+            "link_type": "DocType",
+            "open_in_new_tab": 0,
+            "show_arrow": 0,
+            "type": "Link"
+        }
+    ],
+    "standard": 1,
+    "title": "Qalcuity ERP",
+    "type": "Workspace"
+}

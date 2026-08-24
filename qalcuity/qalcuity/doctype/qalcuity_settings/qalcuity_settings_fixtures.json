@@ -1,0 +1,15 @@
+[
+    {
+        "company_name": "Qalcuity ERP",
+        "superadmin_email": "admin@qalcuity.com",
+        "max_file_size_mb": 10,
+        "allowed_payment_methods": "Bank Transfer\nE-Wallet\nVirtual Account",
+        "subscription_expiry_warning_days": 7,
+        "enable_trial_period": 1,
+        "trial_period_days": 14,
+        "bank_account_name": "PT Qalcuity Indonesia",
+        "bank_account_number": "1234567890",
+        "bank_name": "Bank Central Asia (BCA)",
+        "currency": "IDR"
+    }
+]

@@ -1,0 +1,124 @@
+[
+    {
+        "plan_name": "Starter",
+        "description": "Paket dasar untuk usaha kecil yang baru memulai. Cocok untuk usaha dengan 1-2 pengguna.",
+        "price": 99000,
+        "currency": "IDR",
+        "billing_period": "Monthly",
+        "max_users": 2,
+        "max_storage_gb": 1,
+        "is_active": 1,
+        "is_trial": 0,
+        "sort_order": 1,
+        "features": [
+            {
+                "feature_name": "Invoicing (Penjualan)"
+            },
+            {
+                "feature_name": "Invoicing (Pembelian)"
+            },
+            {
+                "feature_name": "Laporan Keuangan Dasar"
+            },
+            {
+                "feature_name": "1 Pengguna"
+            }
+        ]
+    },
+    {
+        "plan_name": "Professional",
+        "description": "Paket lengkap untuk bisnis yang berkembang. Termasuk CRM, inventori, dan manajemen proyek.",
+        "price": 299000,
+        "currency": "IDR",
+        "billing_period": "Monthly",
+        "max_users": 10,
+        "max_storage_gb": 5,
+        "is_active": 1,
+        "is_trial": 0,
+        "sort_order": 2,
+        "features": [
+            {
+                "feature_name": "Semua fitur Starter"
+            },
+            {
+                "feature_name": "CRM & Penjualan"
+            },
+            {
+                "feature_name": "Manajemen Inventori"
+            },
+            {
+                "feature_name": "Manajemen Pembelian"
+            },
+            {
+                "feature_name": "Manajemen Proyek"
+            },
+            {
+                "feature_name": "Laporan Lanjutan"
+            },
+            {
+                "feature_name": "Hingga 10 Pengguna"
+            }
+        ]
+    },
+    {
+        "plan_name": "Enterprise",
+        "description": "Paket premium untuk perusahaan besar. Fitur lengkap dengan dukungan prioritas.",
+        "price": 799000,
+        "currency": "IDR",
+        "billing_period": "Monthly",
+        "max_users": 50,
+        "max_storage_gb": 20,
+        "is_active": 1,
+        "is_trial": 0,
+        "sort_order": 3,
+        "features": [
+            {
+                "feature_name": "Semua fitur Professional"
+            },
+            {
+                "feature_name": "Multi-Gudang"
+            },
+            {
+                "feature_name": "Manufacturing"
+            },
+            {
+                "feature_name": "Quality Management"
+            },
+            {
+                "feature_name": "Custom Report"
+            },
+            {
+                "feature_name": "API Access"
+            },
+            {
+                "feature_name": "Hingga 50 Pengguna"
+            },
+            {
+                "feature_name": "Dukungan Prioritas"
+            }
+        ]
+    },
+    {
+        "plan_name": "Trial",
+        "description": "Paket percobaan gratis selama 14 hari. Akses semua fitur Professional tanpa batas.",
+        "price": 0,
+        "currency": "IDR",
+        "billing_period": "Monthly",
+        "max_users": 5,
+        "max_storage_gb": 1,
+        "is_active": 1,
+        "is_trial": 1,
+        "sort_order": 0,
+        "features": [
+            {
+                "feature_name": "Akses Semua Fitur Professional"
+            },
+            {
+                "feature_name": "14 Hari Percobaan"
+            },
+            {
+                "feature_name": "Tanpa Kartu Kredit"
+            }
+        ]
+    }
+]

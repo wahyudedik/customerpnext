@@ -1,0 +1,147 @@
+{
+    "actions": [],
+    "allow_rename": 0,
+    "autoname": "format:{company_name}",
+    "creation": "2026-08-22 15:57:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "company_name",
+        "superadmin_email",
+        "column_break_01",
+        "max_file_size_mb",
+        "subscription_expiry_warning_days",
+        "section_break_trial",
+        "enable_trial_period",
+        "trial_period_days",
+        "section_break_bank",
+        "bank_name",
+        "bank_account_name",
+        "bank_account_number",
+        "column_break_bank2",
+        "currency",
+        "section_break_02",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "fieldname": "company_name",
+            "fieldtype": "Small Text",
+            "label": "Company Name",
+            "reqd": 1
+        },
+        {
+            "fieldname": "superadmin_email",
+            "fieldtype": "Data",
+            "label": "Superadmin Email",
+            "options": "Email",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "5",
+            "fieldname": "max_file_size_mb",
+            "fieldtype": "Int",
+            "label": "Max File Size (MB)"
+        },
+        {
+            "default": "7",
+            "fieldname": "subscription_expiry_warning_days",
+            "fieldtype": "Int",
+            "label": "Subscription Expiry Warning Days"
+        },
+        {
+            "fieldname": "section_break_trial",
+            "fieldtype": "Section Break",
+            "label": "Trial Period"
+        },
+        {
+            "default": "0",
+            "fieldname": "enable_trial_period",
+            "fieldtype": "Check",
+            "label": "Enable Trial Period"
+        },
+        {
+            "default": "14",
+            "fieldname": "trial_period_days",
+            "fieldtype": "Int",
+            "label": "Trial Period Days",
+            "depends_on": "eval:doc.enable_trial_period"
+        },
+        {
+            "fieldname": "section_break_bank",
+            "fieldtype": "Section Break",
+            "label": "Bank Account"
+        },
+        {
+            "fieldname": "bank_name",
+            "fieldtype": "Small Text",
+            "label": "Bank Name"
+        },
+        {
+            "fieldname": "bank_account_name",
+            "fieldtype": "Small Text",
+            "label": "Bank Account Name"
+        },
+        {
+            "fieldname": "bank_account_number",
+            "fieldtype": "Data",
+            "label": "Bank Account Number"
+        },
+        {
+            "fieldname": "column_break_bank2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "IDR",
+            "fieldname": "currency",
+            "fieldtype": "Link",
+            "label": "Default Currency",
+            "options": "Currency"
+        },
+        {
+            "fieldname": "section_break_02",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Qalcuity Settings",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 0,
+    "issingle": 1,
+    "links": [],
+    "modified": "2026-08-22 15:57:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Settings",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

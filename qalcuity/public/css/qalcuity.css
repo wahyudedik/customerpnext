@@ -1,0 +1,427 @@
+/**
+ * Qalcuity ERP - Main CSS
+ * Branding and custom styles for Qalcuity SaaS ERP
+ */
+
+/* ===========================
+   CSS Custom Properties
+   =========================== */
+:root {
+	--qalcuity-primary: #2490ef;
+	--qalcuity-primary-dark: #1a7fd4;
+	--qalcuity-secondary: #5e64ff;
+	--qalcuity-success: #28a745;
+	--qalcuity-warning: #ffc107;
+	--qalcuity-danger: #dc3545;
+	--qalcuity-info: #17a2b8;
+	--qalcuity-text: #333333;
+	--qalcuity-text-muted: #6c757d;
+	--qalcuity-border: #e2e8f0;
+	--qalcuity-bg: #f8f9fa;
+	--qalcuity-bg-card: #ffffff;
+	--qalcuity-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+	--qalcuity-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+	--qalcuity-radius: 8px;
+	--qalcuity-radius-sm: 4px;
+	--qalcuity-radius-lg: 12px;
+}
+
+/* Dark mode support */
+[data-theme="dark"] {
+	--qalcuity-text: #e2e8f0;
+	--qalcuity-text-muted: #a0aec0;
+	--qalcuity-border: #4a5568;
+	--qalcuity-bg: #1a202c;
+	--qalcuity-bg-card: #2d3748;
+	--qalcuity-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+	--qalcuity-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* ===========================
+   Base Styles
+   =========================== */
+.qalcuity-logo {
+	font-weight: 700;
+	color: var(--qalcuity-primary);
+}
+
+.qalcuity-brand {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* ===========================
+   Card Styles
+   =========================== */
+.qalcuity-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	box-shadow: var(--qalcuity-shadow);
+	padding: 20px;
+	margin-bottom: 16px;
+	transition: box-shadow 0.2s ease;
+}
+
+.qalcuity-card:hover {
+	box-shadow: var(--qalcuity-shadow-lg);
+}
+
+.qalcuity-card-header {
+	font-size: 16px;
+	font-weight: 600;
+	margin-bottom: 12px;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-card-body {
+	color: var(--qalcuity-text-muted);
+}
+
+/* ===========================
+   Plan Card Styles
+   =========================== */
+.qalcuity-plan-card {
+	background: var(--qalcuity-bg-card);
+	border: 2px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+	padding: 24px;
+	text-align: center;
+	transition: all 0.3s ease;
+	position: relative;
+}
+
+.qalcuity-plan-card:hover {
+	border-color: var(--qalcuity-primary);
+	transform: translateY(-2px);
+	box-shadow: var(--qalcuity-shadow-lg);
+}
+
+.qalcuity-plan-card.popular {
+	border-color: var(--qalcuity-primary);
+}
+
+.qalcuity-plan-card.popular::before {
+	content: "Popular";
+	position: absolute;
+	top: -12px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--qalcuity-primary);
+	color: white;
+	padding: 4px 16px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.qalcuity-plan-name {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin-bottom: 8px;
+}
+
+.qalcuity-plan-price {
+	font-size: 32px;
+	font-weight: 700;
+	color: var(--qalcuity-primary);
+	margin-bottom: 4px;
+}
+
+.qalcuity-plan-period {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin-bottom: 16px;
+}
+
+.qalcuity-plan-features {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 20px 0;
+	text-align: left;
+}
+
+.qalcuity-plan-features li {
+	padding: 8px 0;
+	border-bottom: 1px solid var(--qalcuity-border);
+	color: var(--qalcuity-text);
+	font-size: 14px;
+}
+
+.qalcuity-plan-features li:last-child {
+	border-bottom: none;
+}
+
+.qalcuity-plan-features li::before {
+	content: "✓";
+	color: var(--qalcuity-success);
+	font-weight: 700;
+	margin-right: 8px;
+}
+
+/* ===========================
+   Status Badge Styles
+   =========================== */
+.qalcuity-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 12px;
+	border-radius: 16px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.qalcuity-status-active {
+	background: #d4edda;
+	color: #155724;
+}
+
+.qalcuity-status-suspended {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.qalcuity-status-expired {
+	background: #f8f9fa;
+	color: #6c757d;
+}
+
+.qalcuity-status-pending {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.qalcuity-status-rejected {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.qalcuity-status-terminated {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+/* Dark mode status badges */
+[data-theme="dark"] .qalcuity-status-active {
+	background: #1e4620;
+	color: #9ae6b4;
+}
+
+[data-theme="dark"] .qalcuity-status-suspended {
+	background: #4a3c00;
+	color: #ffd700;
+}
+
+[data-theme="dark"] .qalcuity-status-rejected {
+	background: #4a1a1a;
+	color: #feb2b2;
+}
+
+[data-theme="dark"] .qalcuity-status-terminated {
+	background: #4a1a1a;
+	color: #feb2b2;
+}
+
+/* ===========================
+   Payment Proof Styles
+   =========================== */
+.qalcuity-proof-preview {
+	max-width: 300px;
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-sm);
+	overflow: hidden;
+	margin-top: 8px;
+}
+
+.qalcuity-proof-preview img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+/* ===========================
+   Dashboard Styles
+   =========================== */
+.qalcuity-dashboard-stat {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 16px;
+	text-align: center;
+}
+
+.qalcuity-dashboard-stat-value {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--qalcuity-primary);
+}
+
+.qalcuity-dashboard-stat-label {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-top: 4px;
+}
+
+/* ===========================
+   Alert Styles
+   =========================== */
+.qalcuity-alert {
+	padding: 12px 16px;
+	border-radius: var(--qalcuity-radius-sm);
+	margin-bottom: 16px;
+	font-size: 14px;
+}
+
+.qalcuity-alert-warning {
+	background: #fff3cd;
+	border: 1px solid #ffc107;
+	color: #856404;
+}
+
+.qalcuity-alert-danger {
+	background: #f8d7da;
+	border: 1px solid #dc3545;
+	color: #721c24;
+}
+
+.qalcuity-alert-success {
+	background: #d4edda;
+	border: 1px solid #28a745;
+	color: #155724;
+}
+
+/* ===========================
+   Form Styles
+   =========================== */
+.qalcuity-form-section {
+	margin-bottom: 24px;
+}
+
+.qalcuity-form-section-title {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+/* ===========================
+   Responsive Adjustments
+   =========================== */
+@media (max-width: 768px) {
+	.qalcuity-plan-card {
+		margin-bottom: 16px;
+	}
+
+	.qalcuity-dashboard-stat-value {
+		font-size: 22px;
+	}
+
+	.qalcuity-card {
+		padding: 16px;
+	}
+}
+
+/* ===========================
+   Print Styles
+   =========================== */
+@media print {
+	.qalcuity-card {
+		box-shadow: none;
+		border: 1px solid #ddd;
+	}
+
+	.qalcuity-status {
+		border: 1px solid currentColor;
+	}
+}
+
+/* ============================================
+   QALCUITY ERP — Brand Overrides
+   ============================================ */
+
+/* Frappe primary color override */
+:root {
+	--primary: #2490EF;
+	--primary-light: #e8f0fe;
+	--primary-dark: #1a6bc4;
+	--text-on-blue: #ffffff;
+}
+
+/* Login Page Branding */
+.login-page .page-card {
+	border-top: 4px solid var(--primary);
+}
+
+.login-page .page-card .page-card-head img,
+.login-page .page-card .page-card-head .app-logo {
+	max-height: 60px;
+}
+
+/* Full Page Logo (for login, setup) */
+.app-logo {
+	max-height: 60px;
+	width: auto;
+}
+
+/* App Logo in Navbar */
+.navbar .app-logo img {
+	max-height: 24px;
+}
+
+/* Dark mode logo swap */
+[data-theme="dark"] .app-logo {
+	content: url("/assets/qalcuity/images/logo-light.png");
+}
+
+@media (prefers-color-scheme: dark) {
+	.app-logo {
+		content: url("/assets/qalcuity/images/logo-light.png");
+	}
+}
+
+/* Sidebar branding */
+.sidebar-menu .sidebar-label {
+	text-transform: uppercase;
+	font-size: 11px;
+	color: var(--text-muted);
+}
+
+/* Workspace branding */
+.workspace-header h1 {
+	color: var(--primary);
+}
+
+/* Desk Navbar — hide default Frappe branding, show Qalcuity */
+.navbar .sidebar-toggle .page-sidebar .app-logo {
+	max-height: 24px;
+}
+
+/* Login page card styling */
+.login-page {
+	background: var(--qalcuity-bg);
+}
+
+/* Setup wizard branding */
+.setup-wizard .page-card {
+	border-top: 4px solid var(--primary);
+}
+
+/* Dark mode status badges — extended */
+[data-theme="dark"] .qalcuity-status-pending {
+	background: #4a3c00;
+	color: #ffd700;
+}
+
+[data-theme="dark"] .qalcuity-status-expired {
+	background: #2d3748;
+	color: #a0aec0;
+}
