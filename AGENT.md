@@ -3,6 +3,9 @@
 # Qalcuity ERP — AI Engineering Agent
 
 > **📦 GitHub Repository:** [`wahyudedik/customerpnext`](https://github.com/wahyudedik/customerpnext) · Branch: `main`
+> **Last Updated:** 2026-08-25
+
+---
 
 ## 1. Project Identity
 
@@ -25,7 +28,7 @@ Qalcuity ERP adalah produk SaaS ERP yang dibangun di atas Frappe Framework dan E
           ▼              ▼              △
        Branding      SaaS Layer      New Features
           │              │              │
-          └──────────────┼──────────────┘
+          └──────────────┼───────────┘
                          ▼
                   qalcuity.com
 ```
@@ -43,7 +46,7 @@ Prinsip inti:
 
 ---
 
-## 1a. ERPNext Role (Core Engine)
+### 1a. ERPNext Role — Core Engine
 
 ERPNext/Frappe bertanggung jawab untuk:
 
@@ -61,7 +64,7 @@ Kita TIDAK memodifikasi fitur-fitur ERPNext ini. Kita menggunakannya sebagaimana
 
 ---
 
-## 1b. Qalcuity Role (Custom Layer)
+### 1b. Qalcuity Role — Custom Layer
 
 Qalcuity custom layer bertanggung jawab untuk:
 
@@ -106,7 +109,7 @@ Do NOT build unnecessary enterprise complexity before the core SaaS flow works.
 
 ---
 
-# 3. Engineering Philosophy
+## 3. Engineering Philosophy
 
 Follow these principles:
 
@@ -131,7 +134,7 @@ Follow these principles:
 
 ---
 
-# 4. Source of Truth
+## 4. Source of Truth
 
 The Git repository is the source of truth for Qalcuity custom code.
 
@@ -162,7 +165,7 @@ All important changes must eventually exist in Git.
 
 ---
 
-# 5. ERPNext/Frappe Customization Rule
+## 5. ERPNext/Frappe Customization Rule
 
 Do NOT blindly edit ERPNext core.
 
@@ -207,13 +210,42 @@ If core modification is unavoidable, document:
 
 ---
 
-# 6. SaaS Architecture
+## 6. SaaS Architecture
 
 Qalcuity menambahkan **SaaS layer DI ATAS ERPNext**. ERPNext tetap utuh sebagai core engine. Customisasi hanya dilakukan di custom app, bukan di ERPNext core.
 
-The system should conceptually be divided into:
+### 3-Area Flow
 
-## SaaS Control Layer (Qalcuity Custom App)
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                    QALCUITY SaaS LAYER                       │
+│                                                              │
+│  1. PUBLIC / SaaS Area                                       │
+│     - /register (Registration)                               │
+│     - /pricing (Choose Plan)                                 │
+│     - /checkout (Payment - Manual Transfer)                  │
+│     - /my-payments (Payment History)                         │
+│     - /dashboard (Customer Dashboard)                        │
+│     - /profile (Edit Profile)                                │
+│     - /account-status (Subscription Status)                  │
+│     - /subscription-history (Subscription Timeline)          │
+│                                                              │
+│  2. SUPERADMIN Area                                          │
+│     - /admin-reviews (Payment Review Queue)                  │
+│     - Approve/Reject Payment                                 │
+│     - Auto-create Subscription + Tenant provisioning         │
+│     - ERP User role assignment                               │
+│     - Subscription management (extend, suspend)              │
+│                                                              │
+│  3. ERP WORKSPACE (Frappe/ERPNext Core)                      │
+│     - Full ERP access for active subscribers                 │
+│     - Accounting, CRM, HR, Inventory, Sales, Purchasing      │
+│     - Company-based isolation per tenant                     │
+│     - Blocked for expired subscriptions                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### SaaS Control Layer — Qalcuity Custom App
 
 Responsible for:
 
@@ -231,7 +263,7 @@ Responsible for:
 * Qalcuity-specific API
 * Qalcuity-specific features
 
-## ERP Layer (ERPNext — TIDAK DIMODIFIKASI)
+### ERP Layer — ERPNext — TIDAK DIMODIFIKASI
 
 Responsible for business operations:
 
@@ -269,7 +301,7 @@ ERPNext/Frappe (Core Engine — TIDAK DIMODIFIKASI)
 
 ---
 
-# 7. Tenant Isolation
+## 7. Tenant Isolation
 
 Tenant isolation is a critical requirement.
 
@@ -301,10 +333,12 @@ Result: isolated view
 * Superadmin bisa melihat semua data (tidak terfilter)
 * Isolation diterapkan di semua SaaS DocTypes: Subscription, Payment, Tenant
 * Permission hooks mengecek Portal User → Customer mapping untuk ownership validation
+* Company-based isolation di ERPNext workspace ([`erpnext_hooks.py`](qalcuity/qalcuity/erpnext_hooks.py))
+* Dual-layer isolation ([`isolation.py`](qalcuity/qalcuity/isolation.py))
 
 ---
 
-# 8. Subscription Model
+## 8. Subscription Model
 
 Initial payment method:
 
@@ -312,7 +346,16 @@ Initial payment method:
 
 Do NOT implement a payment gateway in the MVP unless explicitly requested.
 
-Basic flow:
+### Complete User Lifecycle
+
+```text
+Register → Choose Plan → Payment (Manual Transfer) → PENDING
+→ Superadmin Reviews → APPROVED
+→ Subscription Auto-Created (ACTIVE) → Tenant Provisioned
+→ ERP User Role Assigned → ERP Access GRANTED
+```
+
+### Basic Payment Flow
 
 ```text
 Customer
@@ -334,7 +377,7 @@ APPROVED
 Subscription ACTIVE (auto-create)
 ```
 
-Rejected payment:
+### Rejected Payment
 
 ```text
 PENDING
@@ -344,7 +387,7 @@ REJECTED
 Customer can submit again
 ```
 
-Expired subscription with grace period:
+### Expired Subscription with Grace Period
 
 ```text
 ACTIVE
@@ -359,12 +402,19 @@ ERPNext Access DIBLOKIR
    ↓
 EXPIRED
    ↓
-Akses sepenuhnya dibatasi
+Data preserved, access fully restricted, renewal required
+```
+
+### Renewal Flow
+
+```text
+EXPIRED → Choose Plan → Payment → PENDING → APPROVED
+→ Subscription RENEWED (extended) → ERP Access RESTORED
 ```
 
 ---
 
-# 9. Superadmin
+## 9. Superadmin
 
 Superadmin is responsible for operational control.
 
@@ -383,6 +433,8 @@ Superadmin must be able to:
 * extend subscription
 * suspend tenant
 * reactivate tenant
+* provision tenants
+* assign ERP User role
 * inspect system status
 * inspect important logs
 
@@ -390,7 +442,7 @@ Do not expose Superadmin functions to ordinary customers.
 
 ---
 
-# 10. Payment Rules
+## 10. Payment Rules
 
 Every payment submission must have a traceable lifecycle.
 
@@ -419,7 +471,7 @@ Do not silently delete payment records.
 
 ---
 
-# 11. API
+## 11. API
 
 Qalcuity should have its own API layer.
 
@@ -476,7 +528,7 @@ Frappe / ERPNext
 | `mark_all_as_read` | POST | Mark all as read |
 | `create_notification` | Internal | Create notification entry |
 
-#### API v1 (Versioned)
+#### API v1 — Versioned
 
 24 endpoints dengan auth check, rate limiting, standard response format.
 Lihat [`api/v1/`](qalcuity/qalcuity/api/v1/) untuk detail lengkap.
@@ -505,7 +557,7 @@ Do not expose internal implementation details unnecessarily.
 
 ---
 
-# 12. UI/UX Rules
+## 12. UI/UX Rules
 
 Qalcuity must look like a real SaaS product.
 
@@ -519,7 +571,7 @@ The UI should progressively become Qalcuity-specific.
 |------|-------|---------|
 | Registration | `/register` | Customer self-registration |
 | Pricing | `/pricing` | Plan listing & selection |
-| Checkout | `/checkout` | Payment submission |
+| Checkout | `/checkout` | Payment submission (multi bank + proof upload + WhatsApp) |
 | My Payments | `/my-payments` | Customer payment history |
 | Admin Reviews | `/admin-reviews` | Superadmin payment review queue |
 | Dashboard | `/dashboard` | Customer dashboard dengan subscription info |
@@ -550,7 +602,7 @@ UI changes must consider both light and dark themes.
 
 ---
 
-# 13. Security
+## 13. Security
 
 Security is mandatory.
 
@@ -577,9 +629,9 @@ Every sensitive operation must be authorized server-side.
 
 ---
 
-# 14. Deployment
+## 14. Deployment
 
-## Development Strategy: Code Local → Test di VPS
+### Development Strategy: Code Local → Test di VPS
 
 > **⚠️ PENTING — CATATAN UNTUK AI AGENT:**
 > Developer lokal TIDAK memiliki Docker dan storage terbatas (~5GB).
@@ -638,9 +690,13 @@ Validasi flow & UI
 7. **LOKAL = CODE ONLY** — tidak ada testing, tidak ada running server
 8. **VPS = Docker + AAPanel** — Docker menjalankan aplikasi, AAPanel manage infrastructure
 
+### Single-Site Multi-Tenant
+
+Qalcuity menggunakan arsitektur **single-site multi-tenant**. Semua tenant berbagi `qalcuity.com`. Tenant isolation dilakukan di level aplikasi (row-level permission hooks), bukan di level site.
+
 ---
 
-## Production Environment
+### Production Environment
 
 Production environment menggunakan VPS managed dengan **Docker (frappe_docker)** untuk runtime aplikasi dan **AAPanel** untuk management layer (domain, SSL, nginx, database, dll).
 
@@ -659,12 +715,6 @@ Production environment menggunakan VPS managed dengan **Docker (frappe_docker)**
 * **Cache:** Redis (dalam Docker container)
 * **Web Server:** Nginx (via AAPanel — reverse proxy ke Docker)
 * **Domain:** `qalcuity.com`
-* **Site Name (bench):** `qalcuity.com`
-* **Production URL:** `https://qalcuity.com`
-
-### Domain Configuration
-
-* **Production Domain:** `qalcuity.com`
 * **Site Name (bench):** `qalcuity.com`
 * **Production URL:** `https://qalcuity.com`
 
@@ -712,140 +762,7 @@ GitHub Qalcuity (wahyudedik/customerpnext)
 
 ---
 
-## GitHub Repository
-
-Qalcuity custom app source code is hosted on GitHub:
-
-* **Repository URL:** https://github.com/wahyudedik/customerpnext.git
-* **Branch:** main
-* **Remote Name:** origin
-* **App Directory:** [`qalcuity/`](qalcuity/)
-
-**Penting:**
-* Repository Qalcuity HANYA berisi kode custom Qalcuity
-* ERPNext/Frappe adalah dependency yang di-install ke bench, BUKAN bagian dari repo Qalcuity
-* JANGAN pernah commit kode ERPNext ke repo Qalcuity
-
-### Deploy dari GitHub (di VPS — Fresh Install)
-
-```bash
-# 1. Install Frappe bench (jika belum ada)
-# 2. Init bench dengan ERPNext
-bench init --frappe-branch version-17 erpnext
-cd erpnext
-bench get-app erpnext
-# 3. Install Qalcuity Custom App
-bench get-app https://github.com/wahyudedik/customerpnext.git
-bench --site qalcuity.com install-app qalcuity
-bench migrate
-bench build
-bench restart
-```
-
-### Update dari GitHub (di VPS — Regular Update)
-
-```bash
-cd apps/qalcuity && git pull origin main
-cd ../..
-bench migrate
-bench build
-docker compose up -d --force-recreate frontend
-```
-
-### Update Workflow untuk AI Agent
-
-Setelah mengedit code di lokal, agent harus:
-
-```bash
-# 1. Pastikan semua perubahan sudah di-commit
-git status
-git add .
-git commit -m "Sprint X: description"
-
-# 2. Push ke GitHub
-git push origin main
-
-# 3. Berikan instruksi ke user untuk update di VPS
-# "Silakan jalankan di VPS:"
-# cd apps/qalcuity && git pull origin main && cd ../.. && bench migrate && bench build && docker compose up -d --force-recreate frontend
-```
-
----
-
-## Do NOT
-
-* Edit code langsung di VPS tanpa commit ke Git
-* Treat VPS files sebagai canonical source
-* Skip Git push setelah perubahan
-* Run bench commands di lokal machine
-* Install Frappe/ERPNext di local machine — gunakan VPS untuk testing
-* Edit code langsung di VPS — selalu edit di lokal, push ke Git, pull di VPS
-
----
-
-## Upstream Update Strategy
-
-ERPNext/Frappe adalah dependency upstream. Update dilakukan melalui mekanisme resmi Frappe/ERPNext, bukan merge dari fork.
-
-### Cara Update ERPNext
-
-```bash
-# Update ERPNext ke versi terbaru
-pip install --upgrade erpnext
-
-# Atau melalui bench update (update semua apps)
-bench update
-
-# Atau update hanya Frappe core
-bench update --pull
-```
-
-### Cara Update Frappe Framework
-
-```bash
-# Update Frappe core
-bench update --pull
-
-# Atau update spesifik branch
-bench get-app frappe --branch version-17
-```
-
-### Keamanan Custom App Qalcuity
-
-* Custom app Qalcuity tetap aman karena terpisah dari ERPNext core
-* Repository Qalcuity (`wahyudedik/customerpnext`) hanya berisi kode custom
-* Update ERPNext TIDAK mempengaruhi kode Qalcuity (kecuali ada breaking changes di Frappe API)
-* Selalu test update di VPS sebelum apply ke production
-
-### Proses Update yang Aman
-
-```text
-1. Backup database (otomatis via scheduler atau manual)
-2. Backup files
-3. Jalankan update:
-   pip install --upgrade erpnext
-   bench update
-4. Test di browser VPS:
-   - Login berhasil
-   - Subscription flow berfungsi
-   - Payment flow berfungsi
-   - Tenant isolation berfungsi
-   - API berfungsi
-5. Jika ada error, rollback:
-   git checkout versi_sebelumnya
-   bench migrate
-```
-
-### Kapan Update Dilakukan
-
-* Update ERPNext: Saat ada release baru yang penting
-* Update Frappe: Saat ada security patch atau bug fix
-* Update Qalcuity: Setelah setiap sprint/task selesai
-* JANGAN update jika tidak ada kebutuhan mendesak
-
----
-
-# 14a. VPS Deployment Architecture
+## 14a. VPS Deployment Architecture
 
 > **⚠️ CATATAN PENTING:** Section ini mendokumentasikan knowledge spesifik tentang deployment VPS yang telah dipelajari dari pengalaman production. Wajib dibaca sebelum melakukan deployment atau debugging di VPS.
 
@@ -958,7 +875,7 @@ nginx (frontend container)
 
 **Penting:** nginx config: `location /assets { try_files $uri =404; }` — hanya serve dari filesystem, TIDAK proxy ke backend. Jadi assets harus ADA di filesystem container frontend.
 
-### Deployment Workflow (Complete)
+### Deployment Workflow — Complete
 
 Setelah code changes di local machine:
 
@@ -1109,9 +1026,62 @@ docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe
 docker compose exec frontend nginx -s reload
 ```
 
+### GitHub Repository
+
+Qalcuity custom app source code is hosted on GitHub:
+
+* **Repository URL:** https://github.com/wahyudedik/customerpnext.git
+* **Branch:** main
+* **Remote Name:** origin
+* **App Directory:** [`qalcuity/`](qalcuity/)
+
+**Penting:**
+* Repository Qalcuity HANYA berisi kode custom Qalcuity
+* ERPNext/Frappe adalah dependency yang di-install ke bench, BUKAN bagian dari repo Qalcuity
+* JANGAN pernah commit kode ERPNext ke repo Qalcuity
+
+### Update Workflow untuk AI Agent
+
+Setelah mengedit code di lokal, agent harus:
+
+```bash
+# 1. Pastikan semua perubahan sudah di-commit
+git status
+git add .
+git commit -m "Sprint X: description"
+
+# 2. Push ke GitHub
+git push origin main
+
+# 3. Berikan instruksi ke user untuk update di VPS
+# "Silakan jalankan di VPS:"
+# cd apps/qalcuity && git pull origin main && cd ../.. && bench migrate && bench build && docker compose up -d --force-recreate frontend
+```
+
+### Upstream Update Strategy
+
+ERPNext/Frappe adalah dependency upstream. Update dilakukan melalui mekanisme resmi Frappe/ERPNext, bukan merge dari fork.
+
+```bash
+# Update ERPNext ke versi terbaru
+pip install --upgrade erpnext
+
+# Atau melalui bench update (update semua apps)
+bench update
+
+# Atau update hanya Frappe core
+bench update --pull
+```
+
+**Keamanan Custom App Qalcuity:**
+* Custom app Qalcuity tetap aman karena terpisah dari ERPNext core
+* Repository Qalcuity (`wahyudedik/customerpnext`) hanya berisi kode custom
+* Update ERPNext TIDAK mempengaruhi kode Qalcuity (kecuali ada breaking changes di Frappe API)
+* Selalu test update di VPS sebelum apply ke production
+
 ---
 
-# 15. Backup
+## 15. Backup
 
 ### Implemented
 
@@ -1135,7 +1105,7 @@ A backup that has never been restored/tested must not be considered fully reliab
 
 ---
 
-# 16. Development Workflow
+## 16. Development Workflow
 
 Before implementing a feature:
 
@@ -1152,7 +1122,7 @@ Before implementing a feature:
 
 ---
 
-# 17. Never Do These (DO NOTs)
+## 17. Never Do These — DO NOTs
 
 Do not:
 
@@ -1178,7 +1148,7 @@ Do not:
 
 ---
 
-# 18. Definition of Done
+## 18. Definition of Done
 
 A feature is NOT complete merely because code exists.
 
@@ -1197,7 +1167,7 @@ A feature is complete when:
 
 ---
 
-# 19. Priority
+## 19. Priority
 
 Always prioritize:
 
@@ -1218,11 +1188,11 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 
 ---
 
-# 20. Project Status (Live)
+## 20. Project Status — Live
 
 > Last Updated: 2026-08-25
 
-## Phase 0 — Foundation: ✅ DONE
+### Phase 0 — Foundation: ✅ DONE
 
 * Custom Frappe App `qalcuity` created at [`qalcuity/`](qalcuity/)
 * 6 DocTypes: Settings, Plan, Plan Feature, Subscription, Payment, Tenant
@@ -1235,13 +1205,13 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 * CSS branding with light/dark mode
 * Patch: Tenant link field on Subscription ([`add_tenant_to_subscription`](qalcuity/qalcuity/patches/add_tenant_to_subscription.py))
 
-## Phase 1 — Base ERP: 🔄 IN PROGRESS
+### Phase 1 — Base ERP: 🔄 IN PROGRESS
 
 * Frappe/ERPNext installed and configured
 * Database, Redis, scheduler operational
 * Pending: reverse proxy, HTTPS, domain configuration
 
-## Phase 2 — Custom App: ✅ DONE
+### Phase 2 — Custom App: ✅ DONE
 
 * App structure established
 * All DocTypes implemented
@@ -1251,31 +1221,31 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 * Bug fixes completed (Batch 1 & 2)
 * Email notifications implemented
 
-## Phase 3 — SaaS Account System: ✅ DONE
+### Phase 3 — SaaS Account System: ✅ DONE
 
 * Customer registration page (`/register`)
 * Registration API (`register_customer()`)
 * Auto-create User + Customer + Portal User + Tenant
 
-## Phase 4 — Subscription System: ✅ DONE
+### Phase 4 — Subscription System: ✅ DONE
 
 * Subscription auto-create (payment approved → subscription active)
 * Grace period 7 hari
 * Subscription enforcement (ERPNext access block)
 
-## Phase 5 — Manual Payment System: ✅ DONE
+### Phase 5 — Manual Payment System: ✅ DONE
 
 * Checkout page (`/checkout`)
 * My Payments page (`/my-payments`)
 * Admin Reviews page (`/admin-reviews`)
 * Pending reviews API (`get_pending_reviews()`)
 
-## Phase 6 — Tenant Management: ✅ DONE
+### Phase 6 — Tenant Management: ✅ DONE
 
 * Multi-tenant isolation via permission hooks
 * Row-level isolation verified
 
-## Sprint 1 — Foundation: ✅ DONE
+### Sprint 1 — Foundation: ✅ DONE
 
 | Item | Status |
 |------|--------|
@@ -1290,7 +1260,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Customer hook (auto-create tenant) | ✅ |
 | Subscription auto-expire scheduler | ✅ |
 
-## Sprint 2 — Bug Fixes & Improvements: ✅ DONE
+### Sprint 2 — Bug Fixes & Improvements: ✅ DONE
 
 | Item | Status |
 |------|--------|
@@ -1307,7 +1277,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Bulk reject payments API | ✅ |
 | Customer payment history API (`get_my_payments`) | ✅ |
 
-## Sprint 3 — SaaS Flow: ✅ DONE
+### Sprint 3 — SaaS Flow: ✅ DONE
 
 | Item | Status |
 |------|--------|
@@ -1324,7 +1294,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Pending Reviews API (`get_pending_reviews()`) | ✅ |
 | Subscription enforcement scheduler | ✅ |
 
-## Sprint 4 — Features & Polish: ✅ DONE
+### Sprint 4 — Features & Polish: ✅ DONE
 
 | Item | Status |
 |------|--------|
@@ -1337,7 +1307,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | API v1 Versioned (20 endpoints) | ✅ |
 | Backup Automation (scheduler + retention) | ✅ |
 
-## Sprint 5 — Payment & Notifications: ✅ DONE
+### Sprint 5 — Payment & Notifications: ✅ DONE
 
 | Item | Status |
 |------|--------|
@@ -1351,7 +1321,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Notification API (5 endpoints) | ✅ |
 | .env update (Xendit, WhatsApp, notification) | ✅ |
 
-## Sprint 6 — ERP Provisioning: ✅ DONE
+### Sprint 6 — ERP Provisioning: ✅ DONE
 
 | Item | Status |
 |------|--------|
@@ -1368,7 +1338,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | seed_bank_accounts patch | ✅ |
 | patches.txt format fix | ✅ |
 
-## Next Sprint — ERP Provisioning & Polish
+### Next Sprint — ERP Provisioning & Polish
 
 * [ ] Superadmin custom dashboard
 * [ ] Custom reports
@@ -1380,7 +1350,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 * [ ] API documentation (Swagger/OpenAPI)
 * [ ] Production deployment automation
 
-## Implemented DocTypes Summary
+### Implemented DocTypes Summary
 
 | DocType | File | Purpose |
 |---------|------|---------|
@@ -1397,7 +1367,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Qalcuity Notification | [`qalcuity_notification/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_notification/) | In-app notifications (`NOTIF-{YYYYMMDD}-{####}`) |
 | Qalcuity Provisioning Log | [`qalcuity_provisioning_log/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_provisioning_log/) | ERP provisioning event tracking (`PROV-{YYYYMMDD}-{####}`) |
 
-## Implemented Web Pages
+### Implemented Web Pages
 
 | Page | Route | Purpose |
 |------|-------|---------|
@@ -1411,7 +1381,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Account Status | `/account-status` | Detail status langganan dan pembayaran |
 | Subscription History | `/subscription-history` | Timeline riwayat perubahan langganan |
 
-## Implemented Patches
+### Implemented Patches
 
 | Patch | File | Purpose |
 |-------|------|---------|
