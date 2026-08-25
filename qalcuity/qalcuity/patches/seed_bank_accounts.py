@@ -66,6 +66,10 @@ def execute():
     for bank in BANK_ACCOUNTS:
         settings.append("bank_accounts", bank)
 
+    # Skip mandatory validation — patch only adds bank accounts,
+    # other required fields (company_name, superadmin_email, payment_mode)
+    # will be configured by admin via UI later.
+    settings.flags.ignore_mandatory = True
     settings.save(ignore_permissions=True)
     frappe.db.commit()
 
