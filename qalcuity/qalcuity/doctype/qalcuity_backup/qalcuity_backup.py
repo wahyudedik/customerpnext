@@ -9,6 +9,7 @@ Tracks backup operations (database, files, full) with status, size, and timing.
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 
 
 class QalcuityBackup(Document):
