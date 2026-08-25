@@ -4,11 +4,11 @@
 frappe.listview_settings["Qalcuity Subscription"] = {
 	get_indicator(doc) {
 		const indicators = {
-			Draft: "orange",
+			Draft: "darkgray",
 			"Pending Payment": "yellow",
 			Active: "green",
-			Suspended: "red",
-			Expired: "darkgray",
+			Suspended: "orange",
+			Expired: "red",
 			Cancelled: "red",
 		};
 		return [
@@ -25,10 +25,26 @@ frappe.listview_settings["Qalcuity Subscription"] = {
 				const now = new Date();
 				const days = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
 				if (days <= 7 && days > 0) {
-					return `<span class="text-danger">${value} (${days}d)</span>`;
+					return `<span class="text-danger" style="font-weight: 600;">${value} (${days}h)</span>`;
+				}
+				if (days <= 0) {
+					return `<span class="text-danger" style="font-weight: 600;">${value} (${__("KEDALUWARSA")})</span>`;
 				}
 			}
 			return value;
 		},
+		end_date_wrapper(value) {
+			return value;
+		},
+	},
+
+	onload(listview) {
+		// Default filter: show active subscriptions first
+		listview.filter_area.add([
+			[listview.doctype, "status", "in", ["Active", "Pending Payment"]],
+		]);
+
+		// Set page length
+		listview.page_length = 20;
 	},
 };

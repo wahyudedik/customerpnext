@@ -1,0 +1,339 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-acc-container">
+	<!-- Header -->
+	<div class="qalcuity-acc-header">
+		<div class="qalcuity-acc-header-left">
+			<h1 class="qalcuity-acc-title">Status Akun</h1>
+			<p class="qalcuity-acc-subtitle">Ringkasan status akun, subscription, dan penggunaan Anda.</p>
+		</div>
+		<div class="qalcuity-acc-header-right">
+			<a href="/profile" class="qalcuity-btn qalcuity-btn-outline">
+				<span class="octicon octicon-person"></span> Profil
+			</a>
+		</div>
+	</div>
+
+	<!-- Warning Banners -->
+	<div id="acc-warning-grace" class="qalcuity-alert qalcuity-alert-danger" style="display: none;">
+		<span class="octicon octicon-alert"></span>
+		<div>
+			<strong>⚠️ Masa Tenggat (Grace Period)</strong>
+			<p>Subscription Anda telah kedaluwarsa. Anda memiliki <strong>7 hari</strong> masa tenggat untuk
+				memperpanjang.
+				Akses ERPNext akan diblokir setelah masa tenggat berakhir.</p>
+			<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary" style="margin-top: 8px;">
+				<span class="octicon octicon-tag"></span> Perpanjang Sekarang
+			</a>
+		</div>
+	</div>
+	<div id="acc-warning-expired" class="qalcuity-alert qalcuity-alert-danger" style="display: none;">
+		<span class="octicon octicon-alert"></span>
+		<div>
+			<strong>🚫 Subscription Kedaluwarsa</strong>
+			<p>Subscription Anda telah kedaluwarsa dan masa tenggat telah berakhir. Akses ERPNext diblokir.
+				Silakan membeli paket baru untuk mengaktifkan kembali akun Anda.</p>
+			<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary" style="margin-top: 8px;">
+				<span class="octicon octicon-tag"></span> Beli Paket Baru
+			</a>
+		</div>
+	</div>
+	<div id="acc-warning-suspended" class="qalcuity-alert qalcuity-alert-warning" style="display: none;">
+		<span class="octicon octicon-alert"></span>
+		<div>
+			<strong>⏸️ Akun Ditangguhkan</strong>
+			<p>Akun Anda sedang ditangguhkan oleh admin. Silakan hubungi support untuk informasi lebih lanjut.</p>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="acc-loading" class="qalcuity-acc-loading">
+		<div class="qalcuity-pricing-spinner"></div>
+		<p>Memuat status akun...</p>
+	</div>
+
+	<!-- Content -->
+	<div id="acc-content" style="display: none;">
+
+		<!-- Section 1: Subscription Status -->
+		<div class="qalcuity-acc-card" id="acc-sub-section">
+			<div class="qalcuity-acc-card-header">
+				<h3 class="qalcuity-acc-card-title">
+					<span class="octicon octicon-package"></span> Status Subscription
+				</h3>
+				<span id="acc-sub-badge"></span>
+			</div>
+			<div class="qalcuity-acc-card-body">
+				<div id="acc-sub-empty" style="display: none;">
+					<div class="qalcuity-acc-empty">
+						<span class="octicon octicon-package"
+							style="font-size: 36px; color: var(--qalcuity-text-muted);"></span>
+						<p>Belum ada subscription aktif.</p>
+						<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary">
+							<span class="octicon octicon-tag"></span> Pilih Paket
+						</a>
+					</div>
+				</div>
+				<div id="acc-sub-details" style="display: none;">
+					<div class="qalcuity-acc-detail-grid">
+						<div class="qalcuity-acc-detail-item">
+							<span class="qalcuity-acc-detail-label">Paket</span>
+							<span class="qalcuity-acc-detail-value" id="acc-sub-plan">-</span>
+						</div>
+						<div class="qalcuity-acc-detail-item">
+							<span class="qalcuity-acc-detail-label">Tanggal Mulai</span>
+							<span class="qalcuity-acc-detail-value" id="acc-sub-start">-</span>
+						</div>
+						<div class="qalcuity-acc-detail-item">
+							<span class="qalcuity-acc-detail-label">Tanggal Berakhir</span>
+							<span class="qalcuity-acc-detail-value" id="acc-sub-end">-</span>
+						</div>
+						<div class="qalcuity-acc-detail-item">
+							<span class="qalcuity-acc-detail-label">Sisa Hari</span>
+							<span class="qalcuity-acc-detail-value qalcuity-acc-countdown"
+								id="acc-sub-countdown">-</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Section 2: Tenant Info -->
+		<div class="qalcuity-acc-card" id="acc-tenant-section" style="display: none;">
+			<div class="qalcuity-acc-card-header">
+				<h3 class="qalcuity-acc-card-title">
+					<span class="octicon octicon-server"></span> Info Tenant
+				</h3>
+				<span id="acc-tenant-badge"></span>
+			</div>
+			<div class="qalcuity-acc-card-body">
+				<div class="qalcuity-acc-detail-grid">
+					<div class="qalcuity-acc-detail-item">
+						<span class="qalcuity-acc-detail-label">Tenant ID</span>
+						<span class="qalcuity-acc-detail-value qalcuity-acc-mono" id="acc-tenant-id">-</span>
+					</div>
+					<div class="qalcuity-acc-detail-item">
+						<span class="qalcuity-acc-detail-label">Status</span>
+						<span class="qalcuity-acc-detail-value" id="acc-tenant-status-text">-</span>
+					</div>
+					<div class="qalcuity-acc-detail-item">
+						<span class="qalcuity-acc-detail-label">Tanggal Provisioning</span>
+						<span class="qalcuity-acc-detail-value" id="acc-tenant-provisioned">-</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Section 3: Payment Summary -->
+		<div class="qalcuity-acc-card">
+			<div class="qalcuity-acc-card-header">
+				<h3 class="qalcuity-acc-card-title">
+					<span class="octicon octicon-credit-card"></span> Ringkasan Pembayaran
+				</h3>
+			</div>
+			<div class="qalcuity-acc-card-body">
+				<div class="qalcuity-acc-payment-grid">
+					<div class="qalcuity-acc-payment-card">
+						<div class="qalcuity-acc-payment-value" id="acc-pay-total">0</div>
+						<div class="qalcuity-acc-payment-label">Total</div>
+					</div>
+					<div class="qalcuity-acc-payment-card qalcuity-acc-payment-pending">
+						<div class="qalcuity-acc-payment-value" id="acc-pay-pending">0</div>
+						<div class="qalcuity-acc-payment-label">Menunggu</div>
+					</div>
+					<div class="qalcuity-acc-payment-card qalcuity-acc-payment-approved">
+						<div class="qalcuity-acc-payment-value" id="acc-pay-approved">0</div>
+						<div class="qalcuity-acc-payment-label">Disetujui</div>
+					</div>
+					<div class="qalcuity-acc-payment-card qalcuity-acc-payment-rejected">
+						<div class="qalcuity-acc-payment-value" id="acc-pay-rejected">0</div>
+						<div class="qalcuity-acc-payment-label">Ditolak</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Section 4: Usage -->
+		<div class="qalcuity-acc-card">
+			<div class="qalcuity-acc-card-header">
+				<h3 class="qalcuity-acc-card-title">
+					<span class="octicon octicon-graph"></span> Penggunaan
+				</h3>
+			</div>
+			<div class="qalcuity-acc-card-body">
+				<div class="qalcuity-acc-usage-grid">
+					<div class="qalcuity-acc-usage-item">
+						<div class="qalcuity-acc-usage-header">
+							<span class="qalcuity-acc-usage-label">Pengguna</span>
+							<span class="qalcuity-acc-usage-value" id="acc-usage-users">0 / 0</span>
+						</div>
+						<div class="qalcuity-acc-usage-bar">
+							<div class="qalcuity-acc-usage-bar-fill" id="acc-usage-users-bar" style="width: 0%;"></div>
+						</div>
+					</div>
+					<div class="qalcuity-acc-usage-item">
+						<div class="qalcuity-acc-usage-header">
+							<span class="qalcuity-acc-usage-label">Penyimpanan</span>
+							<span class="qalcuity-acc-usage-value" id="acc-usage-storage">0 / 0</span>
+						</div>
+						<div class="qalcuity-acc-usage-bar">
+							<div class="qalcuity-acc-usage-bar-fill" id="acc-usage-storage-bar" style="width: 0%;">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Section 5: Quick Actions -->
+		<div class="qalcuity-acc-card">
+			<div class="qalcuity-acc-card-header">
+				<h3 class="qalcuity-acc-card-title">
+					<span class="octicon octicon-zap"></span> Aksi Cepat
+				</h3>
+			</div>
+			<div class="qalcuity-acc-card-body">
+				<div class="qalcuity-acc-actions-grid">
+					<a href="/pricing" class="qalcuity-acc-action-card">
+						<span class="octicon octicon-tag"
+							style="font-size: 24px; color: var(--qalcuity-primary);"></span>
+						<span class="qalcuity-acc-action-label">Upgrade / Perpanjang</span>
+						<span class="qalcuity-acc-action-desc">Lihat paket dan perpanjang langganan</span>
+					</a>
+					<a href="/my-payments" class="qalcuity-acc-action-card">
+						<span class="octicon octicon-credit-card"
+							style="font-size: 24px; color: var(--qalcuity-warning);"></span>
+						<span class="qalcuity-acc-action-label">Riwayat Pembayaran</span>
+						<span class="qalcuity-acc-action-desc">Lihat status pembayaran Anda</span>
+					</a>
+					<a href="/dashboard" class="qalcuity-acc-action-card">
+						<span class="octicon octicon-home"
+							style="font-size: 24px; color: var(--qalcuity-success);"></span>
+						<span class="qalcuity-acc-action-label">Dashboard</span>
+						<span class="qalcuity-acc-action-desc">Kembali ke dashboard utama</span>
+					</a>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script>
+	(function () {
+		function loadAccountStatus() {
+			frappe.call({
+				method: 'qalcuity.api.account_status.get_account_status',
+				callback: function (r) {
+					document.getElementById('acc-loading').style.display = 'none';
+					document.getElementById('acc-content').style.display = 'block';
+
+					if (!r.message) return;
+					var data = r.message;
+
+					// --- Warning Banners ---
+					if (data.subscription) {
+						var sub = data.subscription;
+						if (sub.status === 'Active' && sub.is_grace_period) {
+							document.getElementById('acc-warning-grace').style.display = 'flex';
+						} else if (sub.status === 'Expired' || (sub.status === 'Active' && sub.days_remaining !== null && sub.days_remaining < 0)) {
+							document.getElementById('acc-warning-expired').style.display = 'flex';
+						} else if (sub.status === 'Suspended') {
+							document.getElementById('acc-warning-suspended').style.display = 'flex';
+						}
+					}
+
+					// --- Section 1: Subscription ---
+					if (data.subscription) {
+						var sub = data.subscription;
+						document.getElementById('acc-sub-empty').style.display = 'none';
+						document.getElementById('acc-sub-details').style.display = 'block';
+
+						var badge = document.getElementById('acc-sub-badge');
+						badge.innerHTML = '<span class="qalcuity-status qalcuity-status-' + sub.status.toLowerCase() + '">' + sub.status + '</span>';
+
+						document.getElementById('acc-sub-plan').textContent = sub.plan_name || sub.plan || '-';
+						document.getElementById('acc-sub-start').textContent = sub.start_date ? frappe.datetime.str_to_user(sub.start_date) : '-';
+						document.getElementById('acc-sub-end').textContent = sub.end_date ? frappe.datetime.str_to_user(sub.end_date) : '-';
+
+						var countdown = document.getElementById('acc-sub-countdown');
+						if (sub.days_remaining !== null && sub.days_remaining !== undefined) {
+							if (sub.days_remaining < 0) {
+								countdown.textContent = 'Kedaluwarsa (' + Math.abs(sub.days_remaining) + ' hari lalu)';
+								countdown.style.color = 'var(--qalcuity-danger)';
+							} else if (sub.days_remaining <= 7) {
+								countdown.textContent = sub.days_remaining + ' hari';
+								countdown.style.color = 'var(--qalcuity-warning)';
+							} else {
+								countdown.textContent = sub.days_remaining + ' hari';
+								countdown.style.color = 'var(--qalcuity-success)';
+							}
+						} else {
+							countdown.textContent = '-';
+						}
+					} else {
+						document.getElementById('acc-sub-empty').style.display = 'flex';
+						document.getElementById('acc-sub-details').style.display = 'none';
+					}
+
+					// --- Section 2: Tenant ---
+					if (data.tenant) {
+						var t = data.tenant;
+						document.getElementById('acc-tenant-section').style.display = 'block';
+						document.getElementById('acc-tenant-id').textContent = t.tenant_id || '-';
+
+						var tBadge = document.getElementById('acc-tenant-badge');
+						tBadge.innerHTML = '<span class="qalcuity-status qalcuity-status-' + t.status.toLowerCase() + '">' + t.status + '</span>';
+
+						document.getElementById('acc-tenant-status-text').textContent = t.status || '-';
+						document.getElementById('acc-tenant-provisioned').textContent = t.provisioned_at ? frappe.datetime.str_to_user(t.provisioned_at) : '-';
+					}
+
+					// --- Section 3: Payment Summary ---
+					if (data.payments) {
+						var p = data.payments;
+						document.getElementById('acc-pay-total').textContent = p.total || 0;
+						document.getElementById('acc-pay-pending').textContent = p.pending || 0;
+						document.getElementById('acc-pay-approved').textContent = p.approved || 0;
+						document.getElementById('acc-pay-rejected').textContent = p.rejected || 0;
+					}
+
+					// --- Section 4: Usage ---
+					if (data.usage) {
+						var u = data.usage;
+
+						// Users
+						var userLimit = u.users_limit || 0;
+						var userCount = u.users_count || 0;
+						document.getElementById('acc-usage-users').textContent = userCount + ' / ' + (userLimit || '∞');
+						var userPct = userLimit > 0 ? Math.min((userCount / userLimit) * 100, 100) : 0;
+						document.getElementById('acc-usage-users-bar').style.width = userPct + '%';
+						if (userPct > 80) {
+							document.getElementById('acc-usage-users-bar').style.background = 'var(--qalcuity-danger)';
+						} else if (userPct > 60) {
+							document.getElementById('acc-usage-users-bar').style.background = 'var(--qalcuity-warning)';
+						}
+
+						// Storage
+						var storageLimit = u.storage_limit || 0;
+						var storageUsed = u.storage_used || 0;
+						document.getElementById('acc-usage-storage').textContent = storageUsed + ' / ' + (storageLimit || '∞');
+						var storagePct = storageLimit > 0 ? Math.min((storageUsed / storageLimit) * 100, 100) : 0;
+						document.getElementById('acc-usage-storage-bar').style.width = storagePct + '%';
+					}
+				},
+				error: function (err) {
+					document.getElementById('acc-loading').innerHTML =
+						'<div class="qalcuity-alert qalcuity-alert-danger">' +
+						'<span class="octicon octicon-x"></span> ' +
+						(err._message || 'Gagal memuat status akun.') +
+						'</div>';
+				}
+			});
+		}
+
+		loadAccountStatus();
+	})();
+</script>
+{% endblock %}

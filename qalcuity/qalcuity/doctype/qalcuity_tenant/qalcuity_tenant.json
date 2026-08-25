@@ -14,7 +14,13 @@
         "site_name",
         "provisioned_on",
         "last_activity",
-        "storage_used_gb"
+        "storage_used_gb",
+        "section_break_provisioning",
+        "erp_provisioning_status",
+        "erp_company",
+        "column_break_provisioning",
+        "last_provisioning_attempt",
+        "provisioning_error"
     ],
     "fields": [
         {
@@ -80,11 +86,49 @@
             "fieldtype": "Float",
             "label": "Storage Used (GB)",
             "read_only": 1
+        },
+        {
+            "fieldname": "section_break_provisioning",
+            "fieldtype": "Section Break",
+            "label": "ERP Provisioning"
+        },
+        {
+            "default": "Not Started",
+            "fieldname": "erp_provisioning_status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "ERP Provisioning Status",
+            "options": "Not Started\nIn Progress\nCompleted\nFailed\nSuspended"
+        },
+        {
+            "fieldname": "erp_company",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "ERP Company",
+            "options": "Company",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_provisioning",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "last_provisioning_attempt",
+            "fieldtype": "Datetime",
+            "label": "Last Provisioning Attempt",
+            "read_only": 1
+        },
+        {
+            "fieldname": "provisioning_error",
+            "fieldtype": "Long Text",
+            "label": "Provisioning Error",
+            "read_only": 1
         }
     ],
     "index_web_pages_for_search": 1,
     "links": [],
-    "modified": "2026-08-22 15:57:00.000000",
+    "modified": "2026-08-25 14:00:00.000000",
     "modified_by": "Administrator",
     "module": "Qalcuity",
     "name": "Qalcuity Tenant",

@@ -1,0 +1,661 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-ar-container">
+	<!-- Header Section -->
+	<div class="qalcuity-ar-header">
+		<div>
+			<h1 class="qalcuity-ar-title">
+				<span class="octicon octicon-eye"></span> Payment Review Queue
+			</h1>
+			<p class="qalcuity-ar-subtitle">Review dan verifikasi pembayaran pelanggan</p>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="ar-loading" class="qalcuity-ar-loading">
+		<div class="qalcuity-ar-spinner"></div>
+		<p>Memuat data review...</p>
+	</div>
+
+	<!-- Content -->
+	<div id="ar-content" style="display: none;">
+
+		<!-- Statistics Bar -->
+		<div class="qalcuity-ar-stats" id="ar-stats"></div>
+
+		<!-- Filter Bar -->
+		<div class="qalcuity-ar-filters">
+			<div class="qalcuity-ar-filter-group">
+				<label class="qalcuity-ar-filter-label">Status</label>
+				<select id="ar-filter-status" class="qalcuity-ar-filter-select">
+					<option value="Pending">Pending</option>
+					<option value="Approved">Approved</option>
+					<option value="Rejected">Rejected</option>
+					<option value="">Semua</option>
+				</select>
+			</div>
+			<div class="qalcuity-ar-filter-group">
+				<label class="qalcuity-ar-filter-label">Dari Tanggal</label>
+				<input type="date" id="ar-filter-date-from" class="qalcuity-ar-filter-input">
+			</div>
+			<div class="qalcuity-ar-filter-group">
+				<label class="qalcuity-ar-filter-label">Sampai Tanggal</label>
+				<input type="date" id="ar-filter-date-to" class="qalcuity-ar-filter-input">
+			</div>
+			<div class="qalcuity-ar-filter-group">
+				<label class="qalcuity-ar-filter-label">Customer</label>
+				<input type="text" id="ar-filter-customer" class="qalcuity-ar-filter-input"
+					placeholder="Nama customer...">
+			</div>
+			<button class="qalcuity-ar-btn qalcuity-ar-btn-primary" onclick="applyFilters()">
+				<span class="octicon octicon-search"></span> Filter
+			</button>
+			<button class="qalcuity-ar-btn qalcuity-ar-btn-outline" onclick="resetFilters()">
+				<span class="octicon octicon-x"></span> Reset
+			</button>
+		</div>
+
+		<!-- Bulk Actions Bar -->
+		<div class="qalcuity-ar-bulk-bar" id="ar-bulk-bar" style="display: none;">
+			<div class="qalcuity-ar-bulk-info">
+				<span id="ar-selected-count">0</span> dipilih
+			</div>
+			<div class="qalcuity-ar-bulk-actions">
+				<button class="qalcuity-ar-btn qalcuity-ar-btn-success" onclick="bulkApprove()">
+					<span class="octicon octicon-check"></span> Approve Terpilih
+				</button>
+				<button class="qalcuity-ar-btn qalcuity-ar-btn-danger" onclick="bulkReject()">
+					<span class="octicon octicon-x"></span> Reject Terpilih
+				</button>
+			</div>
+		</div>
+
+		<!-- Payment List -->
+		<div class="qalcuity-ar-list" id="ar-list"></div>
+
+		<!-- Empty State -->
+		<div class="qalcuity-ar-empty" id="ar-empty" style="display: none;">
+			<div class="qalcuity-ar-empty-icon">
+				<span class="octicon octicon-checklist"
+					style="font-size: 48px; color: var(--qalcuity-text-muted);"></span>
+			</div>
+			<h3>Tidak Ada Data</h3>
+			<p>Tidak ada pembayaran yang cocok dengan filter yang dipilih.</p>
+		</div>
+	</div>
+</div>
+
+<!-- Reject Modal -->
+<div class="qalcuity-ar-modal-overlay" id="ar-reject-modal" style="display: none;" onclick="closeRejectModal(event)">
+	<div class="qalcuity-ar-modal" onclick="event.stopPropagation()">
+		<div class="qalcuity-ar-modal-header">
+			<h3>
+				<span class="octicon octicon-x-circle" style="color: var(--qalcuity-danger);"></span>
+				Tolak Pembayaran
+			</h3>
+			<button class="qalcuity-ar-modal-close" onclick="closeRejectModal()">&times;</button>
+		</div>
+		<div class="qalcuity-ar-modal-body">
+			<p>Apakah Anda yakin ingin menolak pembayaran <strong id="ar-reject-payment-name"></strong>?</p>
+			<div class="qalcuity-ar-form-group">
+				<label class="qalcuity-ar-form-label">Alasan Penolakan <span
+						style="color: var(--qalcuity-danger);">*</span></label>
+				<textarea id="ar-reject-reason" class="qalcuity-ar-form-textarea" rows="4"
+					placeholder="Masukkan alasan penolakan..."></textarea>
+			</div>
+		</div>
+		<div class="qalcuity-ar-modal-footer">
+			<button class="qalcuity-ar-btn qalcuity-ar-btn-outline" onclick="closeRejectModal()">Batal</button>
+			<button class="qalcuity-ar-btn qalcuity-ar-btn-danger" onclick="confirmReject()">
+				<span class="octicon octicon-x"></span> Tolak Pembayaran
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- Bulk Reject Modal -->
+<div class="qalcuity-ar-modal-overlay" id="ar-bulk-reject-modal" style="display: none;"
+	onclick="closeBulkRejectModal(event)">
+	<div class="qalcuity-ar-modal" onclick="event.stopPropagation()">
+		<div class="qalcuity-ar-modal-header">
+			<h3>
+				<span class="octicon octicon-x-circle" style="color: var(--qalcuity-danger);"></span>
+				Bulk Reject Pembayaran
+			</h3>
+			<button class="qalcuity-ar-modal-close" onclick="closeBulkRejectModal()">&times;</button>
+		</div>
+		<div class="qalcuity-ar-modal-body">
+			<p>Apakah Anda yakin ingin menolak <strong id="ar-bulk-reject-count"></strong> pembayaran yang dipilih?</p>
+			<div class="qalcuity-ar-form-group">
+				<label class="qalcuity-ar-form-label">Alasan Penolakan <span
+						style="color: var(--qalcuity-danger);">*</span></label>
+				<textarea id="ar-bulk-reject-reason" class="qalcuity-ar-form-textarea" rows="4"
+					placeholder="Masukkan alasan penolakan..."></textarea>
+			</div>
+		</div>
+		<div class="qalcuity-ar-modal-footer">
+			<button class="qalcuity-ar-btn qalcuity-ar-btn-outline" onclick="closeBulkRejectModal()">Batal</button>
+			<button class="qalcuity-ar-btn qalcuity-ar-btn-danger" onclick="confirmBulkReject()">
+				<span class="octicon octicon-x"></span> Tolak Semua
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- Proof Preview Modal -->
+<div class="qalcuity-ar-modal-overlay" id="ar-proof-modal" style="display: none;" onclick="closeProofModal(event)">
+	<div class="qalcuity-ar-modal qalcuity-ar-modal-lg" onclick="event.stopPropagation()">
+		<div class="qalcuity-ar-modal-header">
+			<h3>
+				<span class="octicon octicon-image"></span>
+				Bukti Pembayaran
+			</h3>
+			<button class="qalcuity-ar-modal-close" onclick="closeProofModal()">&times;</button>
+		</div>
+		<div class="qalcuity-ar-modal-body" style="text-align: center;">
+			<div id="ar-proof-content"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+	// State
+	var selectedPayments = {};
+	var currentPayments = [];
+	var rejectTarget = null;
+	var bulkRejectMode = false;
+
+	frappe.ready(function () {
+		loadReviewStats();
+		loadPayments();
+	});
+
+	// =============================================================================
+	// Load Data
+	// =============================================================================
+
+	function loadReviewStats() {
+		frappe.call({
+			method: 'qalcuity.api.admin.get_review_stats',
+			callback: function (r) {
+				if (r.message) {
+					renderStats(r.message);
+				}
+			}
+		});
+	}
+
+	function loadPayments(filters) {
+		var loading = document.getElementById('ar-loading');
+		var content = document.getElementById('ar-content');
+
+		loading.style.display = 'flex';
+		content.style.display = 'none';
+
+		frappe.call({
+			method: 'qalcuity.api.admin.get_pending_payments',
+			args: { filters: filters || {} },
+			callback: function (r) {
+				loading.style.display = 'none';
+				content.style.display = 'block';
+
+				if (r.message) {
+					currentPayments = r.message;
+					renderPayments(r.message);
+				} else {
+					currentPayments = [];
+					renderPayments([]);
+				}
+			},
+			error: function () {
+				loading.style.display = 'none';
+				content.style.display = 'block';
+				renderPayments([]);
+			}
+		});
+	}
+
+	// =============================================================================
+	// Render Functions
+	// =============================================================================
+
+	function renderStats(stats) {
+		var el = document.getElementById('ar-stats');
+		var html = '';
+
+		html += '<div class="qalcuity-ar-stat-card qalcuity-ar-stat-pending">';
+		html += '<div class="qalcuity-ar-stat-icon"><span class="octicon octicon-clock"></span></div>';
+		html += '<div class="qalcuity-ar-stat-content">';
+		html += '<div class="qalcuity-ar-stat-value">' + stats.total_pending + '</div>';
+		html += '<div class="qalcuity-ar-stat-label">Pending</div>';
+		html += '</div></div>';
+
+		html += '<div class="qalcuity-ar-stat-card qalcuity-ar-stat-approved">';
+		html += '<div class="qalcuity-ar-stat-icon"><span class="octicon octicon-check"></span></div>';
+		html += '<div class="qalcuity-ar-stat-content">';
+		html += '<div class="qalcuity-ar-stat-value">' + stats.total_approved + '</div>';
+		html += '<div class="qalcuity-ar-stat-label">Approved</div>';
+		html += '</div></div>';
+
+		html += '<div class="qalcuity-ar-stat-card qalcuity-ar-stat-rejected">';
+		html += '<div class="qalcuity-ar-stat-icon"><span class="octicon octicon-x"></span></div>';
+		html += '<div class="qalcuity-ar-stat-content">';
+		html += '<div class="qalcuity-ar-stat-value">' + stats.total_rejected + '</div>';
+		html += '<div class="qalcuity-ar-stat-label">Rejected</div>';
+		html += '</div></div>';
+
+		html += '<div class="qalcuity-ar-stat-card qalcuity-ar-stat-amount">';
+		html += '<div class="qalcuity-ar-stat-icon"><span class="octicon octicon-mortar-board"></span></div>';
+		html += '<div class="qalcuity-ar-stat-content">';
+		html += '<div class="qalcuity-ar-stat-value">Rp ' + formatCurrency(stats.total_amount_pending) + '</div>';
+		html += '<div class="qalcuity-ar-stat-label">Total Pending</div>';
+		html += '</div></div>';
+
+		el.innerHTML = html;
+	}
+
+	function renderPayments(payments) {
+		var listEl = document.getElementById('ar-list');
+		var emptyEl = document.getElementById('ar-empty');
+
+		if (!payments || payments.length === 0) {
+			listEl.innerHTML = '';
+			emptyEl.style.display = 'block';
+			return;
+		}
+
+		emptyEl.style.display = 'none';
+		selectedPayments = {};
+		updateBulkBar();
+
+		var html = '<div class="qalcuity-ar-table-wrapper">';
+		html += '<table class="qalcuity-ar-table">';
+
+		// Header
+		html += '<thead><tr>';
+		html += '<th class="qalcuity-ar-th-check">';
+		html += '<input type="checkbox" id="ar-select-all" onchange="toggleSelectAll(this)">';
+		html += '</th>';
+		html += '<th>Pembayaran</th>';
+		html += '<th>Customer</th>';
+		html += '<th>Paket</th>';
+		html += '<th>Jumlah</th>';
+		html += '<th>Tanggal</th>';
+		html += '<th>Status</th>';
+		html += '<th>Aksi</th>';
+		html += '</tr></thead>';
+
+		// Body
+		html += '<tbody>';
+		payments.forEach(function (p) {
+			var statusClass = getStatusClass(p.status);
+			html += '<tr class="qalcuity-ar-row" data-name="' + frappe.utils.escape_html(p.name) + '">';
+
+			// Checkbox
+			html += '<td class="qalcuity-ar-td-check">';
+			if (p.status === 'Pending') {
+				html += '<input type="checkbox" class="ar-payment-checkbox" value="' + frappe.utils.escape_html(p.name) + '" onchange="togglePaymentSelect(this)">';
+			}
+			html += '</td>';
+
+			// Payment info
+			html += '<td>';
+			html += '<div class="qalcuity-ar-payment-name">' + frappe.utils.escape_html(p.name) + '</div>';
+			if (p.reference_number) {
+				html += '<div class="qalcuity-ar-payment-ref">Ref: ' + frappe.utils.escape_html(p.reference_number) + '</div>';
+			}
+			if (p.proof_of_payment) {
+				html += '<a href="javascript:void(0)" class="qalcuity-ar-proof-link" onclick="showProof(\'' + frappe.utils.escape_html(p.proof_of_payment) + '\')">';
+				html += '<span class="octicon octicon-image"></span> Lihat Bukti</a>';
+			}
+			html += '</td>';
+
+			// Customer
+			html += '<td>';
+			html += '<div>' + frappe.utils.escape_html(p.customer_name || '-') + '</div>';
+			if (p.customer_email) {
+				html += '<div class="qalcuity-ar-text-muted">' + frappe.utils.escape_html(p.customer_email) + '</div>';
+			}
+			html += '</td>';
+
+			// Plan
+			html += '<td>' + frappe.utils.escape_html(p.plan_name || '-') + '</td>';
+
+			// Amount
+			html += '<td class="qalcuity-ar-amount">' + (p.currency || 'IDR') + ' ' + formatCurrency(p.amount) + '</td>';
+
+			// Date
+			html += '<td>' + frappe.utils.escape_html(p.payment_date || '-') + '</td>';
+
+			// Status
+			html += '<td><span class="qalcuity-status ' + statusClass + '">' + frappe.utils.escape_html(p.status) + '</span></td>';
+
+			// Actions
+			html += '<td class="qalcuity-ar-actions">';
+			if (p.status === 'Pending') {
+				html += '<button class="qalcuity-ar-btn qalcuity-ar-btn-success-sm" onclick="approvePayment(\'' + frappe.utils.escape_html(p.name) + '\')" title="Approve">';
+				html += '<span class="octicon octicon-check"></span></button> ';
+				html += '<button class="qalcuity-ar-btn qalcuity-ar-btn-danger-sm" onclick="showRejectModal(\'' + frappe.utils.escape_html(p.name) + '\')" title="Reject">';
+				html += '<span class="octicon octicon-x"></span></button>';
+			} else if (p.status === 'Approved') {
+				html += '<span class="qalcuity-ar-text-muted">by ' + frappe.utils.escape_html(p.reviewed_by || '-') + '</span>';
+			} else if (p.status === 'Rejected') {
+				html += '<span class="qalcuity-ar-text-muted" title="' + frappe.utils.escape_html(p.rejection_reason || '') + '">';
+				html += 'Ditolak</span>';
+			}
+			html += '</td>';
+
+			html += '</tr>';
+		});
+		html += '</tbody></table></div>';
+
+		listEl.innerHTML = html;
+	}
+
+	// =============================================================================
+	// Filter Functions
+	// =============================================================================
+
+	function applyFilters() {
+		var filters = {};
+
+		var status = document.getElementById('ar-filter-status').value;
+		if (status) filters.status = status;
+
+		var dateFrom = document.getElementById('ar-filter-date-from').value;
+		if (dateFrom) filters.date_from = dateFrom;
+
+		var dateTo = document.getElementById('ar-filter-date-to').value;
+		if (dateTo) filters.date_to = dateTo;
+
+		var customer = document.getElementById('ar-filter-customer').value;
+		if (customer) filters.customer = customer;
+
+		loadPayments(filters);
+	}
+
+	function resetFilters() {
+		document.getElementById('ar-filter-status').value = 'Pending';
+		document.getElementById('ar-filter-date-from').value = '';
+		document.getElementById('ar-filter-date-to').value = '';
+		document.getElementById('ar-filter-customer').value = '';
+		loadPayments({ status: 'Pending' });
+	}
+
+	// =============================================================================
+	// Select & Bulk Actions
+	// =============================================================================
+
+	function toggleSelectAll(checkbox) {
+		var checkboxes = document.querySelectorAll('.ar-payment-checkbox');
+		checkboxes.forEach(function (cb) {
+			cb.checked = checkbox.checked;
+			if (checkbox.checked) {
+				selectedPayments[cb.value] = true;
+			} else {
+				delete selectedPayments[cb.value];
+			}
+		});
+		updateBulkBar();
+	}
+
+	function togglePaymentSelect(checkbox) {
+		if (checkbox.checked) {
+			selectedPayments[checkbox.value] = true;
+		} else {
+			delete selectedPayments[checkbox.value];
+		}
+		updateBulkBar();
+	}
+
+	function updateBulkBar() {
+		var bar = document.getElementById('ar-bulk-bar');
+		var count = Object.keys(selectedPayments).length;
+		var countEl = document.getElementById('ar-selected-count');
+
+		if (count > 0) {
+			bar.style.display = 'flex';
+			countEl.textContent = count;
+		} else {
+			bar.style.display = 'none';
+		}
+	}
+
+	function getSelectedNames() {
+		return Object.keys(selectedPayments);
+	}
+
+	// =============================================================================
+	// Approve / Reject Actions
+	// =============================================================================
+
+	function approvePayment(name) {
+		frappe.confirm(
+			'Approve pembayaran <strong>' + name + '</strong>?',
+			function () {
+				frappe.call({
+					method: 'qalcuity.api.admin.approve_payment',
+					args: { payment_name: name },
+					callback: function (r) {
+						if (r.message) {
+							frappe.show_alert({
+								message: 'Pembayaran ' + name + ' berhasil di-approve.',
+								indicator: 'green'
+							});
+							loadPayments(getCurrentFilters());
+							loadReviewStats();
+						}
+					},
+					error: function (err) {
+						frappe.msgprint({
+							title: 'Error',
+							message: err.message || 'Gagal approve pembayaran.',
+							indicator: 'red'
+						});
+					}
+				});
+			}
+		);
+	}
+
+	function showRejectModal(name) {
+		rejectTarget = name;
+		document.getElementById('ar-reject-payment-name').textContent = name;
+		document.getElementById('ar-reject-reason').value = '';
+		document.getElementById('ar-reject-modal').style.display = 'flex';
+	}
+
+	function closeRejectModal(event) {
+		if (event && event.target !== event.currentTarget) return;
+		document.getElementById('ar-reject-modal').style.display = 'none';
+		rejectTarget = null;
+	}
+
+	function confirmReject() {
+		var reason = document.getElementById('ar-reject-reason').value.trim();
+		if (!reason) {
+			frappe.msgprint({
+				title: 'Perhatian',
+				message: 'Alasan penolakan harus diisi.',
+				indicator: 'orange'
+			});
+			return;
+		}
+
+		frappe.call({
+			method: 'qalcuity.api.admin.reject_payment',
+			args: { payment_name: rejectTarget, reason: reason },
+			callback: function (r) {
+				if (r.message) {
+					frappe.show_alert({
+						message: 'Pembayaran ' + rejectTarget + ' berhasil ditolak.',
+						indicator: 'red'
+					});
+					closeRejectModal();
+					loadPayments(getCurrentFilters());
+					loadReviewStats();
+				}
+			},
+			error: function (err) {
+				frappe.msgprint({
+					title: 'Error',
+					message: err.message || 'Gagal menolak pembayaran.',
+					indicator: 'red'
+				});
+			}
+		});
+	}
+
+	function bulkApprove() {
+		var names = getSelectedNames();
+		if (names.length === 0) return;
+
+		frappe.confirm(
+			'Approve <strong>' + names.length + '</strong> pembayaran yang dipilih?',
+			function () {
+				frappe.call({
+					method: 'qalcuity.api.admin.bulk_approve_payments',
+					args: { payment_names: JSON.stringify(names) },
+					callback: function (r) {
+						if (r.message) {
+							var successCount = r.message.filter(function (x) { return x.status === 'success'; }).length;
+							frappe.show_alert({
+								message: successCount + ' pembayaran berhasil di-approve.',
+								indicator: 'green'
+							});
+							selectedPayments = {};
+							updateBulkBar();
+							loadPayments(getCurrentFilters());
+							loadReviewStats();
+						}
+					},
+					error: function (err) {
+						frappe.msgprint({
+							title: 'Error',
+							message: err.message || 'Gagal bulk approve.',
+							indicator: 'red'
+						});
+					}
+				});
+			}
+		);
+	}
+
+	function bulkReject() {
+		var names = getSelectedNames();
+		if (names.length === 0) return;
+
+		bulkRejectMode = true;
+		document.getElementById('ar-bulk-reject-count').textContent = names.length;
+		document.getElementById('ar-bulk-reject-reason').value = '';
+		document.getElementById('ar-bulk-reject-modal').style.display = 'flex';
+	}
+
+	function closeBulkRejectModal(event) {
+		if (event && event.target !== event.currentTarget) return;
+		document.getElementById('ar-bulk-reject-modal').style.display = 'none';
+		bulkRejectMode = false;
+	}
+
+	function confirmBulkReject() {
+		var reason = document.getElementById('ar-bulk-reject-reason').value.trim();
+		if (!reason) {
+			frappe.msgprint({
+				title: 'Perhatian',
+				message: 'Alasan penolakan harus diisi.',
+				indicator: 'orange'
+			});
+			return;
+		}
+
+		var names = getSelectedNames();
+
+		frappe.call({
+			method: 'qalcuity.api.admin.bulk_reject_payments',
+			args: { payment_names: JSON.stringify(names), reason: reason },
+			callback: function (r) {
+				if (r.message) {
+					var successCount = r.message.filter(function (x) { return x.status === 'success'; }).length;
+					frappe.show_alert({
+						message: successCount + ' pembayaran berhasil ditolak.',
+						indicator: 'red'
+					});
+					closeBulkRejectModal();
+					selectedPayments = {};
+					updateBulkBar();
+					loadPayments(getCurrentFilters());
+					loadReviewStats();
+				}
+			},
+			error: function (err) {
+				frappe.msgprint({
+					title: 'Error',
+					message: err.message || 'Gagal bulk reject.',
+					indicator: 'red'
+				});
+			}
+		});
+	}
+
+	// =============================================================================
+	// Proof Preview
+	// =============================================================================
+
+	function showProof(url) {
+		var content = document.getElementById('ar-proof-content');
+		if (url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+			content.innerHTML = '<img src="' + frappe.utils.escape_html(url) + '" style="max-width: 100%; border-radius: 8px;">';
+		} else if (url.match(/\.pdf$/i)) {
+			content.innerHTML = '<iframe src="' + frappe.utils.escape_html(url) + '" style="width: 100%; height: 500px; border: none; border-radius: 8px;"></iframe>';
+		} else {
+			content.innerHTML = '<a href="' + frappe.utils.escape_html(url) + '" target="_blank" class="qalcuity-ar-btn qalcuity-ar-btn-primary">Buka File</a>';
+		}
+		document.getElementById('ar-proof-modal').style.display = 'flex';
+	}
+
+	function closeProofModal(event) {
+		if (event && event.target !== event.currentTarget) return;
+		document.getElementById('ar-proof-modal').style.display = 'none';
+		document.getElementById('ar-proof-content').innerHTML = '';
+	}
+
+	// =============================================================================
+	// Helper Functions
+	// =============================================================================
+
+	function getCurrentFilters() {
+		var filters = {};
+		var status = document.getElementById('ar-filter-status').value;
+		if (status) filters.status = status;
+		var dateFrom = document.getElementById('ar-filter-date-from').value;
+		if (dateFrom) filters.date_from = dateFrom;
+		var dateTo = document.getElementById('ar-filter-date-to').value;
+		if (dateTo) filters.date_to = dateTo;
+		var customer = document.getElementById('ar-filter-customer').value;
+		if (customer) filters.customer = customer;
+		return filters;
+	}
+
+	function getStatusClass(status) {
+		var map = {
+			'Active': 'qalcuity-status-active',
+			'Pending Payment': 'qalcuity-status-pending',
+			'Pending': 'qalcuity-status-pending',
+			'Expired': 'qalcuity-status-expired',
+			'Suspended': 'qalcuity-status-suspended',
+			'Approved': 'qalcuity-status-approved',
+			'Rejected': 'qalcuity-status-rejected',
+			'Cancelled': 'qalcuity-status-cancelled',
+			'Draft': 'qalcuity-status-draft',
+			'Terminated': 'qalcuity-status-terminated'
+		};
+		return map[status] || 'qalcuity-status-draft';
+	}
+
+	function formatCurrency(num) {
+		if (!num) return '0';
+		return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+	}
+</script>
+{% endblock %}

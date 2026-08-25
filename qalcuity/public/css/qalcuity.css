@@ -1,6 +1,6 @@
 /**
  * Qalcuity ERP - Main CSS
- * Branding and custom styles for Qalcuity SaaS ERP
+ * Branding, responsive design, and custom styles for Qalcuity SaaS ERP
  */
 
 /* ===========================
@@ -27,7 +27,8 @@
 }
 
 /* Dark mode support */
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-theme-mode="dark"] {
 	--qalcuity-text: #e2e8f0;
 	--qalcuity-text-muted: #a0aec0;
 	--qalcuity-border: #4a5568;
@@ -155,10 +156,17 @@
 }
 
 .qalcuity-plan-features li::before {
-	content: "✓";
+	content: "\2713";
 	color: var(--qalcuity-success);
 	font-weight: 700;
 	margin-right: 8px;
+}
+
+/* Plan cards grid layout */
+.qalcuity-plan-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 24px;
 }
 
 /* ===========================
@@ -174,6 +182,7 @@
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
+	white-space: nowrap;
 }
 
 .qalcuity-status-active {
@@ -196,6 +205,11 @@
 	color: #856404;
 }
 
+.qalcuity-status-approved {
+	background: #d4edda;
+	color: #155724;
+}
+
 .qalcuity-status-rejected {
 	background: #f8d7da;
 	color: #721c24;
@@ -206,25 +220,69 @@
 	color: #721c24;
 }
 
+.qalcuity-status-cancelled {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.qalcuity-status-draft {
+	background: #e2e8f0;
+	color: #4a5568;
+}
+
 /* Dark mode status badges */
-[data-theme="dark"] .qalcuity-status-active {
+[data-theme="dark"] .qalcuity-status-active,
+[data-theme-mode="dark"] .qalcuity-status-active {
 	background: #1e4620;
 	color: #9ae6b4;
 }
 
-[data-theme="dark"] .qalcuity-status-suspended {
+[data-theme="dark"] .qalcuity-status-suspended,
+[data-theme-mode="dark"] .qalcuity-status-suspended {
 	background: #4a3c00;
 	color: #ffd700;
 }
 
-[data-theme="dark"] .qalcuity-status-rejected {
+[data-theme="dark"] .qalcuity-status-approved,
+[data-theme-mode="dark"] .qalcuity-status-approved {
+	background: #1e4620;
+	color: #9ae6b4;
+}
+
+[data-theme="dark"] .qalcuity-status-rejected,
+[data-theme-mode="dark"] .qalcuity-status-rejected {
 	background: #4a1a1a;
 	color: #feb2b2;
 }
 
-[data-theme="dark"] .qalcuity-status-terminated {
+[data-theme="dark"] .qalcuity-status-terminated,
+[data-theme-mode="dark"] .qalcuity-status-terminated {
 	background: #4a1a1a;
 	color: #feb2b2;
+}
+
+[data-theme="dark"] .qalcuity-status-cancelled,
+[data-theme-mode="dark"] .qalcuity-status-cancelled {
+	background: #4a1a1a;
+	color: #feb2b2;
+}
+
+[data-theme="dark"] .qalcuity-status-pending,
+[data-theme-mode="dark"] .qalcuity-status-pending {
+	background: #4a3c00;
+	color: #ffd700;
+}
+
+[data-theme="dark"] .qalcuity-status-expired,
+[data-theme-mode="dark"] .qalcuity-status-expired {
+	background: #2d3748;
+	color: #a0aec0;
+}
+
+[data-theme="dark"] .qalcuity-status-draft,
+[data-theme-mode="dark"] .qalcuity-status-draft {
+	background: #2d3748;
+	color: #a0aec0;
 }
 
 /* ===========================
@@ -269,6 +327,14 @@
 	margin-top: 4px;
 }
 
+/* Dashboard grid layout */
+.qalcuity-dashboard-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
 /* ===========================
    Alert Styles
    =========================== */
@@ -297,6 +363,41 @@
 	color: #155724;
 }
 
+.qalcuity-alert-info {
+	background: #d1ecf1;
+	border: 1px solid #17a2b8;
+	color: #0c5460;
+}
+
+/* Dark mode alerts */
+[data-theme="dark"] .qalcuity-alert-warning,
+[data-theme-mode="dark"] .qalcuity-alert-warning {
+	background: #4a3c00;
+	border-color: #6b5c00;
+	color: #ffd700;
+}
+
+[data-theme="dark"] .qalcuity-alert-danger,
+[data-theme-mode="dark"] .qalcuity-alert-danger {
+	background: #4a1a1a;
+	border-color: #6b2a2a;
+	color: #feb2b2;
+}
+
+[data-theme="dark"] .qalcuity-alert-success,
+[data-theme-mode="dark"] .qalcuity-alert-success {
+	background: #1e4620;
+	border-color: #276729;
+	color: #9ae6b4;
+}
+
+[data-theme="dark"] .qalcuity-alert-info,
+[data-theme-mode="dark"] .qalcuity-alert-info {
+	background: #1a3a4a;
+	border-color: #2a5a6a;
+	color: #90cdf4;
+}
+
 /* ===========================
    Form Styles
    =========================== */
@@ -314,19 +415,547 @@
 }
 
 /* ===========================
-   Responsive Adjustments
+   Sidebar & Navigation
    =========================== */
-@media (max-width: 768px) {
-	.qalcuity-plan-card {
-		margin-bottom: 16px;
+.sidebar-menu .sidebar-label {
+	text-transform: uppercase;
+	font-size: 11px;
+	color: var(--text-muted);
+}
+
+/* Sidebar branding */
+.qalcuity-sidebar-brand {
+	padding: 12px 16px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-sidebar-brand img {
+	max-height: 28px;
+	width: auto;
+}
+
+/* ===========================
+   Responsive Adjustments — Tablet
+   =========================== */
+@media (max-width: 992px) {
+	.qalcuity-plan-grid {
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 16px;
 	}
 
-	.qalcuity-dashboard-stat-value {
-		font-size: 22px;
+	.qalcuity-dashboard-grid {
+		grid-template-columns: repeat(2, 1fr);
 	}
 
 	.qalcuity-card {
 		padding: 16px;
+	}
+
+	.qalcuity-plan-card {
+		padding: 20px;
+	}
+
+	.qalcuity-plan-price {
+		font-size: 28px;
+	}
+
+	.qalcuity-dashboard-stat-value {
+		font-size: 24px;
+	}
+}
+
+/* ===========================
+   Responsive Adjustments — Mobile
+   =========================== */
+@media (max-width: 768px) {
+
+	/* Plan cards stack on mobile */
+	.qalcuity-plan-grid {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+
+	.qalcuity-plan-card {
+		margin-bottom: 16px;
+		padding: 16px;
+	}
+
+	.qalcuity-plan-card:hover {
+		transform: none;
+	}
+
+	.qalcuity-plan-name {
+		font-size: 18px;
+	}
+
+	.qalcuity-plan-price {
+		font-size: 24px;
+	}
+
+	.qalcuity-plan-features li {
+		font-size: 13px;
+		padding: 6px 0;
+	}
+
+	/* Dashboard grid stacks on mobile */
+	.qalcuity-dashboard-grid {
+		grid-template-columns: 1fr 1fr;
+		gap: 12px;
+	}
+
+	.qalcuity-dashboard-stat {
+		padding: 12px;
+	}
+
+	.qalcuity-dashboard-stat-value {
+		font-size: 20px;
+	}
+
+	.qalcuity-dashboard-stat-label {
+		font-size: 11px;
+	}
+
+	/* Cards reduce padding */
+	.qalcuity-card {
+		padding: 12px;
+		margin-bottom: 12px;
+	}
+
+	.qalcuity-card-header {
+		font-size: 14px;
+	}
+
+	/* Proof preview max width */
+	.qalcuity-proof-preview {
+		max-width: 100%;
+	}
+
+	/* Status badges */
+	.qalcuity-status {
+		font-size: 11px;
+		padding: 3px 8px;
+	}
+
+	/* Form sections */
+	.qalcuity-form-section {
+		margin-bottom: 16px;
+	}
+
+	.qalcuity-form-section-title {
+		font-size: 13px;
+	}
+
+	/* Sidebar adjustments */
+	.qalcuity-sidebar-brand {
+		padding: 10px 12px;
+	}
+
+	.qalcuity-sidebar-brand img {
+		max-height: 24px;
+	}
+}
+
+/* ===========================
+   Responsive Adjustments — Small Mobile
+   =========================== */
+@media (max-width: 576px) {
+
+	/* Single column layout */
+	.qalcuity-dashboard-grid {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+
+	.qalcuity-plan-card {
+		padding: 12px;
+	}
+
+	.qalcuity-plan-name {
+		font-size: 16px;
+	}
+
+	.qalcuity-plan-price {
+		font-size: 22px;
+	}
+
+	/* Compact card padding */
+	.qalcuity-card {
+		padding: 10px;
+	}
+
+	.qalcuity-card-header {
+		font-size: 13px;
+		margin-bottom: 8px;
+	}
+
+	/* Alert compact */
+	.qalcuity-alert {
+		padding: 8px 12px;
+		font-size: 13px;
+		margin-bottom: 12px;
+	}
+
+	/* Brand */
+	.qalcuity-logo {
+		font-size: 16px !important;
+	}
+}
+
+/* ===========================
+   Registration Page Styles
+   =========================== */
+.qalcuity-register-page {
+	background: var(--qalcuity-bg);
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px 16px;
+}
+
+.qalcuity-register-container {
+	width: 100%;
+	max-width: 480px;
+	margin: 0 auto;
+}
+
+.qalcuity-register-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+	box-shadow: var(--qalcuity-shadow-lg);
+	padding: 40px 36px;
+}
+
+.qalcuity-register-header {
+	text-align: center;
+	margin-bottom: 32px;
+}
+
+.qalcuity-register-header img {
+	margin-bottom: 16px;
+}
+
+.qalcuity-register-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-register-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+/* Registration Form */
+.qalcuity-register-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.qalcuity-form-group {
+	margin-bottom: 20px;
+}
+
+.qalcuity-form-label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin-bottom: 6px;
+}
+
+.qalcuity-form-label .octicon {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-form-input {
+	width: 100%;
+	padding: 10px 14px;
+	font-size: 14px;
+	color: var(--qalcuity-text);
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-sm);
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	box-sizing: border-box;
+}
+
+.qalcuity-form-input:focus {
+	border-color: var(--qalcuity-primary);
+	box-shadow: 0 0 0 3px rgba(36, 144, 239, 0.15);
+}
+
+.qalcuity-form-input::placeholder {
+	color: var(--qalcuity-text-muted);
+	opacity: 0.6;
+}
+
+.qalcuity-form-input-error {
+	border-color: var(--qalcuity-danger) !important;
+	box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15) !important;
+}
+
+.qalcuity-form-error {
+	font-size: 12px;
+	color: var(--qalcuity-danger);
+	margin-top: 4px;
+	display: none;
+}
+
+/* Password wrapper with toggle */
+.qalcuity-password-wrapper {
+	position: relative;
+}
+
+.qalcuity-password-wrapper .qalcuity-form-input {
+	padding-right: 44px;
+}
+
+.qalcuity-password-toggle {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px 8px;
+	color: var(--qalcuity-text-muted);
+	font-size: 16px;
+	line-height: 1;
+	border-radius: var(--qalcuity-radius-sm);
+	transition: color 0.2s ease;
+}
+
+.qalcuity-password-toggle:hover {
+	color: var(--qalcuity-text);
+}
+
+/* Password strength indicator */
+.qalcuity-password-strength {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 6px;
+}
+
+.qalcuity-password-strength-bar {
+	height: 4px;
+	border-radius: 2px;
+	background: var(--qalcuity-border);
+	transition: width 0.3s ease, background 0.3s ease;
+	flex: 1;
+	max-width: 120px;
+}
+
+.qalcuity-password-strength-text {
+	font-size: 12px;
+	font-weight: 600;
+}
+
+/* Submit button */
+.qalcuity-register-submit {
+	width: 100%;
+	padding: 12px 24px;
+	font-size: 16px;
+	font-weight: 600;
+	color: #ffffff;
+	background: var(--qalcuity-primary);
+	border: none;
+	border-radius: var(--qalcuity-radius-sm);
+	cursor: pointer;
+	transition: background 0.2s ease, opacity 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.qalcuity-register-submit:hover {
+	background: var(--qalcuity-primary-dark);
+}
+
+.qalcuity-register-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.qalcuity-register-submit-text,
+.qalcuity-register-submit-loading {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+/* Footer link */
+.qalcuity-register-footer {
+	text-align: center;
+	margin-top: 24px;
+	padding-top: 20px;
+	border-top: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-register-footer p {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+.qalcuity-register-link {
+	color: var(--qalcuity-primary);
+	text-decoration: none;
+	font-weight: 600;
+	transition: color 0.2s ease;
+}
+
+.qalcuity-register-link:hover {
+	color: var(--qalcuity-primary-dark);
+	text-decoration: underline;
+}
+
+/* Registration alert */
+.qalcuity-register-alert {
+	padding: 12px 16px;
+	border-radius: var(--qalcuity-radius-sm);
+	margin-bottom: 20px;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.qalcuity-register-alert-success {
+	background: #d4edda;
+	border: 1px solid #28a745;
+	color: #155724;
+}
+
+.qalcuity-register-alert-error {
+	background: #f8d7da;
+	border: 1px solid #dc3545;
+	color: #721c24;
+}
+
+/* Dark mode registration alerts */
+[data-theme="dark"] .qalcuity-register-alert-success,
+[data-theme-mode="dark"] .qalcuity-register-alert-success {
+	background: #1e4620;
+	border-color: #276729;
+	color: #9ae6b4;
+}
+
+[data-theme="dark"] .qalcuity-register-alert-error,
+[data-theme-mode="dark"] .qalcuity-register-alert-error {
+	background: #4a1a1a;
+	border-color: #6b2a2a;
+	color: #feb2b2;
+}
+
+/* Logo dark mode toggle */
+[data-theme="dark"] .qalcuity-register-logo-light,
+[data-theme-mode="dark"] .qalcuity-register-logo-light {
+	display: none !important;
+}
+
+[data-theme="dark"] .qalcuity-register-logo-dark,
+[data-theme-mode="dark"] .qalcuity-register-logo-dark {
+	display: block !important;
+}
+
+/* Login page links container */
+.qalcuity-login-links {
+	text-align: center;
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-login-forgot-link {
+	margin-bottom: 12px;
+}
+
+.qalcuity-login-forgot-link a {
+	font-size: 14px;
+}
+
+/* Login page register link (legacy class kept for compatibility) */
+.qalcuity-login-register-link {
+	text-align: center;
+	margin-top: 12px;
+}
+
+.qalcuity-login-register-link p {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+.qalcuity-register-cta {
+	color: var(--qalcuity-primary);
+	text-decoration: none;
+	font-weight: 600;
+	transition: color 0.2s ease;
+}
+
+.qalcuity-register-cta:hover {
+	color: var(--qalcuity-primary-dark);
+	text-decoration: underline;
+}
+
+/* Registration Responsive — Tablet */
+@media (max-width: 768px) {
+	.qalcuity-register-card {
+		padding: 32px 28px;
+	}
+
+	.qalcuity-register-title {
+		font-size: 22px;
+	}
+}
+
+/* Registration Responsive — Mobile */
+@media (max-width: 576px) {
+	.qalcuity-register-page {
+		padding: 16px 12px;
+		align-items: flex-start;
+		padding-top: 32px;
+	}
+
+	.qalcuity-register-card {
+		padding: 24px 20px;
+		border-radius: var(--qalcuity-radius);
+	}
+
+	.qalcuity-register-title {
+		font-size: 20px;
+	}
+
+	.qalcuity-register-subtitle {
+		font-size: 13px;
+	}
+
+	.qalcuity-form-input {
+		padding: 9px 12px;
+		font-size: 13px;
+	}
+
+	.qalcuity-register-submit {
+		padding: 11px 20px;
+		font-size: 15px;
+	}
+
+	.qalcuity-form-group {
+		margin-bottom: 16px;
 	}
 }
 
@@ -341,6 +970,14 @@
 
 	.qalcuity-status {
 		border: 1px solid currentColor;
+	}
+
+	.qalcuity-plan-card {
+		break-inside: avoid;
+	}
+
+	.qalcuity-proof-preview {
+		max-width: 200px;
 	}
 }
 
@@ -377,34 +1014,6 @@
 	max-height: 24px;
 }
 
-/* Dark mode logo swap */
-[data-theme="dark"] .app-logo {
-	content: url("/assets/qalcuity/images/logo-light.png");
-}
-
-@media (prefers-color-scheme: dark) {
-	.app-logo {
-		content: url("/assets/qalcuity/images/logo-light.png");
-	}
-}
-
-/* Sidebar branding */
-.sidebar-menu .sidebar-label {
-	text-transform: uppercase;
-	font-size: 11px;
-	color: var(--text-muted);
-}
-
-/* Workspace branding */
-.workspace-header h1 {
-	color: var(--primary);
-}
-
-/* Desk Navbar — hide default Frappe branding, show Qalcuity */
-.navbar .sidebar-toggle .page-sidebar .app-logo {
-	max-height: 24px;
-}
-
 /* Login page card styling */
 .login-page {
 	background: var(--qalcuity-bg);
@@ -415,13 +1024,2848 @@
 	border-top: 4px solid var(--primary);
 }
 
-/* Dark mode status badges — extended */
-[data-theme="dark"] .qalcuity-status-pending {
+/* Desk Navbar — hide default Frappe branding, show Qalcuity */
+.navbar .sidebar-toggle .page-sidebar .app-logo {
+	max-height: 24px;
+}
+
+/* Workspace branding */
+.workspace-header h1 {
+	color: var(--primary);
+}
+
+/* ===========================
+   Pricing Page Styles
+   =========================== */
+.qalcuity-pricing-page {
+	background: var(--qalcuity-bg);
+	min-height: 100vh;
+}
+
+.qalcuity-pricing-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 40px 24px;
+}
+
+.qalcuity-pricing-header {
+	text-align: center;
+	margin-bottom: 48px;
+}
+
+.qalcuity-pricing-title {
+	font-size: 36px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 12px 0;
+}
+
+.qalcuity-pricing-subtitle {
+	font-size: 18px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+	max-width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Plan Description */
+.qalcuity-plan-description {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin-bottom: 16px;
+	min-height: 40px;
+}
+
+/* Plan CTA Button */
+.qalcuity-plan-cta {
+	display: inline-block;
+	width: 100%;
+	padding: 12px 24px;
+	font-size: 16px;
+	font-weight: 600;
+	text-decoration: none;
+	text-align: center;
+	border-radius: var(--qalcuity-radius-sm);
+	transition: all 0.2s ease;
+	cursor: pointer;
+	border: none;
+}
+
+.qalcuity-plan-cta:hover {
+	text-decoration: none;
+	opacity: 0.9;
+}
+
+/* Pricing Loading */
+.qalcuity-pricing-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-pricing-spinner {
+	width: 40px;
+	height: 40px;
+	border: 3px solid var(--qalcuity-border);
+	border-top-color: var(--qalcuity-primary);
+	border-radius: 50%;
+	animation: qalcuity-spin 0.8s linear infinite;
+	margin-bottom: 16px;
+}
+
+@keyframes qalcuity-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.qalcuity-pricing-loading p {
+	font-size: 14px;
+	margin: 0;
+}
+
+.qalcuity-pricing-error,
+.qalcuity-pricing-empty {
+	text-align: center;
+	padding: 40px 20px;
+}
+
+.qalcuity-pricing-error .qalcuity-alert,
+.qalcuity-pricing-empty .qalcuity-alert {
+	display: inline-block;
+	margin-bottom: 16px;
+}
+
+/* Pricing Responsive — Tablet */
+@media (max-width: 992px) {
+	.qalcuity-pricing-title {
+		font-size: 30px;
+	}
+
+	.qalcuity-pricing-subtitle {
+		font-size: 16px;
+	}
+
+	.qalcuity-pricing-container {
+		padding: 32px 20px;
+	}
+}
+
+/* Pricing Responsive — Mobile */
+@media (max-width: 768px) {
+	.qalcuity-pricing-header {
+		margin-bottom: 32px;
+	}
+
+	.qalcuity-pricing-title {
+		font-size: 24px;
+	}
+
+	.qalcuity-pricing-subtitle {
+		font-size: 14px;
+	}
+
+	.qalcuity-pricing-container {
+		padding: 24px 16px;
+	}
+}
+
+/* ===========================
+   Checkout Page Styles
+   =========================== */
+.qalcuity-checkout-page {
+	background: var(--qalcuity-bg);
+	min-height: 100vh;
+}
+
+.qalcuity-checkout-container {
+	max-width: 1100px;
+	margin: 0 auto;
+	padding: 40px 24px;
+}
+
+.qalcuity-checkout-header {
+	margin-bottom: 32px;
+}
+
+.qalcuity-checkout-title {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-checkout-subtitle {
+	font-size: 16px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+.qalcuity-checkout-empty {
+	text-align: center;
+	padding: 40px 20px;
+}
+
+.qalcuity-checkout-empty .qalcuity-alert {
+	margin-bottom: 20px;
+}
+
+.qalcuity-checkout-alert {
+	margin-bottom: 24px;
+}
+
+/* Checkout Layout — Two Columns */
+.qalcuity-checkout-layout {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 32px;
+	align-items: start;
+}
+
+/* Checkout Sidebar */
+.qalcuity-checkout-sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.qalcuity-checkout-section-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin: 0 0 16px 0;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--qalcuity-border);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* Plan Summary */
+.qalcuity-checkout-summary {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+	padding: 24px;
+}
+
+.qalcuity-checkout-plan-info {
+	text-align: center;
+}
+
+.qalcuity-checkout-plan-name {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin-bottom: 8px;
+}
+
+.qalcuity-checkout-plan-desc {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin-bottom: 16px;
+}
+
+.qalcuity-checkout-plan-price {
+	font-size: 32px;
+	font-weight: 700;
+	color: var(--qalcuity-primary);
+}
+
+.qalcuity-checkout-plan-period {
+	font-size: 16px;
+	font-weight: 400;
+	color: var(--qalcuity-text-muted);
+}
+
+/* Bank Transfer Instructions */
+.qalcuity-payment-instructions {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+	padding: 24px;
+}
+
+.qalcuity-payment-steps {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.qalcuity-payment-step {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.qalcuity-payment-step-num {
+	width: 28px;
+	height: 28px;
+	min-width: 28px;
+	background: var(--qalcuity-primary);
+	color: white;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.qalcuity-payment-step-text {
+	font-size: 14px;
+	color: var(--qalcuity-text);
+	padding-top: 3px;
+}
+
+/* Bank Details */
+.qalcuity-bank-details {
+	background: var(--qalcuity-bg);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 16px;
+	margin-left: 40px;
+}
+
+.qalcuity-bank-detail {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-bank-detail:last-child {
+	border-bottom: none;
+}
+
+.qalcuity-bank-label {
+	font-size: 13px;
+	color: var(--qalcuity-text-muted);
+	font-weight: 500;
+}
+
+.qalcuity-bank-value {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-bank-account {
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	transition: color 0.2s ease;
+}
+
+.qalcuity-bank-account:hover {
+	color: var(--qalcuity-primary);
+}
+
+.qalcuity-copy-icon {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+}
+
+/* Checkout Form */
+.qalcuity-checkout-form-container {
+	min-width: 0;
+}
+
+.qalcuity-checkout-form {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+	padding: 32px;
+}
+
+.qalcuity-checkout-submit {
+	width: 100%;
+	margin-top: 8px;
+	padding: 14px 24px;
+	font-size: 16px;
+	font-weight: 600;
+	color: #ffffff;
+	background: var(--qalcuity-primary);
+	border: none;
+	border-radius: var(--qalcuity-radius-sm);
+	cursor: pointer;
+	transition: background 0.2s ease, opacity 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.qalcuity-checkout-submit:hover {
+	background: var(--qalcuity-primary-dark);
+}
+
+.qalcuity-checkout-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.qalcuity-register-submit-text,
+.qalcuity-register-submit-loading {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+/* Input with prefix (Rp) */
+.qalcuity-input-with-prefix {
+	position: relative;
+}
+
+.qalcuity-input-prefix {
+	position: absolute;
+	left: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	pointer-events: none;
+	z-index: 1;
+}
+
+.qalcuity-input-with-prefix-field {
+	padding-left: 36px !important;
+}
+
+/* File Upload */
+.qalcuity-file-upload-wrapper {
+	position: relative;
+}
+
+.qalcuity-file-input {
+	position: absolute;
+	left: -9999px;
+}
+
+.qalcuity-file-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 16px 20px;
+	border: 2px dashed var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	background: var(--qalcuity-bg);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-align: center;
+	justify-content: center;
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-file-label:hover {
+	border-color: var(--qalcuity-primary);
+	background: rgba(36, 144, 239, 0.05);
+}
+
+.qalcuity-file-preview {
+	margin-top: 12px;
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-sm);
+	overflow: hidden;
+}
+
+.qalcuity-file-preview img {
+	width: 100%;
+	max-height: 200px;
+	object-fit: contain;
+	display: block;
+	background: var(--qalcuity-bg);
+}
+
+.qalcuity-file-preview-doc {
+	padding: 12px 16px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	color: var(--qalcuity-text);
+	background: var(--qalcuity-bg);
+}
+
+/* Checkout Responsive — Tablet */
+@media (max-width: 992px) {
+	.qalcuity-checkout-layout {
+		grid-template-columns: 1fr;
+		gap: 24px;
+	}
+
+	.qalcuity-checkout-container {
+		padding: 32px 20px;
+	}
+
+	.qalcuity-bank-details {
+		margin-left: 0;
+	}
+}
+
+/* Checkout Responsive — Mobile */
+@media (max-width: 768px) {
+	.qalcuity-checkout-title {
+		font-size: 24px;
+	}
+
+	.qalcuity-checkout-container {
+		padding: 24px 16px;
+	}
+
+	.qalcuity-checkout-form {
+		padding: 24px 20px;
+	}
+
+	.qalcuity-checkout-plan-price {
+		font-size: 28px;
+	}
+}
+
+/* ===========================
+   My Payments Page Styles
+   =========================== */
+.qalcuity-my-payments-page {
+	background: var(--qalcuity-bg);
+	min-height: 100vh;
+}
+
+.qalcuity-my-payments-container {
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 40px 24px;
+}
+
+.qalcuity-my-payments-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 32px;
+	gap: 16px;
+}
+
+.qalcuity-my-payments-header-left {
+	flex: 1;
+}
+
+.qalcuity-my-payments-header-right {
+	flex-shrink: 0;
+}
+
+.qalcuity-my-payments-title {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-my-payments-subtitle {
+	font-size: 16px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+.qalcuity-my-payments-stats {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 16px;
+	margin-bottom: 32px;
+}
+
+/* Payment Card */
+.qalcuity-payment-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+	padding: 0;
+	margin-bottom: 16px;
+	transition: box-shadow 0.2s ease;
+	overflow: hidden;
+}
+
+.qalcuity-payment-card:hover {
+	box-shadow: var(--qalcuity-shadow-lg);
+}
+
+.qalcuity-payment-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--qalcuity-border);
+	background: var(--qalcuity-bg);
+}
+
+.qalcuity-payment-card-id {
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-payment-card-body {
+	padding: 16px 20px;
+}
+
+.qalcuity-payment-card-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-payment-card-row:last-child {
+	border-bottom: none;
+}
+
+.qalcuity-payment-card-label {
+	font-size: 13px;
+	color: var(--qalcuity-text-muted);
+	font-weight: 500;
+}
+
+.qalcuity-payment-card-value {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-payment-card-amount {
+	font-size: 16px;
+	color: var(--qalcuity-primary);
+}
+
+/* Rejected payment notice */
+.qalcuity-payment-card-rejected {
+	padding: 12px 20px;
+	background: #f8d7da;
+	color: #721c24;
+	font-size: 13px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.qalcuity-payment-card-rejected a {
+	color: #721c24;
+	font-weight: 600;
+	text-decoration: underline;
+}
+
+/* Loading */
+.qalcuity-my-payments-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	color: var(--qalcuity-text-muted);
+}
+
+/* Empty State */
+.qalcuity-my-payments-empty {
+	text-align: center;
+	padding: 60px 20px;
+}
+
+.qalcuity-my-payments-empty-icon {
+	margin-bottom: 20px;
+}
+
+.qalcuity-my-payments-empty h3 {
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-my-payments-empty p {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0 0 24px 0;
+}
+
+.qalcuity-my-payments-error {
+	text-align: center;
+	padding: 40px 20px;
+}
+
+.qalcuity-my-payments-error .qalcuity-alert {
+	display: inline-block;
+	margin-bottom: 16px;
+}
+
+/* Button Styles */
+.qalcuity-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 10px 20px;
+	font-size: 14px;
+	font-weight: 600;
+	border-radius: var(--qalcuity-radius-sm);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	border: none;
+	line-height: 1.4;
+}
+
+.qalcuity-btn-primary {
+	background: var(--qalcuity-primary);
+	color: #ffffff;
+}
+
+.qalcuity-btn-primary:hover {
+	background: var(--qalcuity-primary-dark);
+	color: #ffffff;
+	text-decoration: none;
+}
+
+/* Dark mode — rejected payment */
+[data-theme="dark"] .qalcuity-payment-card-rejected,
+[data-theme-mode="dark"] .qalcuity-payment-card-rejected {
+	background: #4a1a1a;
+	color: #feb2b2;
+}
+
+[data-theme="dark"] .qalcuity-payment-card-rejected a,
+[data-theme-mode="dark"] .qalcuity-payment-card-rejected a {
+	color: #feb2b2;
+}
+
+/* My Payments Responsive — Tablet */
+@media (max-width: 992px) {
+	.qalcuity-my-payments-stats {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.qalcuity-my-payments-container {
+		padding: 32px 20px;
+	}
+}
+
+/* My Payments Responsive — Mobile */
+@media (max-width: 768px) {
+	.qalcuity-my-payments-header {
+		flex-direction: column;
+	}
+
+	.qalcuity-my-payments-title {
+		font-size: 24px;
+	}
+
+	.qalcuity-my-payments-container {
+		padding: 24px 16px;
+	}
+
+	.qalcuity-my-payments-stats {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
+	}
+
+	.qalcuity-payment-card-header {
+		padding: 12px 16px;
+	}
+
+	.qalcuity-payment-card-body {
+		padding: 12px 16px;
+	}
+
+	.qalcuity-payment-card-id {
+		font-size: 14px;
+	}
+}
+
+@media (max-width: 576px) {
+	.qalcuity-my-payments-stats {
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+
+	.qalcuity-dashboard-stat {
+		padding: 10px;
+	}
+
+	.qalcuity-dashboard-stat-value {
+		font-size: 18px;
+	}
+}
+
+/* Dark mode — checkout bank details */
+[data-theme="dark"] .qalcuity-bank-details,
+[data-theme-mode="dark"] .qalcuity-bank-details {
+	background: #2d3748;
+}
+
+[data-theme="dark"] .qalcuity-file-label,
+[data-theme-mode="dark"] .qalcuity-file-label {
+	background: #2d3748;
+}
+
+[data-theme="dark"] .qalcuity-file-label:hover,
+[data-theme-mode="dark"] .qalcuity-file-label:hover {
+	background: rgba(36, 144, 239, 0.1);
+}
+
+[data-theme="dark"] .qalcuity-file-preview-doc,
+[data-theme-mode="dark"] .qalcuity-file-preview-doc {
+	background: #2d3748;
+}
+
+[data-theme="dark"] .qalcuity-file-preview img,
+[data-theme-mode="dark"] .qalcuity-file-preview img {
+	background: #2d3748;
+}
+
+/* ============================================
+   QALCUITY ERP — Customer Dashboard Page
+   ============================================ */
+
+.qalcuity-dash-container {
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 40px 24px;
+}
+
+.qalcuity-dash-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 32px;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.qalcuity-dash-title {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 4px 0;
+}
+
+.qalcuity-dash-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+.qalcuity-dash-header-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+/* Loading */
+.qalcuity-dash-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 0;
+	color: var(--qalcuity-text-muted);
+	gap: 12px;
+}
+
+.qalcuity-dash-spinner {
+	width: 36px;
+	height: 36px;
+	border: 3px solid var(--qalcuity-border);
+	border-top-color: var(--qalcuity-primary);
+	border-radius: 50%;
+	animation: qalcuity-spin 0.8s linear infinite;
+}
+
+@keyframes qalcuity-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Empty State */
+.qalcuity-dash-empty {
+	text-align: center;
+	padding: 60px 24px;
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+}
+
+.qalcuity-dash-empty-icon {
+	margin-bottom: 20px;
+}
+
+.qalcuity-dash-empty-title {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-dash-empty-desc {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0 0 24px 0;
+	max-width: 400px;
+	margin-left: auto;
+	margin-right: auto;
+	line-height: 1.6;
+}
+
+/* Stats Grid */
+.qalcuity-dash-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.qalcuity-dash-stat-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 20px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	transition: box-shadow 0.2s ease;
+}
+
+.qalcuity-dash-stat-card:hover {
+	box-shadow: var(--qalcuity-shadow-lg);
+}
+
+.qalcuity-dash-stat-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: var(--qalcuity-radius);
+	background: rgba(36, 144, 239, 0.1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.qalcuity-dash-stat-icon .octicon {
+	font-size: 20px;
+	color: var(--qalcuity-primary);
+}
+
+.qalcuity-dash-stat-content {
+	min-width: 0;
+}
+
+.qalcuity-dash-stat-value {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	line-height: 1.3;
+}
+
+.qalcuity-dash-stat-label {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-top: 2px;
+}
+
+/* Cards */
+.qalcuity-dash-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	margin-bottom: 20px;
+	overflow: hidden;
+}
+
+.qalcuity-dash-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-dash-card-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-dash-card-title .octicon {
+	color: var(--qalcuity-primary);
+}
+
+.qalcuity-dash-card-body {
+	padding: 16px 20px;
+}
+
+/* Detail Grid */
+.qalcuity-dash-detail-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+}
+
+.qalcuity-dash-detail-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-dash-detail-row:last-child {
+	border-bottom: none;
+}
+
+.qalcuity-dash-detail-label {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	font-weight: 500;
+}
+
+.qalcuity-dash-detail-value {
+	font-size: 14px;
+	color: var(--qalcuity-text);
+	font-weight: 600;
+	text-align: right;
+}
+
+/* Alerts */
+.qalcuity-dash-alert {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 16px 20px;
+	border-radius: var(--qalcuity-radius);
+	margin-bottom: 20px;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.qalcuity-dash-alert .octicon {
+	font-size: 18px;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.qalcuity-dash-alert strong {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.qalcuity-dash-alert p {
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-dash-alert-warning {
+	background: #fff3cd;
+	border: 1px solid #ffc107;
+	color: #856404;
+}
+
+.qalcuity-dash-alert-danger {
+	background: #f8d7da;
+	border: 1px solid #dc3545;
+	color: #721c24;
+}
+
+/* Payment List */
+.qalcuity-dash-payment-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.qalcuity-dash-payment-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-dash-payment-item:last-child {
+	border-bottom: none;
+}
+
+.qalcuity-dash-payment-name {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-dash-payment-date {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 2px;
+}
+
+.qalcuity-dash-payment-right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+}
+
+.qalcuity-dash-payment-amount {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+/* Buttons */
+.qalcuity-dash-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	font-size: 14px;
+	font-weight: 600;
+	border-radius: var(--qalcuity-radius-sm);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	border: none;
+	line-height: 1.4;
+}
+
+.qalcuity-dash-btn-primary {
+	background: var(--qalcuity-primary);
+	color: #ffffff;
+}
+
+.qalcuity-dash-btn-primary:hover {
+	background: var(--qalcuity-primary-dark);
+	color: #ffffff;
+	text-decoration: none;
+}
+
+.qalcuity-dash-btn-outline {
+	background: transparent;
+	color: var(--qalcuity-primary);
+	border: 1px solid var(--qalcuity-primary);
+}
+
+.qalcuity-dash-btn-outline:hover {
+	background: rgba(36, 144, 239, 0.08);
+	text-decoration: none;
+}
+
+.qalcuity-dash-btn-danger-sm {
+	background: var(--qalcuity-danger);
+	color: #ffffff;
+	padding: 6px 14px;
+	font-size: 13px;
+}
+
+.qalcuity-dash-btn-danger-sm:hover {
+	background: #c82333;
+	color: #ffffff;
+	text-decoration: none;
+}
+
+.qalcuity-dash-btn-lg {
+	padding: 12px 24px;
+	font-size: 16px;
+}
+
+.qalcuity-dash-link {
+	font-size: 14px;
+	color: var(--qalcuity-primary);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.qalcuity-dash-link:hover {
+	text-decoration: underline;
+}
+
+/* Dark mode dashboard */
+[data-theme="dark"] .qalcuity-dash-stat-icon,
+[data-theme-mode="dark"] .qalcuity-dash-stat-icon {
+	background: rgba(36, 144, 239, 0.15);
+}
+
+[data-theme="dark"] .qalcuity-dash-alert-warning,
+[data-theme-mode="dark"] .qalcuity-dash-alert-warning {
+	background: #4a3c00;
+	border-color: #6b5c00;
+	color: #ffd700;
+}
+
+[data-theme="dark"] .qalcuity-dash-alert-danger,
+[data-theme-mode="dark"] .qalcuity-dash-alert-danger {
+	background: #4a1a1a;
+	border-color: #6b2a2a;
+	color: #feb2b2;
+}
+
+[data-theme="dark"] .qalcuity-dash-empty,
+[data-theme-mode="dark"] .qalcuity-dash-empty {
+	background: var(--qalcuity-bg-card);
+	border-color: var(--qalcuity-border);
+}
+
+/* Dashboard Responsive — Tablet */
+@media (max-width: 992px) {
+	.qalcuity-dash-container {
+		padding: 32px 20px;
+	}
+
+	.qalcuity-dash-stats {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+/* Dashboard Responsive — Mobile */
+@media (max-width: 768px) {
+	.qalcuity-dash-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.qalcuity-dash-title {
+		font-size: 24px;
+	}
+
+	.qalcuity-dash-container {
+		padding: 24px 16px;
+	}
+
+	.qalcuity-dash-stats {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
+	}
+
+	.qalcuity-dash-stat-card {
+		padding: 14px;
+	}
+
+	.qalcuity-dash-stat-icon {
+		width: 36px;
+		height: 36px;
+	}
+
+	.qalcuity-dash-stat-icon .octicon {
+		font-size: 16px;
+	}
+
+	.qalcuity-dash-stat-value {
+		font-size: 15px;
+	}
+
+	.qalcuity-dash-card-header {
+		padding: 12px 16px;
+	}
+
+	.qalcuity-dash-card-body {
+		padding: 12px 16px;
+	}
+
+	.qalcuity-dash-payment-item {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	.qalcuity-dash-payment-right {
+		align-items: flex-start;
+		flex-direction: row;
+		gap: 8px;
+	}
+}
+
+/* Dashboard Responsive — Small Mobile */
+@media (max-width: 576px) {
+	.qalcuity-dash-stats {
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+
+	.qalcuity-dash-stat-card {
+		padding: 12px;
+	}
+
+	.qalcuity-dash-stat-value {
+		font-size: 14px;
+	}
+
+	.qalcuity-dash-stat-label {
+		font-size: 11px;
+	}
+
+	.qalcuity-dash-empty {
+		padding: 40px 16px;
+	}
+
+	.qalcuity-dash-empty-title {
+		font-size: 18px;
+	}
+
+	.qalcuity-dash-detail-row {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 2px;
+	}
+
+	.qalcuity-dash-detail-value {
+		text-align: left;
+	}
+}
+
+/* ============================================
+	  PROFILE PAGE STYLES
+	  ============================================ */
+.qalcuity-profile-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 32px 24px;
+}
+
+.qalcuity-profile-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 32px;
+	gap: 16px;
+}
+
+.qalcuity-profile-title {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-profile-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+.qalcuity-profile-header-right {
+	flex-shrink: 0;
+}
+
+/* Profile Card */
+.qalcuity-profile-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	box-shadow: var(--qalcuity-shadow);
+	margin-bottom: 24px;
+	overflow: hidden;
+}
+
+.qalcuity-profile-card-header {
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--qalcuity-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.qalcuity-profile-card-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-profile-card-title .octicon {
+	color: var(--qalcuity-primary);
+	font-size: 16px;
+}
+
+.qalcuity-profile-card-body {
+	padding: 20px;
+}
+
+/* Profile Form */
+.qalcuity-profile-form {
+	display: flex;
+	flex-direction: column;
+}
+
+.qalcuity-profile-form-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+}
+
+.qalcuity-profile-form-actions {
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid var(--qalcuity-border);
+	display: flex;
+	justify-content: flex-end;
+}
+
+.qalcuity-form-help {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 4px;
+	display: block;
+}
+
+.qalcuity-form-input[readonly],
+.qalcuity-form-input[disabled] {
+	background: var(--qalcuity-bg);
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
+/* Buttons */
+.qalcuity-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+	border-radius: var(--qalcuity-radius-sm);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border: none;
+	white-space: nowrap;
+}
+
+.qalcuity-btn-primary {
+	background: var(--qalcuity-primary);
+	color: #ffffff;
+}
+
+.qalcuity-btn-primary:hover {
+	background: var(--qalcuity-primary-dark);
+	text-decoration: none;
+	color: #ffffff;
+}
+
+.qalcuity-btn-outline {
+	background: transparent;
+	color: var(--qalcuity-primary);
+	border: 1px solid var(--qalcuity-primary);
+}
+
+.qalcuity-btn-outline:hover {
+	background: var(--qalcuity-primary);
+	color: #ffffff;
+	text-decoration: none;
+}
+
+/* Profile Info Grid */
+.qalcuity-profile-info-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.qalcuity-profile-info-item {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 12px;
+	background: var(--qalcuity-bg);
+	border-radius: var(--qalcuity-radius-sm);
+	border: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-profile-info-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.qalcuity-profile-info-value {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+/* Profile Loading */
+.qalcuity-profile-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-profile-loading p {
+	margin-top: 12px;
+	font-size: 14px;
+}
+
+/* Profile Alerts */
+.qalcuity-profile-container .qalcuity-alert {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-bottom: 20px;
+}
+
+/* Dark mode buttons */
+[data-theme="dark"] .qalcuity-btn-outline,
+[data-theme-mode="dark"] .qalcuity-btn-outline {
+	background: transparent;
+	color: var(--qalcuity-primary);
+	border-color: var(--qalcuity-primary);
+}
+
+[data-theme="dark"] .qalcuity-btn-outline:hover,
+[data-theme-mode="dark"] .qalcuity-btn-outline:hover {
+	background: var(--qalcuity-primary);
+	color: #ffffff;
+}
+
+/* ============================================
+	  ACCOUNT STATUS PAGE STYLES
+	  ============================================ */
+.qalcuity-acc-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 32px 24px;
+}
+
+.qalcuity-acc-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 32px;
+	gap: 16px;
+}
+
+.qalcuity-acc-title {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-acc-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+.qalcuity-acc-header-right {
+	flex-shrink: 0;
+}
+
+/* Account Card */
+.qalcuity-acc-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	box-shadow: var(--qalcuity-shadow);
+	margin-bottom: 24px;
+	overflow: hidden;
+}
+
+.qalcuity-acc-card-header {
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--qalcuity-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.qalcuity-acc-card-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-acc-card-title .octicon {
+	color: var(--qalcuity-primary);
+	font-size: 16px;
+}
+
+.qalcuity-acc-card-body {
+	padding: 20px;
+}
+
+/* Detail Grid */
+.qalcuity-acc-detail-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.qalcuity-acc-detail-item {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 12px;
+	background: var(--qalcuity-bg);
+	border-radius: var(--qalcuity-radius-sm);
+	border: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-acc-detail-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.qalcuity-acc-detail-value {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-acc-mono {
+	font-family: monospace;
+	font-size: 13px;
+}
+
+.qalcuity-acc-countdown {
+	font-size: 18px;
+	font-weight: 700;
+}
+
+/* Empty State */
+.qalcuity-acc-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 24px;
+	text-align: center;
+	gap: 12px;
+}
+
+.qalcuity-acc-empty p {
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+/* Payment Summary Grid */
+.qalcuity-acc-payment-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 16px;
+}
+
+.qalcuity-acc-payment-card {
+	background: var(--qalcuity-bg);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 16px;
+	text-align: center;
+	transition: box-shadow 0.2s ease;
+}
+
+.qalcuity-acc-payment-card:hover {
+	box-shadow: var(--qalcuity-shadow);
+}
+
+.qalcuity-acc-payment-value {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-acc-payment-label {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-top: 4px;
+}
+
+.qalcuity-acc-payment-pending .qalcuity-acc-payment-value {
+	color: var(--qalcuity-warning);
+}
+
+.qalcuity-acc-payment-approved .qalcuity-acc-payment-value {
+	color: var(--qalcuity-success);
+}
+
+.qalcuity-acc-payment-rejected .qalcuity-acc-payment-value {
+	color: var(--qalcuity-danger);
+}
+
+/* Usage Grid */
+.qalcuity-acc-usage-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.qalcuity-acc-usage-item {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.qalcuity-acc-usage-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.qalcuity-acc-usage-label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-acc-usage-value {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-acc-usage-bar {
+	height: 8px;
+	background: var(--qalcuity-border);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.qalcuity-acc-usage-bar-fill {
+	height: 100%;
+	background: var(--qalcuity-primary);
+	border-radius: 4px;
+	transition: width 0.5s ease, background 0.3s ease;
+	min-width: 0;
+}
+
+/* Quick Actions Grid */
+.qalcuity-acc-actions-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+}
+
+.qalcuity-acc-action-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 20px 16px;
+	background: var(--qalcuity-bg);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	text-decoration: none;
+	text-align: center;
+	transition: all 0.2s ease;
+}
+
+.qalcuity-acc-action-card:hover {
+	border-color: var(--qalcuity-primary);
+	box-shadow: var(--qalcuity-shadow);
+	transform: translateY(-2px);
+	text-decoration: none;
+}
+
+.qalcuity-acc-action-label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-acc-action-desc {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+}
+
+/* Account Alerts */
+.qalcuity-acc-container .qalcuity-alert {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-bottom: 20px;
+}
+
+/* Account Loading */
+.qalcuity-acc-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-acc-loading p {
+	margin-top: 12px;
+	font-size: 14px;
+}
+
+/* ============================================
+	  RESPONSIVE — Profile & Account Status
+	  ============================================ */
+
+/* Tablet */
+@media (max-width: 992px) {
+	.qalcuity-acc-payment-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.qalcuity-acc-actions-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+	.qalcuity-profile-container,
+	.qalcuity-acc-container {
+		padding: 24px 16px;
+	}
+
+	.qalcuity-profile-header,
+	.qalcuity-acc-header {
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.qalcuity-profile-title,
+	.qalcuity-acc-title {
+		font-size: 24px;
+	}
+
+	.qalcuity-profile-form-grid,
+	.qalcuity-acc-detail-grid,
+	.qalcuity-profile-info-grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.qalcuity-profile-card-body,
+	.qalcuity-acc-card-body {
+		padding: 16px;
+	}
+
+	.qalcuity-acc-payment-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
+	}
+
+	.qalcuity-acc-actions-grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.qalcuity-acc-payment-value {
+		font-size: 22px;
+	}
+
+	.qalcuity-acc-countdown {
+		font-size: 16px;
+	}
+}
+
+/* Small Mobile */
+@media (max-width: 576px) {
+
+	.qalcuity-profile-container,
+	.qalcuity-acc-container {
+		padding: 16px 12px;
+	}
+
+	.qalcuity-profile-title,
+	.qalcuity-acc-title {
+		font-size: 20px;
+	}
+
+	.qalcuity-profile-card-header,
+	.qalcuity-acc-card-header {
+		padding: 12px 14px;
+	}
+
+	.qalcuity-profile-card-body,
+	.qalcuity-acc-card-body {
+		padding: 12px;
+	}
+
+	.qalcuity-acc-payment-grid {
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+
+	.qalcuity-acc-payment-card {
+		padding: 12px;
+	}
+
+	.qalcuity-acc-payment-value {
+		font-size: 18px;
+	}
+
+	.qalcuity-acc-detail-grid,
+	.qalcuity-profile-info-grid {
+		gap: 8px;
+	}
+
+	.qalcuity-acc-detail-item,
+	.qalcuity-profile-info-item {
+		padding: 10px;
+	}
+
+	.qalcuity-btn {
+		padding: 7px 12px;
+		font-size: 13px;
+	}
+}
+
+/* ============================================
+	  QALCUITY ERP — Subscription History Timeline
+	  ============================================ */
+
+.qalcuity-sub-history-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 24px 16px;
+}
+
+.qalcuity-sub-history-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.qalcuity-sub-history-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 4px 0;
+}
+
+.qalcuity-sub-history-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+/* Filter Bar */
+.qalcuity-sub-history-filters {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 24px;
+	padding: 12px 16px;
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+}
+
+.qalcuity-sub-history-filter-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-sub-history-filter-label {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	white-space: nowrap;
+}
+
+.qalcuity-sub-history-filter-group .qalcuity-form-input {
+	max-width: 200px;
+	padding: 6px 10px;
+	font-size: 13px;
+}
+
+/* Loading */
+.qalcuity-sub-history-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 48px 16px;
+	color: var(--qalcuity-text-muted);
+}
+
+/* Timeline */
+.qalcuity-sub-history-timeline {
+	position: relative;
+	padding-left: 32px;
+}
+
+.qalcuity-sub-history-timeline::before {
+	content: '';
+	position: absolute;
+	left: 11px;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: var(--qalcuity-border);
+}
+
+/* Timeline Entry */
+.qalcuity-sub-history-entry {
+	position: relative;
+	margin-bottom: 24px;
+	padding-bottom: 4px;
+}
+
+.qalcuity-sub-history-entry-dot {
+	position: absolute;
+	left: -32px;
+	top: 4px;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	color: #ffffff;
+	z-index: 1;
+}
+
+.qalcuity-sub-history-entry.action-created .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-info);
+}
+
+.qalcuity-sub-history-entry.action-activated .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-success);
+}
+
+.qalcuity-sub-history-entry.action-suspended .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-warning);
+}
+
+.qalcuity-sub-history-entry.action-reactivated .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-primary);
+}
+
+.qalcuity-sub-history-entry.action-cancelled .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-danger);
+}
+
+.qalcuity-sub-history-entry.action-expired .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-text-muted);
+}
+
+.qalcuity-sub-history-entry.action-extended .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-primary);
+}
+
+.qalcuity-sub-history-entry.action-plan-changed .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-secondary);
+}
+
+.qalcuity-sub-history-entry.action-default .qalcuity-sub-history-entry-dot {
+	background: var(--qalcuity-text-muted);
+}
+
+.qalcuity-sub-history-entry-content {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 14px 16px;
+	transition: box-shadow 0.2s ease;
+}
+
+.qalcuity-sub-history-entry-content:hover {
+	box-shadow: var(--qalcuity-shadow);
+}
+
+.qalcuity-sub-history-entry-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+	gap: 8px;
+}
+
+.qalcuity-sub-history-entry-action {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-sub-history-entry-date {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	white-space: nowrap;
+}
+
+.qalcuity-sub-history-entry-details {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 16px;
+	margin-bottom: 6px;
+	font-size: 13px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-sub-history-entry-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.qalcuity-sub-history-entry-notes {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 6px;
+	padding-top: 6px;
+	border-top: 1px solid var(--qalcuity-border);
+	font-style: italic;
+}
+
+.qalcuity-sub-history-entry-performer {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 6px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.qalcuity-sub-history-entry-performer .octicon {
+	font-size: 12px;
+}
+
+/* Empty State */
+.qalcuity-sub-history-empty {
+	text-align: center;
+	padding: 48px 16px;
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+}
+
+.qalcuity-sub-history-empty h3 {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+	margin: 16px 0 8px 0;
+}
+
+.qalcuity-sub-history-empty p {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin-bottom: 20px;
+}
+
+/* Error State */
+.qalcuity-sub-history-error {
+	text-align: center;
+	padding: 32px 16px;
+}
+
+/* Pagination */
+.qalcuity-sub-history-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	margin-top: 24px;
+	padding: 12px 0;
+}
+
+.qalcuity-sub-history-page-info {
+	font-size: 13px;
+	color: var(--qalcuity-text-muted);
+}
+
+/* Responsive — Mobile */
+@media (max-width: 768px) {
+	.qalcuity-sub-history-header {
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.qalcuity-sub-history-title {
+		font-size: 20px;
+	}
+
+	.qalcuity-sub-history-timeline {
+		padding-left: 28px;
+	}
+
+	.qalcuity-sub-history-entry-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+	}
+
+	.qalcuity-sub-history-filters {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	.qalcuity-sub-history-filter-group .qalcuity-form-input {
+		max-width: 100%;
+	}
+}
+
+/* ============================================
+	  QALCUITY ERP — Audit Log Styles
+	  ============================================ */
+
+.qalcuity-audit-log-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	overflow: hidden;
+}
+
+.qalcuity-audit-log-table th {
+	background: var(--qalcuity-bg);
+	padding: 10px 14px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	text-align: left;
+	border-bottom: 2px solid var(--qalcuity-border);
+	white-space: nowrap;
+}
+
+.qalcuity-audit-log-table td {
+	padding: 10px 14px;
+	font-size: 13px;
+	color: var(--qalcuity-text);
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-audit-log-table tr:last-child td {
+	border-bottom: none;
+}
+
+.qalcuity-audit-log-table tr:hover td {
+	background: var(--qalcuity-bg);
+}
+
+.qalcuity-audit-log-action {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.qalcuity-audit-log-action.action-login {
+	background: #d4edda;
+	color: #155724;
+}
+
+.qalcuity-audit-log-action.action-logout {
+	background: #e2e8f0;
+	color: #4a5568;
+}
+
+.qalcuity-audit-log-action.action-payment {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.qalcuity-audit-log-action.action-subscription {
+	background: #d1ecf1;
+	color: #0c5460;
+}
+
+.qalcuity-audit-log-action.action-other {
+	background: #f8f9fa;
+	color: #6c757d;
+}
+
+/* Dark mode audit log */
+[data-theme="dark"] .qalcuity-audit-log-action.action-login,
+[data-theme-mode="dark"] .qalcuity-audit-log-action.action-login {
+	background: #1e4620;
+	color: #9ae6b4;
+}
+
+[data-theme="dark"] .qalcuity-audit-log-action.action-logout,
+[data-theme-mode="dark"] .qalcuity-audit-log-action.action-logout {
+	background: #2d3748;
+	color: #a0aec0;
+}
+
+[data-theme="dark"] .qalcuity-audit-log-action.action-payment,
+[data-theme-mode="dark"] .qalcuity-audit-log-action.action-payment {
 	background: #4a3c00;
 	color: #ffd700;
 }
 
-[data-theme="dark"] .qalcuity-status-expired {
-	background: #2d3748;
-	color: #a0aec0;
+[data-theme="dark"] .qalcuity-audit-log-action.action-subscription,
+[data-theme-mode="dark"] .qalcuity-audit-log-action.action-subscription {
+	background: #1a3a4a;
+	color: #90cdf4;
+}
+
+/* Responsive audit log */
+@media (max-width: 768px) {
+	.qalcuity-audit-log-table {
+		display: block;
+		overflow-x: auto;
+	}
+}
+
+/* ============================================
+	  QALCUITY ERP — Plan Limits Warning Banners
+	  ============================================ */
+
+.qalcuity-limit-banner {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 16px;
+	border-radius: var(--qalcuity-radius);
+	margin-bottom: 16px;
+	font-size: 14px;
+}
+
+.qalcuity-limit-banner .octicon {
+	font-size: 18px;
+	flex-shrink: 0;
+}
+
+.qalcuity-limit-banner-warning {
+	background: #fff3cd;
+	border: 1px solid #ffc107;
+	color: #856404;
+}
+
+.qalcuity-limit-banner-danger {
+	background: #f8d7da;
+	border: 1px solid #dc3545;
+	color: #721c24;
+}
+
+.qalcuity-limit-banner-info {
+	background: #d1ecf1;
+	border: 1px solid #17a2b8;
+	color: #0c5460;
+}
+
+.qalcuity-limit-banner-success {
+	background: #d4edda;
+	border: 1px solid #28a745;
+	color: #155724;
+}
+
+.qalcuity-limit-banner-text {
+	flex: 1;
+}
+
+.qalcuity-limit-banner-text strong {
+	font-weight: 600;
+}
+
+.qalcuity-limit-banner-progress {
+	width: 100%;
+	height: 6px;
+	border-radius: 3px;
+	background: rgba(0, 0, 0, 0.1);
+	margin-top: 8px;
+	overflow: hidden;
+}
+
+.qalcuity-limit-banner-progress-bar {
+	height: 100%;
+	border-radius: 3px;
+	transition: width 0.3s ease;
+}
+
+.qalcuity-limit-banner-progress-bar.progress-ok {
+	background: var(--qalcuity-success);
+}
+
+.qalcuity-limit-banner-progress-bar.progress-warn {
+	background: var(--qalcuity-warning);
+}
+
+.qalcuity-limit-banner-progress-bar.progress-danger {
+	background: var(--qalcuity-danger);
+}
+
+/* Dark mode limit banners */
+[data-theme="dark"] .qalcuity-limit-banner-warning,
+[data-theme-mode="dark"] .qalcuity-limit-banner-warning {
+	background: #4a3c00;
+	border-color: #6b5c00;
+	color: #ffd700;
+}
+
+[data-theme="dark"] .qalcuity-limit-banner-danger,
+[data-theme-mode="dark"] .qalcuity-limit-banner-danger {
+	background: #4a1a1a;
+	border-color: #6b2a2a;
+	color: #feb2b2;
+}
+
+[data-theme="dark"] .qalcuity-limit-banner-info,
+[data-theme-mode="dark"] .qalcuity-limit-banner-info {
+	background: #1a3a4a;
+	border-color: #2a5a6a;
+	color: #90cdf4;
+}
+
+[data-theme="dark"] .qalcuity-limit-banner-success,
+[data-theme-mode="dark"] .qalcuity-limit-banner-success {
+	background: #1e4620;
+	border-color: #276729;
+	color: #9ae6b4;
+}
+
+[data-theme="dark"] .qalcuity-limit-banner-progress,
+[data-theme-mode="dark"] .qalcuity-limit-banner-progress {
+	background: rgba(255, 255, 255, 0.1);
+}
+
+/* ===========================
+   Bell Icon Notification
+   =========================== */
+
+.qalcuity-bell-wrapper {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+}
+
+.qalcuity-bell-btn {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 6px 8px;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-color, #555);
+	transition: background 0.15s ease, color 0.15s ease;
+	position: relative;
+}
+
+.qalcuity-bell-btn:hover {
+	background: rgba(0, 0, 0, 0.06);
+	color: var(--primary, #2490EF);
+}
+
+.qalcuity-bell-btn svg {
+	width: 18px;
+	height: 18px;
+}
+
+.qalcuity-bell-badge {
+	position: absolute;
+	top: 2px;
+	right: 2px;
+	min-width: 16px;
+	height: 16px;
+	padding: 0 4px;
+	border-radius: 8px;
+	background: #f44336;
+	color: #fff;
+	font-size: 10px;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+	pointer-events: none;
+}
+
+/* Dropdown Panel */
+.qalcuity-bell-dropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	margin-top: 8px;
+	width: 340px;
+	max-height: 420px;
+	background: var(--card-bg, #fff);
+	border: 1px solid var(--border-color, #e2e8f0);
+	border-radius: var(--border-radius-lg, 12px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+	z-index: 9999;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Header */
+.qalcuity-bell-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--border-color, #e2e8f0);
+	background: var(--subtle-bg, #f8f9fa);
+}
+
+.qalcuity-bell-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-color, #333);
+}
+
+.qalcuity-bell-mark-all {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 11px;
+	color: var(--primary, #2490EF);
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 6px;
+	border-radius: 4px;
+	transition: background 0.15s ease;
+}
+
+.qalcuity-bell-mark-all:hover {
+	background: rgba(36, 144, 239, 0.08);
+}
+
+.qalcuity-bell-mark-all svg {
+	width: 12px;
+	height: 12px;
+}
+
+/* Notification List */
+.qalcuity-bell-list {
+	overflow-y: auto;
+	max-height: 300px;
+	flex: 1;
+}
+
+.qalcuity-bell-empty {
+	padding: 32px 16px;
+	text-align: center;
+	color: var(--text-muted, #999);
+	font-size: 13px;
+}
+
+.qalcuity-bell-loading {
+	padding: 24px 16px;
+	text-align: center;
+	color: var(--text-muted, #999);
+	font-size: 13px;
+}
+
+/* Notification Item */
+.qalcuity-bell-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 10px 16px;
+	cursor: pointer;
+	transition: background 0.12s ease;
+	border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.qalcuity-bell-item:hover {
+	background: var(--subtle-bg, #f8f9fa);
+}
+
+.qalcuity-bell-item.qalcuity-bell-unread {
+	background: rgba(36, 144, 239, 0.04);
+}
+
+.qalcuity-bell-item.qalcuity-bell-unread .qalcuity-bell-item-title {
+	font-weight: 600;
+}
+
+.qalcuity-bell-item-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-top: 5px;
+	flex-shrink: 0;
+}
+
+.qalcuity-bell-item-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.qalcuity-bell-item-title {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--text-color, #333);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.qalcuity-bell-item-message {
+	font-size: 11px;
+	color: var(--text-muted, #888);
+	margin-top: 2px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.qalcuity-bell-item-time {
+	font-size: 10px;
+	color: var(--text-muted, #aaa);
+	margin-top: 3px;
+}
+
+/* Footer */
+.qalcuity-bell-footer {
+	padding: 8px 16px;
+	border-top: 1px solid var(--border-color, #e2e8f0);
+	text-align: center;
+	background: var(--subtle-bg, #f8f9fa);
+}
+
+.qalcuity-bell-view-all {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--primary, #2490EF);
+	text-decoration: none;
+}
+
+.qalcuity-bell-view-all:hover {
+	text-decoration: underline;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .qalcuity-bell-btn {
+	color: #ccc;
+}
+
+[data-theme="dark"] .qalcuity-bell-btn:hover {
+	background: rgba(255, 255, 255, 0.08);
+	color: #4fc3f7;
+}
+
+[data-theme="dark"] .qalcuity-bell-dropdown {
+	background: #1e1e2e;
+	border-color: #2d2d3f;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .qalcuity-bell-header {
+	background: #252536;
+	border-color: #2d2d3f;
+}
+
+[data-theme="dark"] .qalcuity-bell-title {
+	color: #e0e0e0;
+}
+
+[data-theme="dark"] .qalcuity-bell-item {
+	border-color: #2d2d3f;
+}
+
+[data-theme="dark"] .qalcuity-bell-item:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .qalcuity-bell-item.qalcuity-bell-unread {
+	background: rgba(36, 144, 239, 0.08);
+}
+
+[data-theme="dark"] .qalcuity-bell-item-title {
+	color: #e0e0e0;
+}
+
+[data-theme="dark"] .qalcuity-bell-item-message {
+	color: #999;
+}
+
+[data-theme="dark"] .qalcuity-bell-item-time {
+	color: #777;
+}
+
+[data-theme="dark"] .qalcuity-bell-empty,
+[data-theme="dark"] .qalcuity-bell-loading {
+	color: #888;
+}
+
+[data-theme="dark"] .qalcuity-bell-footer {
+	background: #252536;
+	border-color: #2d2d3f;
+}
+
+[data-theme="dark"] .qalcuity-bell-view-all {
+	color: #4fc3f7;
+}
+
+[data-theme="dark"] .qalcuity-bell-mark-all {
+	color: #4fc3f7;
+}
+
+[data-theme="dark"] .qalcuity-bell-mark-all:hover {
+	background: rgba(79, 195, 247, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+	.qalcuity-bell-dropdown {
+		width: 280px;
+		right: -8px;
+	}
+}
+
+/* =========================================================================
+   ERP Access Banner — Dashboard
+   ========================================================================= */
+
+.qalcuity-dash-erp-banner {
+	margin-bottom: 20px;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.qalcuity-dash-erp-banner-content {
+	display: flex;
+	align-items: center;
+	padding: 20px 24px;
+	gap: 16px;
+}
+
+.qalcuity-dash-erp-banner-icon {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 12px;
+}
+
+.qalcuity-dash-erp-banner-text {
+	flex: 1;
+}
+
+.qalcuity-dash-erp-banner-text h3 {
+	margin: 0 0 4px 0;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.qalcuity-dash-erp-banner-text p {
+	margin: 0;
+	font-size: 13px;
+	opacity: 0.85;
+}
+
+.qalcuity-dash-erp-banner-btn {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 28px;
+	background: #fff;
+	color: var(--qalcuity-primary, #2490EF);
+	font-weight: 600;
+	font-size: 15px;
+	text-decoration: none;
+	border-radius: 8px;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+}
+
+.qalcuity-dash-erp-banner-btn:hover {
+	background: rgba(255, 255, 255, 0.9);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Ready state — green gradient */
+.qalcuity-dash-erp-ready {
+	background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+	color: #fff;
+}
+
+.qalcuity-dash-erp-ready .qalcuity-dash-erp-banner-icon {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* Provisioning state — blue gradient with animation */
+.qalcuity-dash-erp-provisioning {
+	background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+	color: #fff;
+}
+
+.qalcuity-dash-erp-provisioning .qalcuity-dash-erp-banner-icon {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* Failed state — red gradient */
+.qalcuity-dash-erp-failed {
+	background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ef4444 100%);
+	color: #fff;
+}
+
+.qalcuity-dash-erp-failed .qalcuity-dash-erp-banner-icon {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* Small spinner for provisioning banner */
+.qalcuity-dash-spinner-sm {
+	width: 28px;
+	height: 28px;
+	border: 3px solid rgba(255, 255, 255, 0.3);
+	border-top-color: #fff;
+	border-radius: 50%;
+	animation: qalcuity-spin 0.8s linear infinite;
+}
+
+@keyframes qalcuity-spin {
+	to { transform: rotate(360deg); }
+}
+
+/* Dark mode adjustments for ERP banner */
+[data-theme="dark"] .qalcuity-dash-erp-banner-btn {
+	background: rgba(255, 255, 255, 0.15);
+	color: #fff;
+}
+
+[data-theme="dark"] .qalcuity-dash-erp-banner-btn:hover {
+	background: rgba(255, 255, 255, 0.25);
+}
+
+/* Responsive ERP banner */
+@media (max-width: 600px) {
+	.qalcuity-dash-erp-banner-content {
+		flex-direction: column;
+		text-align: center;
+		padding: 16px;
+	}
+
+	.qalcuity-dash-erp-banner-btn {
+		width: 100%;
+		justify-content: center;
+	}
 }

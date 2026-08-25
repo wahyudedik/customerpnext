@@ -1,0 +1,377 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-profile-container">
+	<!-- Header -->
+	<div class="qalcuity-profile-header">
+		<div class="qalcuity-profile-header-left">
+			<h1 class="qalcuity-profile-title">Profil Saya</h1>
+			<p class="qalcuity-profile-subtitle">Kelola informasi akun dan pengaturan Anda.</p>
+		</div>
+		<div class="qalcuity-profile-header-right">
+			<a href="/account-status" class="qalcuity-btn qalcuity-btn-outline">
+				<span class="octicon octicon-info"></span> Status Akun
+			</a>
+		</div>
+	</div>
+
+	<!-- Success/Error Alerts -->
+	<div id="profile-success" class="qalcuity-alert qalcuity-alert-success" style="display: none;">
+		<span class="octicon octicon-check"></span>
+		<span id="profile-success-msg">Profil berhasil diperbarui.</span>
+	</div>
+	<div id="profile-error" class="qalcuity-alert qalcuity-alert-danger" style="display: none;">
+		<span class="octicon octicon-x"></span>
+		<span id="profile-error-msg">Terjadi kesalahan.</span>
+	</div>
+
+	<!-- Loading State -->
+	<div id="profile-loading" class="qalcuity-profile-loading">
+		<div class="qalcuity-pricing-spinner"></div>
+		<p>Memuat data profil...</p>
+	</div>
+
+	<!-- Profile Content -->
+	<div id="profile-content" style="display: none;">
+
+		<!-- Section 1: Profil -->
+		<div class="qalcuity-profile-card">
+			<div class="qalcuity-profile-card-header">
+				<h3 class="qalcuity-profile-card-title">
+					<span class="octicon octicon-person"></span> Informasi Profil
+				</h3>
+			</div>
+			<div class="qalcuity-profile-card-body">
+				<form id="profile-form" class="qalcuity-profile-form">
+					<div class="qalcuity-profile-form-grid">
+						<div class="qalcuity-form-group">
+							<label class="qalcuity-form-label">
+								<span class="octicon octicon-person"></span> Nama Lengkap
+							</label>
+							<input type="text" id="profile-full-name" class="qalcuity-form-input"
+								placeholder="Nama lengkap Anda">
+						</div>
+						<div class="qalcuity-form-group">
+							<label class="qalcuity-form-label">
+								<span class="octicon octicon-mail"></span> Email
+							</label>
+							<input type="email" id="profile-email" class="qalcuity-form-input" readonly disabled>
+							<small class="qalcuity-form-help">Email tidak dapat diubah.</small>
+						</div>
+						<div class="qalcuity-form-group">
+							<label class="qalcuity-form-label">
+								<span class="octicon octicon-device-mobile"></span> Telepon
+							</label>
+							<input type="tel" id="profile-phone" class="qalcuity-form-input"
+								placeholder="Nomor telepon">
+						</div>
+						<div class="qalcuity-form-group">
+							<label class="qalcuity-form-label">
+								<span class="octicon octicon-organization"></span> Nama Perusahaan
+							</label>
+							<input type="text" id="profile-company" class="qalcuity-form-input"
+								placeholder="Nama perusahaan">
+						</div>
+					</div>
+					<div class="qalcuity-profile-form-actions">
+						<button type="submit" id="profile-save-btn" class="qalcuity-btn qalcuity-btn-primary">
+							<span class="octicon octicon-check"></span> Simpan Perubahan
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Section 2: Ganti Password -->
+		<div class="qalcuity-profile-card">
+			<div class="qalcuity-profile-card-header">
+				<h3 class="qalcuity-profile-card-title">
+					<span class="octicon octicon-lock"></span> Ganti Password
+				</h3>
+			</div>
+			<div class="qalcuity-profile-card-body">
+				<form id="password-form" class="qalcuity-profile-form">
+					<div class="qalcuity-profile-form-grid">
+						<div class="qalcuity-form-group">
+							<label class="qalcuity-form-label">
+								<span class="octicon octicon-lock"></span> Password Lama
+							</label>
+							<div class="qalcuity-password-wrapper">
+								<input type="password" id="old-password" class="qalcuity-form-input"
+									placeholder="Masukkan password lama" autocomplete="current-password">
+								<button type="button" class="qalcuity-password-toggle" data-target="old-password">
+									<span class="octicon octicon-eye"></span>
+								</button>
+							</div>
+						</div>
+						<div class="qalcuity-form-group">
+							<label class="qalcuity-form-label">
+								<span class="octicon octicon-lock"></span> Password Baru
+							</label>
+							<div class="qalcuity-password-wrapper">
+								<input type="password" id="new-password" class="qalcuity-form-input"
+									placeholder="Masukkan password baru (min. 6 karakter)" autocomplete="new-password">
+								<button type="button" class="qalcuity-password-toggle" data-target="new-password">
+									<span class="octicon octicon-eye"></span>
+								</button>
+							</div>
+							<div class="qalcuity-password-strength" id="password-strength" style="display: none;">
+								<div class="qalcuity-password-strength-bar" id="strength-bar"></div>
+								<span class="qalcuity-password-strength-text" id="strength-text"></span>
+							</div>
+						</div>
+						<div class="qalcuity-form-group">
+							<label class="qalcuity-form-label">
+								<span class="octicon octicon-lock"></span> Konfirmasi Password Baru
+							</label>
+							<div class="qalcuity-password-wrapper">
+								<input type="password" id="confirm-password" class="qalcuity-form-input"
+									placeholder="Ulangi password baru" autocomplete="new-password">
+								<button type="button" class="qalcuity-password-toggle" data-target="confirm-password">
+									<span class="octicon octicon-eye"></span>
+								</button>
+							</div>
+						</div>
+					</div>
+					<div class="qalcuity-profile-form-actions">
+						<button type="submit" id="password-save-btn" class="qalcuity-btn qalcuity-btn-primary">
+							<span class="octicon octicon-lock"></span> Ubah Password
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Section 3: Info Akun -->
+		<div class="qalcuity-profile-card">
+			<div class="qalcuity-profile-card-header">
+				<h3 class="qalcuity-profile-card-title">
+					<span class="octicon octicon-info"></span> Info Akun
+				</h3>
+			</div>
+			<div class="qalcuity-profile-card-body">
+				<div class="qalcuity-profile-info-grid">
+					<div class="qalcuity-profile-info-item">
+						<span class="qalcuity-profile-info-label">Role</span>
+						<span class="qalcuity-profile-info-value" id="info-role">-</span>
+					</div>
+					<div class="qalcuity-profile-info-item">
+						<span class="qalcuity-profile-info-label">Tanggal Daftar</span>
+						<span class="qalcuity-profile-info-value" id="info-creation">-</span>
+					</div>
+					<div class="qalcuity-profile-info-item">
+						<span class="qalcuity-profile-info-label">Tenant ID</span>
+						<span class="qalcuity-profile-info-value" id="info-tenant-id">-</span>
+					</div>
+					<div class="qalcuity-profile-info-item">
+						<span class="qalcuity-profile-info-label">Status Tenant</span>
+						<span class="qalcuity-profile-info-value" id="info-tenant-status">-</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script>
+	(function () {
+		// --- Load Profile Data ---
+		function loadProfile() {
+			frappe.call({
+				method: 'qalcuity.api.profile.get_profile',
+				callback: function (r) {
+					document.getElementById('profile-loading').style.display = 'none';
+					document.getElementById('profile-content').style.display = 'block';
+
+					if (r.message) {
+						var data = r.message;
+						var user = data.user;
+						var tenant = data.tenant;
+
+						// Fill form
+						document.getElementById('profile-full-name').value = user.full_name || '';
+						document.getElementById('profile-email').value = user.email || '';
+						document.getElementById('profile-phone').value = user.phone || '';
+						document.getElementById('profile-company').value = user.company_name || '';
+
+						// Fill info
+						document.getElementById('info-role').textContent = (user.roles || ['Customer']).join(', ');
+						document.getElementById('info-creation').textContent = user.creation ? frappe.datetime.str_to_user(user.creation) : '-';
+
+						if (tenant) {
+							document.getElementById('info-tenant-id').textContent = tenant.tenant_id || '-';
+							var statusEl = document.getElementById('info-tenant-status');
+							statusEl.textContent = tenant.status || '-';
+							statusEl.className = 'qalcuity-status qalcuity-status-' + (tenant.status || 'draft').toLowerCase();
+						} else {
+							document.getElementById('info-tenant-id').textContent = '-';
+							document.getElementById('info-tenant-status').textContent = '-';
+						}
+					}
+				},
+				error: function (err) {
+					document.getElementById('profile-loading').style.display = 'none';
+					showError(err._message || 'Gagal memuat data profil.');
+				}
+			});
+		}
+
+		// --- Profile Form Submit ---
+		document.getElementById('profile-form').addEventListener('submit', function (e) {
+			e.preventDefault();
+			hideAlerts();
+
+			var data = {
+				full_name: document.getElementById('profile-full-name').value.trim(),
+				phone: document.getElementById('profile-phone').value.trim(),
+				company_name: document.getElementById('profile-company').value.trim()
+			};
+
+			var btn = document.getElementById('profile-save-btn');
+			btn.disabled = true;
+			btn.innerHTML = '<span class="octicon octicon-sync"></span> Menyimpan...';
+
+			frappe.call({
+				method: 'qalcuity.api.profile.update_profile',
+				args: { data: data },
+				callback: function (r) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-check"></span> Simpan Perubahan';
+					if (r.message && r.message.success) {
+						showSuccess(r.message.message || 'Profil berhasil diperbarui.');
+					}
+				},
+				error: function (err) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-check"></span> Simpan Perubahan';
+					showError(err._message || 'Gagal memperbarui profil.');
+				}
+			});
+		});
+
+		// --- Password Form Submit ---
+		document.getElementById('password-form').addEventListener('submit', function (e) {
+			e.preventDefault();
+			hideAlerts();
+
+			var oldPwd = document.getElementById('old-password').value;
+			var newPwd = document.getElementById('new-password').value;
+			var confirmPwd = document.getElementById('confirm-password').value;
+
+			if (!oldPwd) {
+				showError('Password lama tidak boleh kosong.');
+				return;
+			}
+			if (!newPwd) {
+				showError('Password baru tidak boleh kosong.');
+				return;
+			}
+			if (newPwd.length < 6) {
+				showError('Password baru minimal 6 karakter.');
+				return;
+			}
+			if (newPwd !== confirmPwd) {
+				showError('Konfirmasi password tidak cocok.');
+				return;
+			}
+
+			var btn = document.getElementById('password-save-btn');
+			btn.disabled = true;
+			btn.innerHTML = '<span class="octicon octicon-sync"></span> Mengubah...';
+
+			frappe.call({
+				method: 'qalcuity.api.profile.change_password',
+				args: { old_password: oldPwd, new_password: newPwd },
+				callback: function (r) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-lock"></span> Ubah Password';
+					if (r.message && r.message.success) {
+						showSuccess(r.message.message || 'Password berhasil diubah.');
+						document.getElementById('old-password').value = '';
+						document.getElementById('new-password').value = '';
+						document.getElementById('confirm-password').value = '';
+						document.getElementById('password-strength').style.display = 'none';
+					}
+				},
+				error: function (err) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-lock"></span> Ubah Password';
+					showError(err._message || 'Gagal mengubah password.');
+				}
+			});
+		});
+
+		// --- Password Strength Indicator ---
+		document.getElementById('new-password').addEventListener('input', function () {
+			var pwd = this.value;
+			var strengthEl = document.getElementById('password-strength');
+			var barEl = document.getElementById('strength-bar');
+			var textEl = document.getElementById('strength-text');
+
+			if (!pwd) {
+				strengthEl.style.display = 'none';
+				return;
+			}
+
+			strengthEl.style.display = 'flex';
+			var score = 0;
+			if (pwd.length >= 6) score++;
+			if (pwd.length >= 10) score++;
+			if (/[A-Z]/.test(pwd)) score++;
+			if (/[0-9]/.test(pwd)) score++;
+			if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+			var levels = [
+				{ width: '20%', color: '#dc3545', text: 'Sangat Lemah' },
+				{ width: '40%', color: '#fd7e14', text: 'Lemah' },
+				{ width: '60%', color: '#ffc107', text: 'Sedang' },
+				{ width: '80%', color: '#28a745', text: 'Kuat' },
+				{ width: '100%', color: '#1a7f37', text: 'Sangat Kuat' }
+			];
+
+			var level = levels[Math.min(score, 4)];
+			barEl.style.width = level.width;
+			barEl.style.background = level.color;
+			textEl.textContent = level.text;
+			textEl.style.color = level.color;
+		});
+
+		// --- Password Toggle ---
+		document.querySelectorAll('.qalcuity-password-toggle').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var target = document.getElementById(this.dataset.target);
+				if (target.type === 'password') {
+					target.type = 'text';
+					this.innerHTML = '<span class="octicon octicon-eye-closed"></span>';
+				} else {
+					target.type = 'password';
+					this.innerHTML = '<span class="octicon octicon-eye"></span>';
+				}
+			});
+		});
+
+		// --- Helper Functions ---
+		function showSuccess(msg) {
+			document.getElementById('profile-success-msg').textContent = msg;
+			document.getElementById('profile-success').style.display = 'flex';
+			document.getElementById('profile-error').style.display = 'none';
+			setTimeout(function () { document.getElementById('profile-success').style.display = 'none'; }, 5000);
+		}
+
+		function showError(msg) {
+			document.getElementById('profile-error-msg').textContent = msg;
+			document.getElementById('profile-error').style.display = 'flex';
+			document.getElementById('profile-success').style.display = 'none';
+		}
+
+		function hideAlerts() {
+			document.getElementById('profile-success').style.display = 'none';
+			document.getElementById('profile-error').style.display = 'none';
+		}
+
+		// Init
+		loadProfile();
+	})();
+</script>
+{% endblock %}

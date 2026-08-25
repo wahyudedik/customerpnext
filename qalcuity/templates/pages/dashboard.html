@@ -1,0 +1,542 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-dash-container">
+	<!-- ERP Access Banner -->
+	<div id="dash-erp-access" style="display: none;">
+		<!-- Active + Provisioned → Show Open ERP button -->
+		<div id="dash-erp-ready" class="qalcuity-dash-erp-banner qalcuity-dash-erp-ready" style="display: none;">
+			<div class="qalcuity-dash-erp-banner-content">
+				<div class="qalcuity-dash-erp-banner-icon">
+					<span class="octicon octicon-terminal" style="font-size: 32px; color: #fff;"></span>
+				</div>
+				<div class="qalcuity-dash-erp-banner-text">
+					<h3>Qalcuity ERP Siap Digunakan</h3>
+					<p>Lingkungan ERP Anda telah aktif dan siap digunakan.</p>
+				</div>
+				<a href="/app" class="qalcuity-dash-erp-banner-btn">
+					<span class="octicon octicon-sign-in"></span> Buka Qalcuity ERP
+				</a>
+			</div>
+		</div>
+
+		<!-- Provisioning In Progress -->
+		<div id="dash-erp-provisioning" class="qalcuity-dash-erp-banner qalcuity-dash-erp-provisioning"
+			style="display: none;">
+			<div class="qalcuity-dash-erp-banner-content">
+				<div class="qalcuity-dash-erp-banner-icon">
+					<div class="qalcuity-dash-spinner-sm"></div>
+				</div>
+				<div class="qalcuity-dash-erp-banner-text">
+					<h3>Lingkungan ERP Sedang Disiapkan</h3>
+					<p>Tim kami sedang menyiapkan lingkungan ERP Anda. Proses ini biasanya memakan waktu beberapa menit.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Provisioning Failed -->
+		<div id="dash-erp-failed" class="qalcuity-dash-erp-banner qalcuity-dash-erp-failed" style="display: none;">
+			<div class="qalcuity-dash-erp-banner-content">
+				<div class="qalcuity-dash-erp-banner-icon">
+					<span class="octicon octicon-alert" style="font-size: 32px; color: #fff;"></span>
+				</div>
+				<div class="qalcuity-dash-erp-banner-text">
+					<h3>Gagal Menyiapkan Lingkungan ERP</h3>
+					<p>Terjadi kesalahan saat menyiapkan lingkungan ERP Anda. Tim kami akan mencoba lagi secara
+						otomatis.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Header Section -->
+	<div class="qalcuity-dash-header">
+		<div>
+			<h1 class="qalcuity-dash-title">Dashboard</h1>
+			<p class="qalcuity-dash-subtitle">Selamat datang di Qalcuity ERP</p>
+		</div>
+		<div class="qalcuity-dash-header-actions">
+			<a href="/my-payments" class="qalcuity-dash-btn qalcuity-dash-btn-outline">
+				<span class="octicon octicon-credit-card"></span> Pembayaran
+			</a>
+			<a href="/pricing" class="qalcuity-dash-btn qalcuity-dash-btn-primary">
+				<span class="octicon octicon-tag"></span> Lihat Paket
+			</a>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="dash-loading" class="qalcuity-dash-loading">
+		<div class="qalcuity-dash-spinner"></div>
+		<p>Memuat dashboard...</p>
+	</div>
+
+	<!-- Dashboard Content -->
+	<div id="dash-content" style="display: none;">
+
+		<!-- No Subscription State -->
+		<div id="dash-no-sub" style="display: none;">
+			<div class="qalcuity-dash-empty">
+				<div class="qalcuity-dash-empty-icon">
+					<span class="octicon octicon-package"
+						style="font-size: 48px; color: var(--qalcuity-text-muted);"></span>
+				</div>
+				<h2 class="qalcuity-dash-empty-title">Belum Ada Subscription</h2>
+				<p class="qalcuity-dash-empty-desc">
+					Anda belum memiliki subscription aktif. Pilih paket yang sesuai untuk memulai menggunakan Qalcuity
+					ERP.
+				</p>
+				<a href="/pricing" class="qalcuity-dash-btn qalcuity-dash-btn-primary qalcuity-dash-btn-lg">
+					<span class="octicon octicon-tag"></span> Pilih Paket Sekarang
+				</a>
+			</div>
+		</div>
+
+		<!-- Subscription Info -->
+		<div id="dash-sub-info" style="display: none;">
+			<!-- Status Overview Cards -->
+			<div class="qalcuity-dash-stats" id="dash-stats"></div>
+
+			<!-- Subscription Detail Card -->
+			<div class="qalcuity-dash-card" id="dash-sub-card">
+				<div class="qalcuity-dash-card-header">
+					<h3 class="qalcuity-dash-card-title">
+						<span class="octicon octicon-package"></span> Subscription
+					</h3>
+					<span id="dash-sub-status"></span>
+				</div>
+				<div class="qalcuity-dash-card-body" id="dash-sub-details"></div>
+			</div>
+
+			<!-- Tenant Info Card -->
+			<div class="qalcuity-dash-card" id="dash-tenant-card" style="display: none;">
+				<div class="qalcuity-dash-card-header">
+					<h3 class="qalcuity-dash-card-title">
+						<span class="octicon octicon-server"></span> Tenant
+					</h3>
+					<span id="dash-tenant-status"></span>
+				</div>
+				<div class="qalcuity-dash-card-body" id="dash-tenant-details"></div>
+			</div>
+
+			<!-- Pending Payment Warning -->
+			<div id="dash-pending-warning" class="qalcuity-dash-alert qalcuity-dash-alert-warning"
+				style="display: none;">
+				<span class="octicon octicon-alert"></span>
+				<div>
+					<strong>Menunggu Verifikasi Pembayaran</strong>
+					<p id="dash-pending-msg">Pembayaran Anda sedang diverifikasi oleh admin.</p>
+				</div>
+			</div>
+
+			<!-- Expiry Warning (7 days before end_date) -->
+			<div id="dash-expiry-warning" class="qalcuity-dash-alert qalcuity-dash-alert-warning"
+				style="display: none;">
+				<span class="octicon octicon-alert"></span>
+				<div>
+					<strong id="dash-expiry-title">Langganan Akan Kedaluwarsa</strong>
+					<p id="dash-expiry-msg">Langganan Anda akan kedaluwarsa dalam X hari.</p>
+					<a href="/pricing" class="qalcuity-dash-btn qalcuity-dash-btn-primary-sm">
+						<span class="octicon octicon-tag"></span> Perpanjang Sekarang
+					</a>
+				</div>
+			</div>
+
+			<!-- Grace Period Warning (within 7 days after end_date) -->
+			<div id="dash-grace-warning" class="qalcuity-dash-alert qalcuity-dash-alert-danger" style="display: none;">
+				<span class="octicon octicon-alert"></span>
+				<div>
+					<strong>Masa Grace Period Aktif</strong>
+					<p id="dash-grace-msg">Langganan Anda telah kedaluwarsa, namun Anda masih dalam masa grace period.
+					</p>
+					<a href="/pricing" class="qalcuity-dash-btn qalcuity-dash-btn-danger-sm">
+						<span class="octicon octicon-tag"></span> Perpanjang Sekarang
+					</a>
+				</div>
+			</div>
+
+			<!-- Expired Warning -->
+			<div id="dash-expired-warning" class="qalcuity-dash-alert qalcuity-dash-alert-danger"
+				style="display: none;">
+				<span class="octicon octicon-alert"></span>
+				<div>
+					<strong>Subscription Telah Expired</strong>
+					<p>Subscription Anda telah berakhir. Silakan perpanjang untuk melanjutkan akses.</p>
+					<a href="/pricing" class="qalcuity-dash-btn qalcuity-dash-btn-danger-sm">Perpanjang Sekarang</a>
+				</div>
+			</div>
+
+			<!-- Recent Payments -->
+			<div class="qalcuity-dash-card" id="dash-payments-card" style="display: none;">
+				<div class="qalcuity-dash-card-header">
+					<h3 class="qalcuity-dash-card-title">
+						<span class="octicon octicon-credit-card"></span> Pembayaran Terbaru
+					</h3>
+					<a href="/my-payments" class="qalcuity-dash-link">Lihat Semua →</a>
+				</div>
+				<div class="qalcuity-dash-card-body" id="dash-payments-list"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	frappe.ready(function () {
+		loadDashboard();
+	});
+
+	function loadDashboard() {
+		var loading = document.getElementById('dash-loading');
+		var content = document.getElementById('dash-content');
+		var noSub = document.getElementById('dash-no-sub');
+		var subInfo = document.getElementById('dash-sub-info');
+
+		loading.style.display = 'flex';
+		content.style.display = 'none';
+		noSub.style.display = 'none';
+		subInfo.style.display = 'none';
+
+		// Load subscription data
+		frappe.call({
+			method: 'qalcuity.api.dashboard.get_dashboard_data',
+			callback: function (r) {
+				loading.style.display = 'none';
+				content.style.display = 'block';
+
+				if (r.message) {
+					renderDashboard(r.message);
+				} else {
+					noSub.style.display = 'block';
+				}
+			},
+			error: function (err) {
+				loading.style.display = 'none';
+				content.style.display = 'block';
+				noSub.style.display = 'block';
+			}
+		});
+	}
+
+	function renderDashboard(data) {
+		var noSub = document.getElementById('dash-no-sub');
+		var subInfo = document.getElementById('dash-sub-info');
+
+		if (!data.subscription) {
+			noSub.style.display = 'block';
+			subInfo.style.display = 'none';
+			return;
+		}
+
+		noSub.style.display = 'none';
+		subInfo.style.display = 'block';
+
+		// Render ERP access banner
+		renderErpAccessBanner(data);
+
+		// Render stats
+		renderStats(data);
+
+		// Render subscription details
+		renderSubscription(data.subscription);
+
+		// Render tenant info
+		if (data.tenant) {
+			renderTenant(data.tenant);
+		}
+
+		// Render pending payment warning
+		if (data.subscription.status === 'Pending Payment') {
+			showPendingWarning(data.payments);
+		}
+
+		// Render expiry/grace/expired warnings
+		if (data.subscription.status === 'Active' && data.subscription.end_date) {
+			var today = new Date();
+			today.setHours(0, 0, 0, 0);
+			var endDate = new Date(data.subscription.end_date);
+			endDate.setHours(0, 0, 0, 0);
+			var daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+			if (daysDiff <= 0) {
+				// Past end_date — check if within grace period (7 days)
+				var graceEndDate = new Date(endDate);
+				graceEndDate.setDate(graceEndDate.getDate() + 7);
+				if (today <= graceEndDate) {
+					// Within grace period
+					var graceDaysLeft = Math.ceil((graceEndDate - today) / (1000 * 60 * 60 * 24));
+					showGraceWarning(graceDaysLeft);
+				} else {
+					// Past grace period — fully expired
+					document.getElementById('dash-expired-warning').style.display = 'flex';
+				}
+			} else if (daysDiff <= 7) {
+				// Within 7 days of expiry
+				showExpiryWarning(daysDiff);
+			}
+		}
+
+		// Expired status (no grace period)
+		if (data.subscription.status === 'Expired') {
+			document.getElementById('dash-expired-warning').style.display = 'flex';
+		}
+
+		// Render recent payments
+		if (data.payments && data.payments.length > 0) {
+			renderPayments(data.payments);
+		}
+	}
+
+	function renderStats(data) {
+		var stats = document.getElementById('dash-stats');
+		var sub = data.subscription;
+		var html = '';
+
+		// Status stat
+		var statusClass = getStatusClass(sub.status);
+		html += '<div class="qalcuity-dash-stat-card">';
+		html += '<div class="qalcuity-dash-stat-icon"><span class="octicon octicon-package"></span></div>';
+		html += '<div class="qalcuity-dash-stat-content">';
+		html += '<div class="qalcuity-dash-stat-value"><span class="qalcuity-status ' + statusClass + '">' + frappe.utils.escape_html(sub.status) + '</span></div>';
+		html += '<div class="qalcuity-dash-stat-label">Status Subscription</div>';
+		html += '</div></div>';
+
+		// Plan stat
+		html += '<div class="qalcuity-dash-stat-card">';
+		html += '<div class="qalcuity-dash-stat-icon"><span class="octicon octicon-star"></span></div>';
+		html += '<div class="qalcuity-dash-stat-content">';
+		html += '<div class="qalcuity-dash-stat-value">' + frappe.utils.escape_html(sub.plan_name || sub.plan || '-') + '</div>';
+		html += '<div class="qalcuity-dash-stat-label">Paket</div>';
+		html += '</div></div>';
+
+		// Expiry stat
+		html += '<div class="qalcuity-dash-stat-card">';
+		html += '<div class="qalcuity-dash-stat-icon"><span class="octicon octicon-calendar"></span></div>';
+		html += '<div class="qalcuity-dash-stat-content">';
+		html += '<div class="qalcuity-dash-stat-value">' + (sub.end_date || '-') + '</div>';
+		html += '<div class="qalcuity-dash-stat-label">Berlaku Hingga</div>';
+		html += '</div></div>';
+
+		// Days remaining
+		if (sub.end_date && sub.status === 'Active') {
+			var daysLeft = getDaysLeft(sub.end_date);
+			html += '<div class="qalcuity-dash-stat-card">';
+			html += '<div class="qalcuity-dash-stat-icon"><span class="octicon octicon-clock"></span></div>';
+			html += '<div class="qalcuity-dash-stat-content">';
+			html += '<div class="qalcuity-dash-stat-value">' + daysLeft + '</div>';
+			html += '<div class="qalcuity-dash-stat-label">Hari Tersisa</div>';
+			html += '</div></div>';
+		}
+
+		stats.innerHTML = html;
+	}
+
+	function renderSubscription(sub) {
+		var statusEl = document.getElementById('dash-sub-status');
+		var detailsEl = document.getElementById('dash-sub-details');
+
+		// Status badge
+		var statusClass = getStatusClass(sub.status);
+		statusEl.innerHTML = '<span class="qalcuity-status ' + statusClass + '">' + frappe.utils.escape_html(sub.status) + '</span>';
+
+		// Details
+		var html = '<div class="qalcuity-dash-detail-grid">';
+
+		html += detailRow('Subscription ID', sub.name);
+		html += detailRow('Paket', sub.plan_name || sub.plan || '-');
+		html += detailRow('Tanggal Mulai', sub.start_date || '-');
+		html += detailRow('Tanggal Berakhir', sub.end_date || '-');
+
+		if (sub.is_trial) {
+			html += detailRow('Tipe', 'Trial');
+		}
+
+		html += '</div>';
+		detailsEl.innerHTML = html;
+	}
+
+	function renderErpAccessBanner(data) {
+		var banner = document.getElementById('dash-erp-access');
+		var ready = document.getElementById('dash-erp-ready');
+		var provisioning = document.getElementById('dash-erp-provisioning');
+		var failed = document.getElementById('dash-erp-failed');
+
+		// Only show banner if there's a subscription
+		if (!data.subscription) {
+			banner.style.display = 'none';
+			return;
+		}
+
+		var isActive = data.subscription.status === 'Active';
+		var tenant = data.tenant;
+		var provisioningStatus = tenant ? (tenant.erp_provisioning_status || 'Not Started') : 'Not Started';
+
+		// Don't show banner for expired/cancelled/suspended subscriptions
+		if (!isActive) {
+			banner.style.display = 'none';
+			return;
+		}
+
+		banner.style.display = 'block';
+
+		// Hide all sub-banners first
+		ready.style.display = 'none';
+		provisioning.style.display = 'none';
+		failed.style.display = 'none';
+
+		if (provisioningStatus === 'Completed') {
+			ready.style.display = 'block';
+		} else if (provisioningStatus === 'In Progress') {
+			provisioning.style.display = 'block';
+		} else if (provisioningStatus === 'Failed') {
+			failed.style.display = 'block';
+		} else {
+			// Not Started or Suspended — show provisioning status
+			provisioning.style.display = 'block';
+		}
+	}
+
+	function renderTenant(tenant) {
+		var card = document.getElementById('dash-tenant-card');
+		var statusEl = document.getElementById('dash-tenant-status');
+		var detailsEl = document.getElementById('dash-tenant-details');
+
+		card.style.display = 'block';
+
+		// Status badge
+		var statusClass = getStatusClass(tenant.status);
+		statusEl.innerHTML = '<span class="qalcuity-status ' + statusClass + '">' + frappe.utils.escape_html(tenant.status) + '</span>';
+
+		// Details
+		var html = '<div class="qalcuity-dash-detail-grid">';
+		html += detailRow('Tenant ID', tenant.tenant_id || '-');
+		html += detailRow('Status', tenant.status || '-');
+
+		// Show provisioning status
+		if (tenant.erp_provisioning_status) {
+			var provClass = tenant.erp_provisioning_status === 'Completed'
+				? 'qalcuity-status-active'
+				: tenant.erp_provisioning_status === 'Failed'
+					? 'qalcuity-status-rejected'
+					: tenant.erp_provisioning_status === 'In Progress'
+						? 'qalcuity-status-pending'
+						: 'qalcuity-status-draft';
+			html += detailRow('ERP Status', '<span class="qalcuity-status ' + provClass + '">' + frappe.utils.escape_html(tenant.erp_provisioning_status) + '</span>');
+
+			if (tenant.erp_company) {
+				html += detailRow('ERP Company', tenant.erp_company);
+			}
+		}
+
+		html += '</div>';
+		detailsEl.innerHTML = html;
+	}
+
+	function showPendingWarning(payments) {
+		var warning = document.getElementById('dash-pending-warning');
+		var msg = document.getElementById('dash-pending-msg');
+
+		var pendingCount = 0;
+		if (payments) {
+			payments.forEach(function (p) {
+				if (p.status === 'Pending') pendingCount++;
+			});
+		}
+
+		if (pendingCount > 0) {
+			msg.textContent = 'Anda memiliki ' + pendingCount + ' pembayaran yang sedang diverifikasi oleh admin.';
+		} else {
+			msg.textContent = 'Pembayaran Anda sedang diverifikasi oleh admin.';
+		}
+
+		warning.style.display = 'flex';
+	}
+
+	function showExpiryWarning(daysLeft) {
+		var warning = document.getElementById('dash-expiry-warning');
+		var title = document.getElementById('dash-expiry-title');
+		var msg = document.getElementById('dash-expiry-msg');
+
+		title.textContent = '⚠️ Langganan Akan Kedaluwarsa';
+		msg.textContent = 'Langganan Anda akan kedaluwarsa dalam ' + daysLeft + ' hari. Silakan perpanjang untuk menghindari gangguan akses.';
+
+		warning.style.display = 'flex';
+	}
+
+	function showGraceWarning(graceDaysLeft) {
+		var warning = document.getElementById('dash-grace-warning');
+		var msg = document.getElementById('dash-grace-msg');
+
+		msg.textContent = 'Langganan Anda telah kedaluwarsa. Anda masih dalam masa grace period (' + graceDaysLeft + ' hari tersisa). '
+			+ 'Setelah grace period berakhir, akses Anda akan dibatasi.';
+
+		warning.style.display = 'flex';
+	}
+
+	function renderPayments(payments) {
+		var card = document.getElementById('dash-payments-card');
+		var list = document.getElementById('dash-payments-list');
+
+		card.style.display = 'block';
+
+		var html = '<div class="qalcuity-dash-payment-list">';
+
+		// Show max 5 recent payments
+		var shown = payments.slice(0, 5);
+
+		shown.forEach(function (p) {
+			var statusClass = getStatusClass(p.status);
+			html += '<div class="qalcuity-dash-payment-item">';
+			html += '<div class="qalcuity-dash-payment-info">';
+			html += '<div class="qalcuity-dash-payment-name">' + frappe.utils.escape_html(p.name) + '</div>';
+			html += '<div class="qalcuity-dash-payment-date">' + frappe.utils.escape_html(p.payment_date || '-') + '</div>';
+			html += '</div>';
+			html += '<div class="qalcuity-dash-payment-right">';
+			html += '<div class="qalcuity-dash-payment-amount">' + (p.currency || 'IDR') + ' ' + formatNumber(p.amount) + '</div>';
+			html += '<span class="qalcuity-status ' + statusClass + '">' + frappe.utils.escape_html(p.status) + '</span>';
+			html += '</div>';
+			html += '</div>';
+		});
+
+		html += '</div>';
+		list.innerHTML = html;
+	}
+
+	// Helper functions
+	function getStatusClass(status) {
+		var map = {
+			'Active': 'qalcuity-status-active',
+			'Pending Payment': 'qalcuity-status-pending',
+			'Pending': 'qalcuity-status-pending',
+			'Expired': 'qalcuity-status-expired',
+			'Suspended': 'qalcuity-status-suspended',
+			'Approved': 'qalcuity-status-approved',
+			'Rejected': 'qalcuity-status-rejected',
+			'Cancelled': 'qalcuity-status-cancelled',
+			'Draft': 'qalcuity-status-draft',
+			'Terminated': 'qalcuity-status-terminated'
+		};
+		return map[status] || 'qalcuity-status-draft';
+	}
+
+	function detailRow(label, value) {
+		return '<div class="qalcuity-dash-detail-row">' +
+			'<span class="qalcuity-dash-detail-label">' + frappe.utils.escape_html(label) + '</span>' +
+			'<span class="qalcuity-dash-detail-value">' + frappe.utils.escape_html(String(value)) + '</span>' +
+			'</div>';
+	}
+
+	function getDaysLeft(endDate) {
+		var end = new Date(endDate);
+		var now = new Date();
+		var diff = end - now;
+		var days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+		return days > 0 ? days : 0;
+	}
+
+	function formatNumber(num) {
+		if (!num) return '0';
+		return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+	}
+</script>
+{% endblock %}

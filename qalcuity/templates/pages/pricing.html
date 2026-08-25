@@ -1,0 +1,135 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-pricing-container">
+	<!-- Header Section -->
+	<div class="qalcuity-pricing-header">
+		<h1 class="qalcuity-pricing-title">Pilih Paket Qalcuity ERP</h1>
+		<p class="qalcuity-pricing-subtitle">Temukan paket yang tepat untuk bisnis Anda. Mulai dari Rp 0 dengan paket
+			Trial.</p>
+	</div>
+
+	<!-- Loading State -->
+	<div id="pricing-loading" class="qalcuity-pricing-loading">
+		<div class="qalcuity-pricing-spinner"></div>
+		<p>Memuat paket...</p>
+	</div>
+
+	<!-- Plans Grid -->
+	<div id="pricing-grid" class="qalcuity-plan-grid" style="display: none;"></div>
+
+	<!-- Error State -->
+	<div id="pricing-error" class="qalcuity-pricing-error" style="display: none;">
+		<div class="qalcuity-alert qalcuity-alert-danger">
+			<span class="octicon octicon-alert"></span>
+			Gagal memuat paket. Silakan coba lagi nanti.
+		</div>
+		<button class="qalcuity-btn qalcuity-btn-primary" onclick="loadPlans()">Coba Lagi</button>
+	</div>
+
+	<!-- Empty State -->
+	<div id="pricing-empty" class="qalcuity-pricing-empty" style="display: none;">
+		<div class="qalcuity-alert qalcuity-alert-info">
+			<span class="octicon octicon-info"></span>
+			Belum ada paket yang tersedia saat ini.
+		</div>
+	</div>
+</div>
+
+<script>
+	frappe.ready(function () {
+		loadPlans();
+	});
+
+	function loadPlans() {
+		var loading = document.getElementById('pricing-loading');
+		var grid = document.getElementById('pricing-grid');
+		var error = document.getElementById('pricing-error');
+		var empty = document.getElementById('pricing-empty');
+
+		loading.style.display = 'flex';
+		grid.style.display = 'none';
+		error.style.display = 'none';
+		empty.style.display = 'none';
+
+		frappe.call({
+			method: 'qalcuity.api.plans.get_active_plans',
+			callback: function (r) {
+				loading.style.display = 'none';
+
+				if (r.message && r.message.length > 0) {
+					renderPlans(r.message);
+					grid.style.display = 'grid';
+				} else {
+					empty.style.display = 'block';
+				}
+			},
+			error: function (err) {
+				loading.style.display = 'none';
+				error.style.display = 'block';
+			}
+		});
+	}
+
+	function renderPlans(plans) {
+		var grid = document.getElementById('pricing-grid');
+		var isLoggedIn = frappe.session && frappe.session.user && frappe.session.user !== 'Guest';
+		var html = '';
+
+		plans.forEach(function (plan, index) {
+			var isPopular = (index === 1); // Second plan is "popular"
+			var cardClass = 'qalcuity-plan-card';
+			if (isPopular) {
+				cardClass += ' popular';
+			}
+
+			// Determine CTA button text
+			var ctaText = 'Pilih Paket';
+			if (plan.is_trial) {
+				ctaText = 'Mulai Gratis';
+			}
+
+			// Build features list
+			var featuresHtml = '';
+			if (plan.features && plan.features.length > 0) {
+				plan.features.forEach(function (feature) {
+					featuresHtml += '<li>' + frappe.utils.escape_html(feature) + '</li>';
+				});
+			}
+
+			// Add limits as features
+			if (plan.max_users) {
+				featuresHtml += '<li>Maksimal ' + plan.max_users + ' pengguna</li>';
+			}
+			if (plan.max_storage_gb) {
+				featuresHtml += '<li>Penyimpanan ' + plan.max_storage_gb + ' GB</li>';
+			}
+
+			// CTA link
+			var ctaUrl = '/checkout?plan=' + encodeURIComponent(plan.name);
+			if (!isLoggedIn) {
+				ctaUrl = '/login?redirect=' + encodeURIComponent('/checkout?plan=' + plan.name);
+			}
+
+			html += '<div class="' + cardClass + '">';
+			html += '  <div class="qalcuity-plan-name">' + frappe.utils.escape_html(plan.plan_name) + '</div>';
+
+			if (plan.description) {
+				html += '  <div class="qalcuity-plan-description">' + frappe.utils.escape_html(plan.description) + '</div>';
+			}
+
+			html += '  <div class="qalcuity-plan-price">' + plan.price_display + '</div>';
+			html += '  <div class="qalcuity-plan-period">' + plan.period_display + '</div>';
+
+			if (featuresHtml) {
+				html += '  <ul class="qalcuity-plan-features">' + featuresHtml + '</ul>';
+			}
+
+			html += '  <a href="' + ctaUrl + '" class="qalcuity-plan-cta qalcuity-btn qalcuity-btn-primary">' + ctaText + '</a>';
+			html += '</div>';
+		});
+
+		grid.innerHTML = html;
+	}
+</script>
+{% endblock %}

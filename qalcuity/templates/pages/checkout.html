@@ -1,0 +1,1156 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<style>
+	/* ===== Checkout Page Styles ===== */
+	.qalcuity-checkout-container {
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 20px;
+	}
+
+	.qalcuity-checkout-header {
+		text-align: center;
+		margin-bottom: 32px;
+	}
+
+	.qalcuity-checkout-title {
+		font-size: 28px;
+		font-weight: 700;
+		color: var(--text-color, #1a202c);
+		margin: 0 0 8px 0;
+	}
+
+	.qalcuity-checkout-subtitle {
+		font-size: 15px;
+		color: var(--text-light, #718096);
+		margin: 0;
+	}
+
+	/* Empty state */
+	.qalcuity-checkout-empty {
+		text-align: center;
+		padding: 48px 20px;
+	}
+
+	/* Alert */
+	.qalcuity-checkout-alert {
+		margin-bottom: 20px;
+		padding: 14px 18px;
+		border-radius: 8px;
+		font-size: 14px;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	/* Layout */
+	.qalcuity-checkout-layout {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 28px;
+		align-items: start;
+	}
+
+	.qalcuity-checkout-sidebar {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.qalcuity-checkout-form-container {
+		background: var(--card-bg, #ffffff);
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 12px;
+		padding: 28px;
+	}
+
+	/* Section title */
+	.qalcuity-checkout-section-title {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--text-color, #1a202c);
+		margin: 0 0 16px 0;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	/* Plan Summary */
+	.qalcuity-checkout-summary {
+		background: var(--card-bg, #ffffff);
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 12px;
+		padding: 24px;
+	}
+
+	.qalcuity-checkout-plan-name {
+		font-size: 20px;
+		font-weight: 700;
+		color: var(--text-color, #1a202c);
+		margin-bottom: 6px;
+	}
+
+	.qalcuity-checkout-plan-desc {
+		font-size: 13px;
+		color: var(--text-light, #718096);
+		margin-bottom: 12px;
+		line-height: 1.5;
+	}
+
+	.qalcuity-checkout-plan-price {
+		font-size: 24px;
+		font-weight: 800;
+		color: var(--primary, #6366f1);
+	}
+
+	.qalcuity-checkout-plan-period {
+		font-size: 14px;
+		font-weight: 400;
+		color: var(--text-light, #718096);
+	}
+
+	/* ===== Bank Transfer Section — Multiple Accounts ===== */
+	.qalcuity-bank-section {
+		background: var(--card-bg, #ffffff);
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 12px;
+		padding: 24px;
+	}
+
+	.qalcuity-bank-section h3 {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--text-color, #1a202c);
+		margin: 0 0 16px 0;
+	}
+
+	.bank-account-card {
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 10px;
+		padding: 16px;
+		margin-bottom: 12px;
+		background: var(--subtle-bg, #f8fafc);
+		transition: box-shadow 0.2s ease;
+	}
+
+	.bank-account-card:last-of-type {
+		margin-bottom: 20px;
+	}
+
+	.bank-account-card:hover {
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	}
+
+	.bank-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	.bank-name {
+		font-size: 15px;
+		font-weight: 700;
+		color: var(--text-color, #1a202c);
+	}
+
+	.copy-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 4px 10px;
+		font-size: 12px;
+		font-weight: 500;
+		color: var(--primary, #6366f1);
+		background: transparent;
+		border: 1px solid var(--primary, #6366f1);
+		border-radius: 6px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+	}
+
+	.copy-btn:hover {
+		background: var(--primary, #6366f1);
+		color: #ffffff;
+	}
+
+	.copy-btn.copied {
+		background: #22c55e;
+		border-color: #22c55e;
+		color: #ffffff;
+	}
+
+	.account-number {
+		font-size: 18px;
+		font-weight: 700;
+		font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+		color: var(--text-color, #1a202c);
+		letter-spacing: 0.5px;
+		margin-bottom: 4px;
+	}
+
+	.account-name {
+		font-size: 13px;
+		color: var(--text-light, #718096);
+		margin-bottom: 2px;
+	}
+
+	.bank-branch {
+		font-size: 12px;
+		color: var(--text-light, #a0aec0);
+	}
+
+	/* Transfer steps */
+	.transfer-steps {
+		border-top: 1px solid var(--border-color, #e2e8f0);
+		padding-top: 16px;
+	}
+
+	.transfer-steps h4 {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text-color, #1a202c);
+		margin: 0 0 10px 0;
+	}
+
+	.transfer-steps ol {
+		margin: 0;
+		padding-left: 20px;
+		font-size: 13px;
+		color: var(--text-light, #4a5568);
+		line-height: 1.8;
+	}
+
+	/* ===== Form Styles ===== */
+	.qalcuity-form-group {
+		margin-bottom: 18px;
+	}
+
+	.qalcuity-form-label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--text-color, #1a202c);
+		margin-bottom: 6px;
+	}
+
+	.qalcuity-form-input {
+		width: 100%;
+		padding: 10px 14px;
+		font-size: 14px;
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 8px;
+		background: var(--card-bg, #ffffff);
+		color: var(--text-color, #1a202c);
+		transition: border-color 0.2s ease;
+		box-sizing: border-box;
+	}
+
+	.qalcuity-form-input:focus {
+		outline: none;
+		border-color: var(--primary, #6366f1);
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+	}
+
+	.qalcuity-form-input-error {
+		border-color: #ef4444 !important;
+	}
+
+	.qalcuity-form-error {
+		display: none;
+		font-size: 12px;
+		color: #ef4444;
+		margin-top: 4px;
+	}
+
+	/* Input with prefix */
+	.qalcuity-input-with-prefix {
+		display: flex;
+		align-items: center;
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 8px;
+		overflow: hidden;
+		transition: border-color 0.2s ease;
+	}
+
+	.qalcuity-input-with-prefix:focus-within {
+		border-color: var(--primary, #6366f1);
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+	}
+
+	.qalcuity-input-prefix {
+		padding: 10px 12px;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text-light, #718096);
+		background: var(--subtle-bg, #f8fafc);
+		border-right: 1px solid var(--border-color, #e2e8f0);
+	}
+
+	.qalcuity-input-with-prefix-field {
+		border: none !important;
+		box-shadow: none !important;
+		flex: 1;
+	}
+
+	/* File upload */
+	.qalcuity-file-upload-wrapper {
+		position: relative;
+	}
+
+	.qalcuity-file-input {
+		position: absolute;
+		opacity: 0;
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+		z-index: 2;
+	}
+
+	.qalcuity-file-label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 20px;
+		border: 2px dashed var(--border-color, #e2e8f0);
+		border-radius: 8px;
+		font-size: 13px;
+		color: var(--text-light, #718096);
+		text-align: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.qalcuity-file-label:hover {
+		border-color: var(--primary, #6366f1);
+		background: rgba(99, 102, 241, 0.03);
+	}
+
+	.qalcuity-file-preview {
+		margin-top: 10px;
+		text-align: center;
+	}
+
+	.qalcuity-file-preview img {
+		max-width: 100%;
+		max-height: 200px;
+		border-radius: 8px;
+		border: 1px solid var(--border-color, #e2e8f0);
+	}
+
+	.qalcuity-file-preview-doc {
+		padding: 12px;
+		background: var(--subtle-bg, #f8fafc);
+		border-radius: 8px;
+		font-size: 13px;
+		color: var(--text-color, #1a202c);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+	}
+
+	/* Buttons */
+	.qalcuity-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		padding: 10px 20px;
+		font-size: 14px;
+		font-weight: 600;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-decoration: none;
+	}
+
+	.qalcuity-btn-primary {
+		background: var(--primary, #6366f1);
+		color: #ffffff;
+	}
+
+	.qalcuity-btn-primary:hover {
+		opacity: 0.9;
+		background: var(--primary, #6366f1);
+		color: #ffffff;
+	}
+
+	.qalcuity-btn-primary:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.qalcuity-checkout-submit {
+		width: 100%;
+		padding: 12px 20px;
+		font-size: 15px;
+		margin-top: 8px;
+	}
+
+	.qalcuity-register-submit-text,
+	.qalcuity-register-submit-loading {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	/* ===== WhatsApp Confirmation ===== */
+	.qalcuity-success-section {
+		text-align: center;
+		padding: 32px 20px;
+	}
+
+	.success-icon {
+		width: 72px;
+		height: 72px;
+		border-radius: 50%;
+		background: #22c55e;
+		color: #ffffff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto 20px;
+		font-size: 36px;
+	}
+
+	.success-message h3 {
+		font-size: 20px;
+		font-weight: 700;
+		color: var(--text-color, #1a202c);
+		margin: 0 0 8px 0;
+	}
+
+	.success-message p {
+		font-size: 14px;
+		color: var(--text-light, #718096);
+		margin: 0 0 4px 0;
+		line-height: 1.6;
+	}
+
+	.whatsapp-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		padding: 14px 28px;
+		font-size: 15px;
+		font-weight: 600;
+		color: #ffffff;
+		background: #25D366;
+		border: none;
+		border-radius: 10px;
+		cursor: pointer;
+		text-decoration: none;
+		transition: all 0.2s ease;
+		margin-top: 24px;
+		margin-bottom: 12px;
+	}
+
+	.whatsapp-btn:hover {
+		background: #20ba5a;
+		color: #ffffff;
+		box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+		transform: translateY(-1px);
+	}
+
+	.whatsapp-btn svg {
+		width: 22px;
+		height: 22px;
+		flex-shrink: 0;
+	}
+
+	.whatsapp-help {
+		font-size: 12px;
+		color: var(--text-light, #a0aec0);
+		margin: 0;
+	}
+
+	/* ===== Alert Styles ===== */
+	.qalcuity-alert {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 16px;
+		border-radius: 8px;
+		font-size: 13px;
+	}
+
+	.qalcuity-alert-success {
+		background: #f0fdf4;
+		color: #166534;
+		border: 1px solid #bbf7d0;
+	}
+
+	.qalcuity-alert-danger {
+		background: #fef2f2;
+		color: #991b1b;
+		border: 1px solid #fecaca;
+	}
+
+	.qalcuity-alert-warning {
+		background: #fffbeb;
+		color: #92400e;
+		border: 1px solid #fde68a;
+	}
+
+	.qalcuity-alert-info {
+		background: #eff6ff;
+		color: #1e40af;
+		border: 1px solid #bfdbfe;
+	}
+
+	/* ===== Responsive ===== */
+	@media (max-width: 768px) {
+		.qalcuity-checkout-layout {
+			grid-template-columns: 1fr;
+		}
+
+		.qalcuity-checkout-container {
+			padding: 12px;
+		}
+
+		.qalcuity-checkout-form-container {
+			padding: 20px;
+		}
+
+		.account-number {
+			font-size: 16px;
+		}
+
+		.whatsapp-btn {
+			width: 100%;
+			justify-content: center;
+		}
+	}
+
+	/* ===== Dark Mode ===== */
+	@media (prefers-color-scheme: dark) {
+		.bank-account-card {
+			background: var(--subtle-bg, #1e293b);
+			border-color: var(--border-color, #334155);
+		}
+
+		.bank-account-card:hover {
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+
+		.copy-btn {
+			color: var(--primary, #818cf8);
+			border-color: var(--primary, #818cf8);
+		}
+
+		.copy-btn:hover {
+			background: var(--primary, #818cf8);
+			color: #ffffff;
+		}
+
+		.qalcuity-file-label {
+			border-color: var(--border-color, #475569);
+		}
+
+		.qalcuity-alert-success {
+			background: #052e16;
+			color: #86efac;
+			border-color: #166534;
+		}
+
+		.qalcuity-alert-danger {
+			background: #450a0a;
+			color: #fca5a5;
+			border-color: #991b1b;
+		}
+
+		.qalcuity-alert-warning {
+			background: #451a03;
+			color: #fde68a;
+			border-color: #92400e;
+		}
+
+		.qalcuity-alert-info {
+			background: #1e3a5f;
+			color: #93c5fd;
+			border-color: #1e40af;
+		}
+	}
+</style>
+
+<div class="qalcuity-checkout-container">
+	<!-- Header -->
+	<div class="qalcuity-checkout-header">
+		<h1 class="qalcuity-checkout-title">Checkout</h1>
+		<p class="qalcuity-checkout-subtitle">Lengkapi pembayaran untuk mengaktifkan paket Anda.</p>
+	</div>
+
+	{% if not plan_name or not plan %}
+	<!-- No Plan Selected -->
+	<div class="qalcuity-checkout-empty">
+		<div class="qalcuity-alert qalcuity-alert-warning">
+			<span class="octicon octicon-alert"></span>
+			Paket tidak dipilih atau tidak valid. Silakan pilih paket terlebih dahulu.
+		</div>
+		<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary">
+			<span class="octicon octicon-arrow-left"></span> Lihat Paket
+		</a>
+	</div>
+	{% else %}
+
+	<!-- Alert Messages -->
+	<div id="checkout-alert" class="qalcuity-checkout-alert" style="display: none;"></div>
+
+	<!-- Success Section (hidden by default) -->
+	<div id="success-section" class="qalcuity-success-section" style="display: none;">
+		<div class="success-icon">✓</div>
+		<div class="success-message">
+			<h3>Pembayaran Berhasil Dikirim!</h3>
+			<p>Bukti pembayaran Anda sedang diverifikasi oleh tim kami.</p>
+			<p>Estimasi verifikasi: maksimal 1×24 jam.</p>
+		</div>
+
+		{% if whatsapp_url %}
+		<a id="whatsapp-link" href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="whatsapp-btn">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+				<path
+					d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+			</svg>
+			Konfirmasi via WhatsApp
+		</a>
+		<p class="whatsapp-help">
+			Klik tombol di atas untuk mengonfirmasi pembayaran via WhatsApp.
+		</p>
+		{% endif %}
+
+		<div style="margin-top: 24px;">
+			<a href="/my-payments" class="qalcuity-btn qalcuity-btn-primary" style="font-size: 13px;">
+				<span class="octicon octicon-list-unordered"></span> Lihat Riwayat Pembayaran
+			</a>
+		</div>
+	</div>
+
+	<!-- Main Checkout Content (hidden after success) -->
+	<div id="checkout-content">
+		<div class="qalcuity-checkout-layout">
+			<!-- Left Column: Plan Summary + Bank Instructions -->
+			<div class="qalcuity-checkout-sidebar">
+				<!-- Plan Summary -->
+				<div class="qalcuity-checkout-summary">
+					<h3 class="qalcuity-checkout-section-title">
+						<span class="octicon octicon-package"></span> Ringkasan Paket
+					</h3>
+					<div class="qalcuity-checkout-plan-info">
+						<div class="qalcuity-checkout-plan-name">{{ plan.plan_name }}</div>
+						{% if plan.description %}
+						<div class="qalcuity-checkout-plan-desc">{{ plan.description }}</div>
+						{% endif %}
+						<div class="qalcuity-checkout-plan-price">
+							{% if plan.is_trial %}
+							Gratis
+							{% elif plan.price == 0 %}
+							Gratis
+							{% else %}
+							Rp {{ "{:,.0f}".format(plan.price).replace(",", ".") }}
+							{% endif %}
+							<span class="qalcuity-checkout-plan-period">
+								{% if plan.billing_period == "Monthly" %}/bulan
+								{% elif plan.billing_period == "Quarterly" %}/kuartal
+								{% elif plan.billing_period == "Annual" %}/tahun
+								{% endif %}
+							</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Bank Transfer Instructions — Multiple Accounts -->
+				{% if not plan.is_trial and plan.price > 0 %}
+				<div class="qalcuity-bank-section">
+					<h3>
+						<span class="octicon octicon-credit-card"></span> Transfer ke Salah Satu Rekening Berikut:
+					</h3>
+
+					{% if bank_accounts %}
+					{% for bank in bank_accounts %}
+					<div class="bank-account-card">
+						<div class="bank-header">
+							<span class="bank-name">{{ bank.bank_name }}</span>
+							<button type="button" class="copy-btn"
+								onclick="copyToClipboard('{{ bank.account_number }}', this)">
+								📋 Copy
+							</button>
+						</div>
+						<div class="account-number">{{ bank.account_number }}</div>
+						<div class="account-name">a/n {{ bank.account_name }}</div>
+						{% if bank.bank_branch %}
+						<div class="bank-branch">Cabang: {{ bank.bank_branch }}</div>
+						{% endif %}
+					</div>
+					{% endfor %}
+					{% else %}
+					<!-- Fallback: legacy single bank fields -->
+					{% if bank_name or bank_account_number %}
+					<div class="bank-account-card">
+						<div class="bank-header">
+							<span class="bank-name">{{ bank_name }}</span>
+							{% if bank_account_number %}
+							<button type="button" class="copy-btn"
+								onclick="copyToClipboard('{{ bank_account_number }}', this)">
+								📋 Copy
+							</button>
+							{% endif %}
+						</div>
+						{% if bank_account_number %}
+						<div class="account-number">{{ bank_account_number }}</div>
+						{% endif %}
+						{% if bank_account_name %}
+						<div class="account-name">a/n {{ bank_account_name }}</div>
+						{% endif %}
+					</div>
+					{% endif %}
+					{% endif %}
+
+					<div class="transfer-steps">
+						<h4>Cara Transfer:</h4>
+						<ol>
+							<li>Pilih salah satu rekening bank di atas</li>
+							<li>Transfer sesuai jumlah yang tertera</li>
+							<li>Simpan bukti transfer</li>
+							<li>Upload bukti di form sebelah kanan</li>
+							<li>Submit dan tunggu konfirmasi (max 1×24 jam)</li>
+						</ol>
+					</div>
+				</div>
+				{% endif %}
+			</div>
+
+			<!-- Right Column: Payment Form -->
+			<div class="qalcuity-checkout-form-container">
+				<div class="qalcuity-checkout-form">
+					<h3 class="qalcuity-checkout-section-title">
+						<span class="octicon octicon-file-text"></span> Formulir Pembayaran
+					</h3>
+
+					<form id="checkout-form" enctype="multipart/form-data" novalidate>
+						<!-- Hidden plan field -->
+						<input type="hidden" id="plan-name" value="{{ plan_name }}">
+
+						{% if plan.is_trial or plan.price == 0 %}
+						<!-- Free/Trial Plan -->
+						<div class="qalcuity-form-group">
+							<div class="qalcuity-alert qalcuity-alert-info">
+								<span class="octicon octicon-info"></span>
+								Paket ini gratis. Tidak perlu melakukan pembayaran.
+							</div>
+						</div>
+
+						<button type="button" class="qalcuity-btn qalcuity-btn-primary qalcuity-checkout-submit"
+							id="btn-activate-trial" onclick="activateTrial()">
+							<span class="qalcuity-register-submit-text">
+								<span class="octicon octicon-check"></span> Aktifkan Paket Gratis
+							</span>
+							<span class="qalcuity-register-submit-loading" style="display: none;">
+								<span class="octicon octicon-sync"></span> Memproses...
+							</span>
+						</button>
+
+						{% else %}
+						<!-- Amount -->
+						<div class="qalcuity-form-group">
+							<label for="amount" class="qalcuity-form-label">
+								<span class="octicon octicon-number"></span>
+								Jumlah Pembayaran
+							</label>
+							<div class="qalcuity-input-with-prefix">
+								<span class="qalcuity-input-prefix">Rp</span>
+								<input type="number" id="amount" name="amount"
+									class="qalcuity-form-input qalcuity-input-with-prefix-field"
+									value="{{ plan.price|int }}" min="0" required>
+							</div>
+							<div class="qalcuity-form-error" id="error-amount"></div>
+						</div>
+
+						<!-- Payment Method -->
+						<div class="qalcuity-form-group">
+							<label for="payment_method" class="qalcuity-form-label">
+								<span class="octicon octicon-credit-card"></span>
+								Metode Pembayaran
+							</label>
+							<select id="payment_method" name="payment_method" class="qalcuity-form-input" required>
+								<option value="Bank Transfer" selected>Bank Transfer</option>
+								<option value="E-Wallet">E-Wallet</option>
+								<option value="Virtual Account">Virtual Account</option>
+							</select>
+							<div class="qalcuity-form-error" id="error-payment_method"></div>
+						</div>
+
+						<!-- Payment Date -->
+						<div class="qalcuity-form-group">
+							<label for="payment_date" class="qalcuity-form-label">
+								<span class="octicon octicon-calendar"></span>
+								Tanggal Pembayaran
+							</label>
+							<input type="date" id="payment_date" name="payment_date" class="qalcuity-form-input"
+								required>
+							<div class="qalcuity-form-error" id="error-payment_date"></div>
+						</div>
+
+						<!-- Reference Number -->
+						<div class="qalcuity-form-group">
+							<label for="reference_number" class="qalcuity-form-label">
+								<span class="octicon octicon-hash"></span>
+								Nomor Referensi
+							</label>
+							<input type="text" id="reference_number" name="reference_number" class="qalcuity-form-input"
+								placeholder="Nomor referensi dari bank (opsional)">
+							<div class="qalcuity-form-error" id="error-reference_number"></div>
+						</div>
+
+						<!-- Proof of Payment -->
+						<div class="qalcuity-form-group">
+							<label for="proof_of_payment" class="qalcuity-form-label">
+								<span class="octicon octicon-file-media"></span>
+								Bukti Pembayaran
+							</label>
+							<div class="qalcuity-file-upload-wrapper">
+								<input type="file" id="proof_of_payment" name="proof_of_payment"
+									class="qalcuity-file-input" accept="image/jpeg,image/png,image/jpg,application/pdf"
+									required>
+								<label for="proof_of_payment" class="qalcuity-file-label">
+									<span class="octicon octicon-cloud-upload"></span>
+									<span id="file-label-text">Pilih file (JPG, PNG, atau PDF, maks 5MB)</span>
+								</label>
+								<div id="file-preview" class="qalcuity-file-preview" style="display: none;"></div>
+							</div>
+							<div class="qalcuity-form-error" id="error-proof_of_payment"></div>
+						</div>
+
+						<!-- Submit Button -->
+						<button type="submit" class="qalcuity-btn qalcuity-btn-primary qalcuity-checkout-submit"
+							id="btn-submit" onclick="submitPayment(event)">
+							<span class="qalcuity-register-submit-text" id="submit-text">
+								<span class="octicon octicon-check"></span> Kirim Pembayaran
+							</span>
+							<span class="qalcuity-register-submit-loading" id="submit-loading" style="display: none;">
+								<span class="octicon octicon-sync"></span> Memproses...
+							</span>
+						</button>
+						{% endif %}
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- End checkout-content -->
+
+	{% endif %}
+</div>
+
+<script>
+	frappe.ready(function () {
+		// Set default date to today
+		var dateField = document.getElementById('payment_date');
+		if (dateField) {
+			var today = new Date().toISOString().split('T')[0];
+			dateField.value = today;
+		}
+
+		// File input handler
+		var fileInput = document.getElementById('proof_of_payment');
+		if (fileInput) {
+			fileInput.addEventListener('change', function (e) {
+				var file = e.target.files[0];
+				var label = document.getElementById('file-label-text');
+				var preview = document.getElementById('file-preview');
+
+				if (file) {
+					label.textContent = file.name;
+					preview.style.display = 'block';
+
+					if (file.type.startsWith('image/')) {
+						var reader = new FileReader();
+						reader.onload = function (ev) {
+							preview.innerHTML = '<img src="' + ev.target.result + '" alt="Preview">';
+						};
+						reader.readAsDataURL(file);
+					} else {
+						preview.innerHTML = '<div class="qalcuity-file-preview-doc"><span class="octicon octicon-file-text"></span> ' + frappe.utils.escape_html(file.name) + '</div>';
+					}
+				} else {
+					label.textContent = 'Pilih file (JPG, PNG, atau PDF, maks 5MB)';
+					preview.style.display = 'none';
+				}
+			});
+		}
+	});
+
+	function clearErrors() {
+		var errors = document.querySelectorAll('.qalcuity-form-error');
+		errors.forEach(function (el) {
+			el.style.display = 'none';
+			el.textContent = '';
+		});
+		var inputs = document.querySelectorAll('.qalcuity-form-input');
+		inputs.forEach(function (el) {
+			el.classList.remove('qalcuity-form-input-error');
+		});
+	}
+
+	function showFieldError(fieldId, message) {
+		var errorEl = document.getElementById('error-' + fieldId);
+		var inputEl = document.getElementById(fieldId);
+		if (errorEl) {
+			errorEl.textContent = message;
+			errorEl.style.display = 'block';
+		}
+		if (inputEl) {
+			inputEl.classList.add('qalcuity-form-input-error');
+		}
+	}
+
+	function showAlert(type, message) {
+		var alertEl = document.getElementById('checkout-alert');
+		alertEl.className = 'qalcuity-checkout-alert qalcuity-alert qalcuity-alert-' + type;
+		alertEl.innerHTML = '<span class="octicon octicon-' + (type === 'danger' ? 'alert' : type === 'success' ? 'check' : 'info') + '"></span> ' + message;
+		alertEl.style.display = 'flex';
+		alertEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
+	function setLoading(loading) {
+		var btnSubmit = document.getElementById('btn-submit');
+		var submitText = document.getElementById('submit-text');
+		var submitLoading = document.getElementById('submit-loading');
+
+		if (btnSubmit) {
+			btnSubmit.disabled = loading;
+		}
+		if (submitText) {
+			submitText.style.display = loading ? 'none' : 'inline-flex';
+		}
+		if (submitLoading) {
+			submitLoading.style.display = loading ? 'inline-flex' : 'none';
+		}
+	}
+
+	/**
+	 * Show success state: hide form, show WhatsApp confirmation.
+	 */
+	function showSuccessState() {
+		// Hide checkout content
+		var checkoutContent = document.getElementById('checkout-content');
+		if (checkoutContent) {
+			checkoutContent.style.display = 'none';
+		}
+
+		// Hide alert
+		var alertEl = document.getElementById('checkout-alert');
+		if (alertEl) {
+			alertEl.style.display = 'none';
+		}
+
+		// Show success section
+		var successSection = document.getElementById('success-section');
+		if (successSection) {
+			successSection.style.display = 'block';
+			successSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	}
+
+	function submitPayment(e) {
+		e.preventDefault();
+		clearErrors();
+
+		var planName = document.getElementById('plan-name').value;
+		var amount = document.getElementById('amount').value;
+		var paymentMethod = document.getElementById('payment_method').value;
+		var paymentDate = document.getElementById('payment_date').value;
+		var referenceNumber = document.getElementById('reference_number').value;
+		var proofFile = document.getElementById('proof_of_payment').files[0];
+
+		// Validation
+		var valid = true;
+
+		if (!amount || parseFloat(amount) <= 0) {
+			showFieldError('amount', 'Jumlah pembayaran harus lebih dari 0.');
+			valid = false;
+		}
+
+		if (!paymentMethod) {
+			showFieldError('payment_method', 'Metode pembayaran wajib dipilih.');
+			valid = false;
+		}
+
+		if (!paymentDate) {
+			showFieldError('payment_date', 'Tanggal pembayaran wajib diisi.');
+			valid = false;
+		}
+
+		if (!proofFile) {
+			showFieldError('proof_of_payment', 'Bukti pembayaran wajib diunggah.');
+			valid = false;
+		}
+
+		if (proofFile) {
+			var maxSize = 5 * 1024 * 1024; // 5MB
+			var allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+
+			if (proofFile.size > maxSize) {
+				showFieldError('proof_of_payment', 'Ukuran file maksimal 5MB.');
+				valid = false;
+			}
+
+			if (allowedTypes.indexOf(proofFile.type) === -1) {
+				showFieldError('proof_of_payment', 'Format file tidak didukung. Gunakan JPG, PNG, atau PDF.');
+				valid = false;
+			}
+		}
+
+		if (!valid) return;
+
+		setLoading(true);
+
+		// First upload the file
+		var fileData = new FormData();
+		fileData.append('file', proofFile);
+		fileData.append('is_private', 1);
+
+		frappe.call({
+			method: 'frappe.handler.uploadfile',
+			args: {
+				file_name: proofFile.name,
+				file_url: '',
+				is_private: 1,
+			},
+			callback: function (r) {
+				// If simple upload doesn't work, use the standard approach
+				uploadFileAndSubmit(proofFile, planName, amount, paymentMethod, paymentDate, referenceNumber);
+			},
+			error: function () {
+				uploadFileAndSubmit(proofFile, planName, amount, paymentMethod, paymentDate, referenceNumber);
+			}
+		});
+	}
+
+	function uploadFileAndSubmit(file, planName, amount, paymentMethod, paymentDate, referenceNumber) {
+		var formData = new FormData();
+		formData.append('file', file);
+		formData.append('is_private', '1');
+
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '/api/method/frappe.handler.upload_file', true);
+		xhr.setRequestHeader('X-Frappe-CSRF-Token', frappe.csrf_token);
+
+		xhr.onload = function () {
+			if (xhr.status === 200) {
+				var response = JSON.parse(xhr.responseText);
+				var fileUrl = response.message.file_url;
+
+				// Now submit the payment
+				frappe.call({
+					method: 'qalcuity.api.plans.submit_payment_with_subscription',
+					args: {
+						plan_name: planName,
+						amount: amount,
+						payment_method: paymentMethod,
+						payment_date: paymentDate,
+						proof_of_payment: fileUrl,
+						reference_number: referenceNumber || '',
+					},
+					callback: function (r) {
+						setLoading(false);
+						if (r.message) {
+							// Show success state with WhatsApp confirmation
+							showSuccessState();
+						}
+					},
+					error: function (err) {
+						setLoading(false);
+						showAlert('danger', (err.message || 'Terjadi kesalahan saat mengirim pembayaran. Silakan coba lagi.'));
+					}
+				});
+			} else {
+				setLoading(false);
+				showAlert('danger', 'Gagal mengunggah file. Silakan coba lagi.');
+			}
+		};
+
+		xhr.onerror = function () {
+			setLoading(false);
+			showAlert('danger', 'Gagal mengunggah file. Periksa koneksi internet Anda.');
+		};
+
+		xhr.send(formData);
+	}
+
+	function activateTrial() {
+		var btnActivate = document.getElementById('btn-activate-trial');
+		if (btnActivate) {
+			btnActivate.disabled = true;
+			btnActivate.querySelector('.qalcuity-register-submit-text').style.display = 'none';
+			btnActivate.querySelector('.qalcuity-register-submit-loading').style.display = 'inline-flex';
+		}
+
+		var planName = document.getElementById('plan-name').value;
+
+		frappe.call({
+			method: 'qalcuity.api.plans.submit_payment_with_subscription',
+			args: {
+				plan_name: planName,
+				amount: 0,
+				payment_method: 'Bank Transfer',
+				payment_date: frappe.datetime.get_today(),
+				proof_of_payment: '',
+				reference_number: 'TRIAL-ACTIVATION',
+			},
+			callback: function (r) {
+				if (r.message) {
+					// Show success state (no WhatsApp for trial)
+					showSuccessState();
+				}
+			},
+			error: function (err) {
+				if (btnActivate) {
+					btnActivate.disabled = false;
+					btnActivate.querySelector('.qalcuity-register-submit-text').style.display = 'inline-flex';
+					btnActivate.querySelector('.qalcuity-register-submit-loading').style.display = 'none';
+				}
+				showAlert('danger', (err.message || 'Terjadi kesalahan. Silakan coba lagi.'));
+			}
+		});
+	}
+
+	function copyToClipboard(text, btnEl) {
+		if (navigator.clipboard) {
+			navigator.clipboard.writeText(text).then(function () {
+				showCopySuccess(btnEl);
+			});
+		} else {
+			// Fallback for older browsers
+			var textarea = document.createElement('textarea');
+			textarea.value = text;
+			textarea.style.position = 'fixed';
+			textarea.style.opacity = '0';
+			document.body.appendChild(textarea);
+			textarea.select();
+			document.execCommand('copy');
+			document.body.removeChild(textarea);
+			showCopySuccess(btnEl);
+		}
+	}
+
+	function showCopySuccess(btnEl) {
+		frappe.show_alert({ message: 'Nomor rekening disalin!', indicator: 'green' });
+		if (btnEl) {
+			var originalText = btnEl.innerHTML;
+			btnEl.innerHTML = '✓ Tersalin';
+			btnEl.classList.add('copied');
+			setTimeout(function () {
+				btnEl.innerHTML = originalText;
+				btnEl.classList.remove('copied');
+			}, 2000);
+		}
+	}
+</script>
+{% endblock %}

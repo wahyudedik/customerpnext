@@ -1,0 +1,208 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-my-payments-container">
+	<!-- Header -->
+	<div class="qalcuity-my-payments-header">
+		<div class="qalcuity-my-payments-header-left">
+			<h1 class="qalcuity-my-payments-title">Pembayaran Saya</h1>
+			<p class="qalcuity-my-payments-subtitle">Riwayat pembayaran dan status verifikasi.</p>
+		</div>
+		<div class="qalcuity-my-payments-header-right">
+			<a href="/checkout" class="qalcuity-btn qalcuity-btn-primary">
+				<span class="octicon octicon-plus"></span> Bayar Sekarang
+			</a>
+		</div>
+	</div>
+
+	<!-- Success Alert -->
+	<div id="success-alert" class="qalcuity-alert qalcuity-alert-success" style="display: none;">
+		<span class="octicon octicon-check"></span>
+		Pembayaran berhasil diajukan! Menunggu verifikasi oleh admin.
+	</div>
+
+	<!-- Loading State -->
+	<div id="payments-loading" class="qalcuity-my-payments-loading">
+		<div class="qalcuity-pricing-spinner"></div>
+		<p>Memuat data pembayaran...</p>
+	</div>
+
+	<!-- Stats Summary -->
+	<div id="payments-stats" class="qalcuity-my-payments-stats" style="display: none;">
+		<div class="qalcuity-dashboard-stat">
+			<div class="qalcuity-dashboard-stat-value" id="stat-total">0</div>
+			<div class="qalcuity-dashboard-stat-label">Total Pembayaran</div>
+		</div>
+		<div class="qalcuity-dashboard-stat">
+			<div class="qalcuity-dashboard-stat-value" id="stat-pending" style="color: var(--qalcuity-warning);">0</div>
+			<div class="qalcuity-dashboard-stat-label">Menunggu</div>
+		</div>
+		<div class="qalcuity-dashboard-stat">
+			<div class="qalcuity-dashboard-stat-value" id="stat-approved" style="color: var(--qalcuity-success);">0
+			</div>
+			<div class="qalcuity-dashboard-stat-label">Disetujui</div>
+		</div>
+		<div class="qalcuity-dashboard-stat">
+			<div class="qalcuity-dashboard-stat-value" id="stat-rejected" style="color: var(--qalcuity-danger);">0</div>
+			<div class="qalcuity-dashboard-stat-label">Ditolak</div>
+		</div>
+	</div>
+
+	<!-- Payments List -->
+	<div id="payments-list" class="qalcuity-my-payments-list" style="display: none;"></div>
+
+	<!-- Empty State -->
+	<div id="payments-empty" class="qalcuity-my-payments-empty" style="display: none;">
+		<div class="qalcuity-my-payments-empty-icon">
+			<span class="octicon octicon-file-text" style="font-size: 48px; color: var(--qalcuity-text-muted);"></span>
+		</div>
+		<h3>Belum ada pembayaran</h3>
+		<p>Anda belum memiliki riwayat pembayaran. Pilih paket untuk memulai.</p>
+		<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary">
+			<span class="octicon octicon-arrow-left"></span> Lihat Paket
+		</a>
+	</div>
+
+	<!-- Error State -->
+	<div id="payments-error" class="qalcuity-my-payments-error" style="display: none;">
+		<div class="qalcuity-alert qalcuity-alert-danger">
+			<span class="octicon octicon-alert"></span>
+			Gagal memuat data pembayaran. Silakan coba lagi.
+		</div>
+		<button class="qalcuity-btn qalcuity-btn-primary" onclick="loadPayments()">Coba Lagi</button>
+	</div>
+</div>
+
+<script>
+	frappe.ready(function () {
+		// Show success alert if redirected after payment
+		var urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.get('success') === '1') {
+			var alertEl = document.getElementById('success-alert');
+			alertEl.style.display = 'block';
+			alertEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			// Auto-hide after 5 seconds
+			setTimeout(function () {
+				alertEl.style.display = 'none';
+			}, 5000);
+		}
+
+		loadPayments();
+	});
+
+	function loadPayments() {
+		var loading = document.getElementById('payments-loading');
+		var list = document.getElementById('payments-list');
+		var error = document.getElementById('payments-error');
+		var empty = document.getElementById('payments-empty');
+		var stats = document.getElementById('payments-stats');
+
+		loading.style.display = 'flex';
+		list.style.display = 'none';
+		error.style.display = 'none';
+		empty.style.display = 'none';
+		stats.style.display = 'none';
+
+		frappe.call({
+			method: 'qalcuity.api.payment.get_my_payments',
+			callback: function (r) {
+				loading.style.display = 'none';
+
+				if (r.message && r.message.length > 0) {
+					renderPayments(r.message);
+					list.style.display = 'block';
+					stats.style.display = 'grid';
+					updateStats(r.message);
+				} else {
+					empty.style.display = 'block';
+				}
+			},
+			error: function (err) {
+				loading.style.display = 'none';
+				error.style.display = 'block';
+			}
+		});
+	}
+
+	function updateStats(payments) {
+		var total = payments.length;
+		var pending = 0, approved = 0, rejected = 0;
+
+		payments.forEach(function (p) {
+			if (p.status === 'Pending') pending++;
+			else if (p.status === 'Approved') approved++;
+			else if (p.status === 'Rejected') rejected++;
+		});
+
+		document.getElementById('stat-total').textContent = total;
+		document.getElementById('stat-pending').textContent = pending;
+		document.getElementById('stat-approved').textContent = approved;
+		document.getElementById('stat-rejected').textContent = rejected;
+	}
+
+	function renderPayments(payments) {
+		var list = document.getElementById('payments-list');
+		var html = '';
+
+		payments.forEach(function (payment) {
+			var statusClass = 'qalcuity-status qalcuity-status-' + payment.status.toLowerCase().replace(' ', '-');
+			var statusText = payment.status;
+			if (payment.status === 'Pending') statusText = 'Menunggu';
+			else if (payment.status === 'Approved') statusText = 'Disetujui';
+			else if (payment.status === 'Rejected') statusText = 'Ditolak';
+
+			var amount = 'Rp ' + formatNumber(payment.amount);
+
+			var dateStr = payment.payment_date || '-';
+			if (payment.payment_date) {
+				var d = new Date(payment.payment_date);
+				dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+			}
+
+			html += '<div class="qalcuity-payment-card">';
+			html += '  <div class="qalcuity-payment-card-header">';
+			html += '    <div class="qalcuity-payment-card-id">' + frappe.utils.escape_html(payment.name) + '</div>';
+			html += '    <div class="' + statusClass + '">' + statusText + '</div>';
+			html += '  </div>';
+			html += '  <div class="qalcuity-payment-card-body">';
+			html += '    <div class="qalcuity-payment-card-row">';
+			html += '      <span class="qalcuity-payment-card-label">Jumlah</span>';
+			html += '      <span class="qalcuity-payment-card-value qalcuity-payment-card-amount">' + amount + '</span>';
+			html += '    </div>';
+			html += '    <div class="qalcuity-payment-card-row">';
+			html += '      <span class="qalcuity-payment-card-label">Tanggal Pembayaran</span>';
+			html += '      <span class="qalcuity-payment-card-value">' + dateStr + '</span>';
+			html += '    </div>';
+			html += '    <div class="qalcuity-payment-card-row">';
+			html += '      <span class="qalcuity-payment-card-label">Metode</span>';
+			html += '      <span class="qalcuity-payment-card-value">' + frappe.utils.escape_html(payment.payment_method || '-') + '</span>';
+			html += '    </div>';
+
+			if (payment.reference_number) {
+				html += '    <div class="qalcuity-payment-card-row">';
+				html += '      <span class="qalcuity-payment-card-label">Referensi</span>';
+				html += '      <span class="qalcuity-payment-card-value">' + frappe.utils.escape_html(payment.reference_number) + '</span>';
+				html += '    </div>';
+			}
+
+			html += '  </div>';
+
+			if (payment.status === 'Rejected') {
+				html += '  <div class="qalcuity-payment-card-rejected">';
+				html += '    <span class="octicon octicon-alert"></span> Pembayaran ditolak. ';
+				html += '    <a href="/checkout?plan=' + frappe.utils.escape_html(payment.subscription || '') + '">Ajukan ulang</a>';
+				html += '  </div>';
+			}
+
+			html += '</div>';
+		});
+
+		list.innerHTML = html;
+	}
+
+	function formatNumber(num) {
+		if (!num) return '0';
+		return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+	}
+</script>
+{% endblock %}

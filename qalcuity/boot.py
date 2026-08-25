@@ -22,4 +22,12 @@ def boot_session(boot_obj):
     boot_obj.app_icon = "octicon octicon-zap"
     boot_obj.app_color = "#2490EF"
 
+    # Inject unread notification count for bell icon
+    try:
+        from qalcuity.qalcuity.api.notification import get_unread_count
+
+        boot_obj.qalcuity_unread_notifications = get_unread_count().get("count", 0)
+    except Exception:
+        boot_obj.qalcuity_unread_notifications = 0
+
     return boot_obj

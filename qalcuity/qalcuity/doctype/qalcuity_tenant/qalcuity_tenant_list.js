@@ -25,23 +25,35 @@ frappe.listview_settings["Qalcuity Tenant"] = {
 	},
 
 	onload(listview) {
-		// Bulk suspend action
+		// Default filter: show active tenants
+		listview.filter_area.add([[listview.doctype, "status", "=", "Active"]]);
+
+		// Set page length
+		listview.page_length = 20;
+
+		// Bulk suspend action (Superadmin only)
 		if (
 			frappe.user.has_role([
 				"System Manager",
 				"Qalcuity Superadmin",
 			])
 		) {
-			listview.page.add_menu_item(__("Bulk Suspend"), function () {
+			listview.page.add_menu_item(__("Tangguhkan Massal"), function () {
 				const selected = listview.get_checked_items();
 				if (!selected.length) {
-					frappe.msgprint(__("Please select tenants to suspend."));
+					frappe.msgprint({
+						message: __("Pilih minimal satu tenant untuk ditangguhkan."),
+						indicator: "orange",
+					});
 					return;
 				}
 				frappe.confirm(
-					__("Suspend {0} tenant(s)?", [selected.length]),
+					__("Tangguhkan {0} tenant?", [selected.length]),
 					function () {
-						selected.forEach(function (item) {
+						let completed = 0;
+						const total = selected.length;
+
+						selected.forEach(function (item, index) {
 							frappe.call({
 								method: "frappe.client.set_value",
 								args: {
@@ -50,9 +62,30 @@ frappe.listview_settings["Qalcuity Tenant"] = {
 									fieldname: "status",
 									value: "Suspended",
 								},
+								callback: function () {
+									completed++;
+									if (completed === total) {
+										frappe.msgprint({
+											message: __("Berhasil menangguhkan {0} tenant.", [
+												completed,
+											]),
+											indicator: "green",
+										});
+										listview.refresh();
+									}
+								},
+								error: function () {
+									completed++;
+									if (completed === total) {
+										frappe.msgprint({
+											message: __("Proses selesai dengan beberapa error."),
+											indicator: "orange",
+										});
+										listview.refresh();
+									}
+								},
 							});
 						});
-						listview.refresh();
 					}
 				);
 			});

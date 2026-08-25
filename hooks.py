@@ -16,7 +16,10 @@ app_license = "MIT"
 # =============================================================================
 # Includes — CSS & JS for branding and custom styles
 # =============================================================================
-app_include_css = "/assets/qalcuity/css/qalcuity.css"
+app_include_css = [
+    "/assets/qalcuity/css/qalcuity.css",
+    "/assets/qalcuity/css/qalcuity-admin.css",
+]
 app_include_js = "/assets/qalcuity/js/qalcuity.js"
 app_include_brand_html = True
 
@@ -33,22 +36,51 @@ override_website_page_render_context = {
 }
 
 # =============================================================================
-# Doc Events
+# Doc Events — Audit Log & Lifecycle Hooks
 # =============================================================================
 doc_events = {
     "Customer": {
         "after_insert": "qalcuity.api.customer.after_customer_insert",
     },
+    "Qalcuity Payment": {
+        "on_update": "qalcuity.api.audit.on_payment_update",
+    },
+    "Qalcuity Subscription": {
+        "on_update": "qalcuity.api.audit.on_subscription_update",
+    },
+    "User": {
+        "before_insert": "qalcuity.enforcement.before_user_insert",
+    },
 }
 
 # =============================================================================
-# Permissions
+# Permissions — has_permission (per-document access check)
 # =============================================================================
 has_permission = {
     "Qalcuity Plan": "qalcuity.qalcuity.doctype.qalcuity_plan.qalcuity_plan.has_permission",
     "Qalcuity Subscription": "qalcuity.qalcuity.doctype.qalcuity_subscription.qalcuity_subscription.has_permission",
     "Qalcuity Payment": "qalcuity.qalcuity.doctype.qalcuity_payment.qalcuity_payment.has_permission",
     "Qalcuity Tenant": "qalcuity.qalcuity.doctype.qalcuity_tenant.qalcuity_tenant.has_permission",
+    "Qalcuity Notification": "qalcuity.qalcuity.doctype.qalcuity_notification.qalcuity_notification.has_permission",
+    # ERPNext DocTypes — tenant isolation
+    "Customer": "qalcuity.qalcuity.erpnext_hooks.has_customer_permission",
+    "Sales Order": "qalcuity.qalcuity.erpnext_hooks.has_sales_order_permission",
+    "Sales Invoice": "qalcuity.qalcuity.erpnext_hooks.has_sales_invoice_permission",
+}
+
+# =============================================================================
+# Permissions — get_permission_query_conditions (list view filtering)
+# =============================================================================
+get_permission_query_conditions = {
+    # Qalcuity DocTypes — tenant isolation via customer field
+    "Qalcuity Subscription": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
+    "Qalcuity Payment": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
+    "Qalcuity Tenant": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
+    # ERPNext DocTypes — tenant isolation via customer field
+    "Customer": "qalcuity.qalcuity.erpnext_hooks.get_customer_permission_query_conditions",
+    "Sales Order": "qalcuity.qalcuity.erpnext_hooks.get_sales_order_permission_query_conditions",
+    "Sales Invoice": "qalcuity.qalcuity.erpnext_hooks.get_sales_invoice_permission_query_conditions",
+    "Quotation": "qalcuity.qalcuity.erpnext_hooks.get_quotation_permission_query_conditions",
 }
 
 # =============================================================================
@@ -59,6 +91,38 @@ website_route_rules = [
         "from_route": "/pricing",
         "to_route": "pricing",
     },
+    {
+        "from_route": "/register",
+        "to_route": "register",
+    },
+    {
+        "from_route": "/checkout",
+        "to_route": "checkout",
+    },
+    {
+        "from_route": "/my-payments",
+        "to_route": "my-payments",
+    },
+    {
+        "from_route": "/dashboard",
+        "to_route": "dashboard",
+    },
+    {
+        "from_route": "/admin-reviews",
+        "to_route": "admin-reviews",
+    },
+    {
+        "from_route": "/profile",
+        "to_route": "profile",
+    },
+    {
+        "from_route": "/account-status",
+        "to_route": "account-status",
+    },
+    {
+        "from_route": "/subscription-history",
+        "to_route": "subscription-history",
+    },
 ]
 
 # =============================================================================
@@ -67,7 +131,10 @@ website_route_rules = [
 fixtures = [
     {
         "dt": "Custom Field",
-        "filters": [["module", "=", "Qalcuity"]],
+        "filters": [
+            ["module", "=", "Qalcuity"],
+            ["dt", "!=", "Qalcuity Notification"],
+        ],
     },
     {
         "dt": "Property Setter",
@@ -81,11 +148,19 @@ fixtures = [
     },
     {
         "dt": "Role",
-        "filters": [["role_name", "in", ["Qalcuity Superadmin", "Qalcuity Admin"]]],
+        "filters": [["role_name", "in", ["Qalcuity Superadmin", "Qalcuity Admin", "Qalcuity ERP User"]]],
+    },
+    {
+        "dt": "Workspace",
+        "filters": [["name", "=", "Qalcuity ERP Customer"]],
     },
     {
         "dt": "Qalcuity Plan",
         "filters": [["is_active", "=", 1]],
+    },
+    {
+        "dt": "Qalcuity Bank Account",
+        "filters": [],
     },
     {
         "dt": "Qalcuity Settings",
@@ -99,16 +174,9 @@ fixtures = [
 scheduler_events = {
     "daily": [
         "qalcuity.tasks.check_subscription_expiry",
+        "qalcuity.tasks.run_scheduled_backup",
+        "qalcuity.tasks.retry_failed_provisioning",
     ],
-}
-
-# =============================================================================
-# Override Whitelisted Methods
-# =============================================================================
-override_whitelisted_methods = {
-    "qalcuity.api.payment.submit_payment": "qalcuity.api.payment.submit_payment",
-    "qalcuity.api.payment.approve_payment": "qalcuity.api.payment.approve_payment",
-    "qalcuity.api.payment.reject_payment": "qalcuity.api.payment.reject_payment",
 }
 
 # =============================================================================

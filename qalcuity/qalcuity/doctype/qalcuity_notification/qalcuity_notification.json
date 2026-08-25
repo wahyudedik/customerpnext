@@ -1,0 +1,135 @@
+{
+    "actions": [],
+    "allow_rename": 0,
+    "autoname": "format:NOTIF-{YYYYMMDD}-{####}",
+    "creation": "2026-08-24 17:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "recipient",
+        "notification_type",
+        "title",
+        "is_read",
+        "column_break_01",
+        "message",
+        "link",
+        "section_break_reference",
+        "reference_doctype",
+        "reference_name",
+        "timestamp"
+    ],
+    "fields": [
+        {
+            "fieldname": "recipient",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Recipient",
+            "options": "User",
+            "reqd": 1
+        },
+        {
+            "fieldname": "notification_type",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Type",
+            "options": "Payment\nSubscription\nSystem\nInfo",
+            "reqd": 1
+        },
+        {
+            "fieldname": "title",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Title",
+            "reqd": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "is_read",
+            "fieldtype": "Check",
+            "in_list_view": 1,
+            "label": "Read"
+        },
+        {
+            "fieldname": "column_break_01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "message",
+            "fieldtype": "Small Text",
+            "label": "Message",
+            "reqd": 1
+        },
+        {
+            "fieldname": "link",
+            "fieldtype": "Data",
+            "label": "Link",
+            "options": "URL"
+        },
+        {
+            "fieldname": "section_break_reference",
+            "fieldtype": "Section Break",
+            "label": "Reference"
+        },
+        {
+            "fieldname": "reference_doctype",
+            "fieldtype": "Link",
+            "label": "Reference DocType",
+            "options": "DocType"
+        },
+        {
+            "fieldname": "reference_name",
+            "fieldtype": "Data",
+            "label": "Reference Name"
+        },
+        {
+            "default": "Now",
+            "fieldname": "timestamp",
+            "fieldtype": "Datetime",
+            "in_list_view": 1,
+            "label": "Timestamp",
+            "reqd": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2026-08-24 17:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Notification",
+    "naming_rule": "Expression",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 1,
+            "create": 1
+        },
+        {
+            "role": "Customer",
+            "read": 1
+        }
+    ],
+    "search_fields": "title,message",
+    "sort_field": "timestamp",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "title",
+    "track_changes": 0
+}

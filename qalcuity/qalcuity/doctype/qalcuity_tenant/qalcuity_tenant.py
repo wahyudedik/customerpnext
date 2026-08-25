@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime, cint
+from frappe.utils import now_datetime, cint, getdate
 
 
 class QalcuityTenant(Document):
@@ -67,25 +67,65 @@ class QalcuityTenant(Document):
             self.provisioned_on = now_datetime()
 
     def generate_tenant_id(self):
-        """Generate tenant_id jika belum ada."""
+        """Generate tenant_id dengan format TENANT-{YYYYMMDD}-{####}."""
         if not self.tenant_id:
-            customer_name = frappe.db.get_value(
-                "Customer", self.customer, "customer_name"
+            from frappe.utils import today
+            import re
+
+            # Format tanggal: YYYYMMDD
+            date_str = getdate(today()).strftime("%Y%m%d")
+
+            # Hitung jumlah tenant yang dibuat hari ini
+            prefix = f"TENANT-{date_str}-"
+            count_today = frappe.db.count(
+                "Qalcuity Tenant",
+                {"tenant_id": ["like", f"{prefix}%"]},
             )
-            if customer_name:
-                # Clean name for tenant_id
-                clean_name = (
-                    customer_name.lower()
-                    .replace(" ", "-")
-                    .replace(".", "")
-                )
-                import re
-                clean_name = re.sub(r"[^a-z0-9\-]", "", clean_name)
-                self.tenant_id = f"{clean_name}-{frappe.utils.cint(frappe.db.count('Qalcuity Tenant')) + 1:04d}"
+            sequence = count_today + 1
+
+            self.tenant_id = f"{prefix}{sequence:04d}"
 
     def update_last_activity(self):
         """Update waktu aktivitas terakhir."""
         self.last_activity = now_datetime()
+
+    # =========================================================================
+    # ERP Provisioning Methods
+    # =========================================================================
+
+    @frappe.whitelist()
+    def provision(self):
+        """
+        Provision ERP environment for this tenant.
+        Creates Company, assigns roles, configures workspace.
+        """
+        from qalcuity.qalcuity.provisioning import provision_tenant
+
+        return provision_tenant(self.name)
+
+    @frappe.whitelist()
+    def deprovision(self):
+        """
+        Deprovision ERP environment for this tenant.
+        Removes ERP roles but preserves Company and data.
+        """
+        from qalcuity.qalcuity.provisioning import deprovision_tenant
+
+        return deprovision_tenant(self.name)
+
+    @frappe.whitelist()
+    def retry_provisioning(self):
+        """
+        Retry provisioning for this tenant.
+        Used when previous provisioning failed.
+        """
+        from qalcuity.qalcuity.provisioning import provision_tenant
+
+        return provision_tenant(self.name)
+
+    # =========================================================================
+    # Existing Methods
+    # =========================================================================
 
     @frappe.whitelist()
     def suspend(self):
@@ -171,7 +211,7 @@ def has_permission(doc, ptype):
 
     # Customer can only read their own tenant (ownership check)
     if ptype == "read" and "Customer" in frappe.get_roles(user):
-        user_customer = frappe.db.get_value("User", user, "customer_name")
+        user_customer = frappe.db.get_value("Portal User", {"user": user}, "parent")
         if user_customer and doc.customer == user_customer:
             return True
         return False

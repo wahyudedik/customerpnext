@@ -20,4 +20,12 @@ frappe.listview_settings["Qalcuity Plan"] = {
 			return value;
 		},
 	},
+
+	onload(listview) {
+		// Set default: show active plans first
+		listview.filter_area.add([[listview.doctype, "is_active", "=", "1"]]);
+
+		// Set page length
+		listview.page_length = 20;
+	},
 };

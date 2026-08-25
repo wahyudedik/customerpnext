@@ -1,0 +1,191 @@
+{
+    "actions": [],
+    "autoname": "format:BACKUP-{YYYYMMDD}-{####}",
+    "creation": "2026-08-24 16:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "backup_name",
+        "backup_type",
+        "status",
+        "site_name",
+        "column_break_info",
+        "performed_by",
+        "started_at",
+        "completed_at",
+        "duration_seconds",
+        "section_break_file",
+        "file_path",
+        "file_size",
+        "section_break_error",
+        "error_message",
+        "section_break_notes",
+        "notes"
+    ],
+    "fields": [
+        {
+            "fieldname": "backup_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Backup Name",
+            "reqd": 1,
+            "read_only": 1,
+            "unique": 1
+        },
+        {
+            "default": "Full",
+            "fieldname": "backup_type",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Backup Type",
+            "options": "Database\nFiles\nFull",
+            "reqd": 1
+        },
+        {
+            "default": "Pending",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "options": "Pending\nRunning\nCompleted\nFailed",
+            "reqd": 1
+        },
+        {
+            "fieldname": "site_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Site Name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_info",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "performed_by",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Performed By",
+            "options": "User",
+            "read_only": 1
+        },
+        {
+            "fieldname": "started_at",
+            "fieldtype": "Datetime",
+            "in_list_view": 1,
+            "label": "Started At",
+            "read_only": 1
+        },
+        {
+            "fieldname": "completed_at",
+            "fieldtype": "Datetime",
+            "label": "Completed At",
+            "read_only": 1
+        },
+        {
+            "fieldname": "duration_seconds",
+            "fieldtype": "Int",
+            "label": "Duration (seconds)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_file",
+            "fieldtype": "Section Break",
+            "label": "File Details"
+        },
+        {
+            "fieldname": "file_path",
+            "fieldtype": "Small Text",
+            "label": "File Path",
+            "read_only": 1
+        },
+        {
+            "fieldname": "file_size",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "File Size (bytes)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_error",
+            "fieldtype": "Section Break",
+            "label": "Error Details",
+            "depends_on": "eval:doc.status === 'Failed'"
+        },
+        {
+            "fieldname": "error_message",
+            "fieldtype": "Text",
+            "label": "Error Message",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "notes",
+            "fieldtype": "Text",
+            "label": "Notes"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 0,
+    "links": [],
+    "modified": "2026-08-24 16:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Backup",
+    "naming_rule": "Expression",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        }
+    ],
+    "search_fields": "backup_name,backup_type,status,site_name",
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": [
+        {
+            "color": "gray",
+            "title": "Pending"
+        },
+        {
+            "color": "orange",
+            "title": "Running"
+        },
+        {
+            "color": "green",
+            "title": "Completed"
+        },
+        {
+            "color": "red",
+            "title": "Failed"
+        }
+    ],
+    "title_field": "backup_name",
+    "track_changes": 0
+}

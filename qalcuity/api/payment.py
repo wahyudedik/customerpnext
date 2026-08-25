@@ -229,11 +229,13 @@ def bulk_approve_payments(payment_names):
         payment_names = frappe.parse_json(payment_names)
 
     results = []
+    approved_count = 0
     for name in payment_names:
         try:
             doc = frappe.get_doc("Qalcuity Payment", name)
             if doc.status == "Pending":
                 doc.approve()
+                approved_count += 1
                 results.append({"name": name, "status": "success"})
             else:
                 results.append({
@@ -242,10 +244,25 @@ def bulk_approve_payments(payment_names):
                     "reason": "Status is {0}".format(doc.status),
                 })
         except Exception as e:
-            frappe.db.rollback()
-            results.append({"name": name, "status": "error", "reason": str(e)})
+            # Rollback semua yang sudah di-approve dalam batch ini
+            if approved_count > 0:
+                frappe.db.rollback()
+                approved_count = 0
+                results = [
+                    r for r in results if r.get("status") != "success"
+                ]
+                # Tandai semua yang sebelumnya sukses sebagai error
+                for r in results:
+                    if r.get("status") not in ("error",):
+                        r["status"] = "error"
+                        r["reason"] = "Batch rolled back due to error: {0}".format(str(e))
+                results.append({"name": name, "status": "error", "reason": str(e)})
+            else:
+                results.append({"name": name, "status": "error", "reason": str(e)})
+            break
 
-    frappe.db.commit()
+    if approved_count > 0:
+        frappe.db.commit()
     return results
 
 
@@ -271,11 +288,13 @@ def bulk_reject_payments(payment_names, reason):
         payment_names = frappe.parse_json(payment_names)
 
     results = []
+    rejected_count = 0
     for name in payment_names:
         try:
             doc = frappe.get_doc("Qalcuity Payment", name)
             if doc.status == "Pending":
                 doc.reject(reason=reason)
+                rejected_count += 1
                 results.append({"name": name, "status": "success"})
             else:
                 results.append({
@@ -284,8 +303,22 @@ def bulk_reject_payments(payment_names, reason):
                     "reason": "Status is {0}".format(doc.status),
                 })
         except Exception as e:
-            frappe.db.rollback()
-            results.append({"name": name, "status": "error", "reason": str(e)})
+            # Rollback semua yang sudah di-reject dalam batch ini
+            if rejected_count > 0:
+                frappe.db.rollback()
+                rejected_count = 0
+                results = [
+                    r for r in results if r.get("status") != "success"
+                ]
+                for r in results:
+                    if r.get("status") not in ("error",):
+                        r["status"] = "error"
+                        r["reason"] = "Batch rolled back due to error: {0}".format(str(e))
+                results.append({"name": name, "status": "error", "reason": str(e)})
+            else:
+                results.append({"name": name, "status": "error", "reason": str(e)})
+            break
 
-    frappe.db.commit()
+    if rejected_count > 0:
+        frappe.db.commit()
     return results

@@ -1,0 +1,140 @@
+{
+    "actions": [],
+    "autoname": "format:SL-{YYYYMMDD}-{####}",
+    "creation": "2026-08-24 16:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "subscription",
+        "action",
+        "old_status",
+        "new_status",
+        "column_break_01",
+        "old_plan",
+        "new_plan",
+        "performed_by",
+        "section_break_notes",
+        "notes",
+        "section_break_timestamp",
+        "timestamp"
+    ],
+    "fields": [
+        {
+            "fieldname": "subscription",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Subscription",
+            "options": "Qalcuity Subscription",
+            "reqd": 1
+        },
+        {
+            "fieldname": "action",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Action",
+            "options": "Created\nActivated\nSuspended\nReactivated\nCancelled\nExpired\nExtended\nPlan Changed",
+            "reqd": 1
+        },
+        {
+            "fieldname": "old_status",
+            "fieldtype": "Data",
+            "label": "Old Status"
+        },
+        {
+            "fieldname": "new_status",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "New Status"
+        },
+        {
+            "fieldname": "column_break_01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "old_plan",
+            "fieldtype": "Data",
+            "label": "Old Plan"
+        },
+        {
+            "fieldname": "new_plan",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "New Plan"
+        },
+        {
+            "fieldname": "performed_by",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Performed By",
+            "options": "User"
+        },
+        {
+            "fieldname": "section_break_notes",
+            "fieldtype": "Section Break",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "notes",
+            "fieldtype": "Text",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "section_break_timestamp",
+            "fieldtype": "Section Break"
+        },
+        {
+            "default": "Now",
+            "fieldname": "timestamp",
+            "fieldtype": "Datetime",
+            "in_list_view": 1,
+            "label": "Timestamp",
+            "reqd": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2026-08-24 16:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Subscription Log",
+    "naming_rule": "Expression",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        },
+        {
+            "role": "Customer",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        }
+    ],
+    "search_fields": "subscription,action,new_status,new_plan",
+    "sort_field": "timestamp",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "action",
+    "track_changes": 0
+}

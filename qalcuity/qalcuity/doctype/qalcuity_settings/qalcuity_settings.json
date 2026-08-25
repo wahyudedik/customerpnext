@@ -14,12 +14,28 @@
         "section_break_trial",
         "enable_trial_period",
         "trial_period_days",
+        "section_break_payment_mode",
+        "payment_mode",
+        "payment_mode_description",
         "section_break_bank",
         "bank_name",
         "bank_account_name",
         "bank_account_number",
         "column_break_bank2",
         "currency",
+        "section_break_bank_accounts",
+        "bank_accounts",
+        "section_break_xendit",
+        "xendit_api_key",
+        "xendit_callback_token",
+        "column_break_xendit01",
+        "xendit_api_url",
+        "section_break_whatsapp",
+        "whatsapp_phone_number",
+        "whatsapp_enabled",
+        "section_break_notifications",
+        "notify_superadmin_on_payment",
+        "superadmin_notification_email",
         "section_break_02",
         "amended_from"
     ],
@@ -72,9 +88,30 @@
             "depends_on": "eval:doc.enable_trial_period"
         },
         {
+            "fieldname": "section_break_payment_mode",
+            "fieldtype": "Section Break",
+            "label": "Payment Mode"
+        },
+        {
+            "default": "Manual Transfer",
+            "fieldname": "payment_mode",
+            "fieldtype": "Select",
+            "label": "Payment Mode",
+            "options": "Manual Transfer\nXendit\nHybrid",
+            "reqd": 1
+        },
+        {
+            "fieldname": "payment_mode_description",
+            "fieldtype": "HTML",
+            "label": "",
+            "read_only": 1,
+            "depends_on": "eval:doc.payment_mode"
+        },
+        {
             "fieldname": "section_break_bank",
             "fieldtype": "Section Break",
-            "label": "Bank Account"
+            "label": "Bank Account (Legacy)",
+            "collapsible": 1
         },
         {
             "fieldname": "bank_name",
@@ -103,6 +140,86 @@
             "options": "Currency"
         },
         {
+            "fieldname": "section_break_bank_accounts",
+            "fieldtype": "Section Break",
+            "label": "Bank Accounts",
+            "collapsible": 1,
+            "depends_on": "eval:doc.payment_mode == 'Manual Transfer' || doc.payment_mode == 'Hybrid'"
+        },
+        {
+            "fieldname": "bank_accounts",
+            "fieldtype": "Table",
+            "label": "Bank Accounts",
+            "options": "Qalcuity Bank Account"
+        },
+        {
+            "fieldname": "section_break_xendit",
+            "fieldtype": "Section Break",
+            "label": "Xendit Configuration",
+            "collapsible": 1,
+            "depends_on": "eval:doc.payment_mode == 'Xendit' || doc.payment_mode == 'Hybrid'"
+        },
+        {
+            "fieldname": "xendit_api_key",
+            "fieldtype": "Password",
+            "label": "Xendit API Key",
+            "depends_on": "eval:doc.payment_mode == 'Xendit' || doc.payment_mode == 'Hybrid'"
+        },
+        {
+            "fieldname": "xendit_callback_token",
+            "fieldtype": "Password",
+            "label": "Xendit Callback Token",
+            "depends_on": "eval:doc.payment_mode == 'Xendit' || doc.payment_mode == 'Hybrid'"
+        },
+        {
+            "fieldname": "column_break_xendit01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "https://api.xendit.co",
+            "fieldname": "xendit_api_url",
+            "fieldtype": "Data",
+            "label": "Xendit API URL",
+            "depends_on": "eval:doc.payment_mode == 'Xendit' || doc.payment_mode == 'Hybrid'"
+        },
+        {
+            "fieldname": "section_break_whatsapp",
+            "fieldtype": "Section Break",
+            "label": "WhatsApp Configuration",
+            "collapsible": 1
+        },
+        {
+            "default": "6281529211963",
+            "fieldname": "whatsapp_phone_number",
+            "fieldtype": "Data",
+            "label": "WhatsApp Phone Number"
+        },
+        {
+            "default": "0",
+            "fieldname": "whatsapp_enabled",
+            "fieldtype": "Check",
+            "label": "WhatsApp Enabled"
+        },
+        {
+            "fieldname": "section_break_notifications",
+            "fieldtype": "Section Break",
+            "label": "Superadmin Notifications",
+            "collapsible": 1
+        },
+        {
+            "default": "1",
+            "fieldname": "notify_superadmin_on_payment",
+            "fieldtype": "Check",
+            "label": "Notify Superadmin on Payment"
+        },
+        {
+            "default": "info@qalcuity.com",
+            "fieldname": "superadmin_notification_email",
+            "fieldtype": "Data",
+            "label": "Superadmin Notification Email",
+            "options": "Email"
+        },
+        {
             "fieldname": "section_break_02",
             "fieldtype": "Section Break"
         },
@@ -119,7 +236,7 @@
     "index_web_pages_for_search": 0,
     "issingle": 1,
     "links": [],
-    "modified": "2026-08-22 15:57:00.000000",
+    "modified": "2026-08-24 17:48:00.000000",
     "modified_by": "Administrator",
     "module": "Qalcuity",
     "name": "Qalcuity Settings",

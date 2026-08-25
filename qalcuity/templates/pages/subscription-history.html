@@ -1,0 +1,272 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-sub-history-container">
+	<!-- Header -->
+	<div class="qalcuity-sub-history-header">
+		<div class="qalcuity-sub-history-header-left">
+			<h1 class="qalcuity-sub-history-title">Riwayat Subscription</h1>
+			<p class="qalcuity-sub-history-subtitle">Lihat riwayat perubahan status langganan Anda.</p>
+		</div>
+		<div class="qalcuity-sub-history-header-right">
+			<a href="/account-status" class="qalcuity-btn qalcuity-btn-outline">
+				<span class="octicon octicon-arrow-left"></span> Kembali
+			</a>
+		</div>
+	</div>
+
+	<!-- Filter Bar -->
+	<div class="qalcuity-sub-history-filters" id="filters-bar" style="display: none;">
+		<div class="qalcuity-sub-history-filter-group">
+			<label class="qalcuity-sub-history-filter-label">Aksi:</label>
+			<select id="filter-action" class="qalcuity-form-input" onchange="loadHistory()">
+				<option value="">Semua</option>
+				<option value="Created">Dibuat</option>
+				<option value="Activated">Diaktifkan</option>
+				<option value="Suspended">Ditangguhkan</option>
+				<option value="Reactivated">Diaktifkan Kembali</option>
+				<option value="Cancelled">Dibatalkan</option>
+				<option value="Expired">Kedaluwarsa</option>
+				<option value="Extended">Diperpanjang</option>
+				<option value="Plan Changed">Ganti Paket</option>
+			</select>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="history-loading" class="qalcuity-sub-history-loading">
+		<div class="qalcuity-pricing-spinner"></div>
+		<p>Memuat riwayat subscription...</p>
+	</div>
+
+	<!-- Timeline -->
+	<div id="history-timeline" class="qalcuity-sub-history-timeline" style="display: none;"></div>
+
+	<!-- Empty State -->
+	<div id="history-empty" class="qalcuity-sub-history-empty" style="display: none;">
+		<div class="qalcuity-sub-history-empty-icon">
+			<span class="octicon octicon-clock" style="font-size: 48px; color: var(--qalcuity-text-muted);"></span>
+		</div>
+		<h3>Belum ada riwayat</h3>
+		<p>Riwayat perubahan subscription Anda akan muncul di sini.</p>
+		<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary">
+			<span class="octicon octicon-tag"></span> Lihat Paket
+		</a>
+	</div>
+
+	<!-- Error State -->
+	<div id="history-error" class="qalcuity-sub-history-error" style="display: none;">
+		<div class="qalcuity-alert qalcuity-alert-danger">
+			<span class="octicon octicon-alert"></span>
+			Gagal memuat riwayat subscription. Silakan coba lagi.
+		</div>
+		<button class="qalcuity-btn qalcuity-btn-primary" onclick="loadHistory()">Coba Lagi</button>
+	</div>
+
+	<!-- Pagination -->
+	<div id="history-pagination" class="qalcuity-sub-history-pagination" style="display: none;">
+		<button id="btn-prev" class="qalcuity-btn qalcuity-btn-outline" onclick="changePage(-1)" disabled>
+			<span class="octicon octicon-chevron-left"></span> Sebelumnya
+		</button>
+		<span id="page-info" class="qalcuity-sub-history-page-info"></span>
+		<button id="btn-next" class="qalcuity-btn qalcuity-btn-outline" onclick="changePage(1)">
+			Selanjutnya <span class="octicon octicon-chevron-right"></span>
+		</button>
+	</div>
+</div>
+
+<script>
+	var PAGE_SIZE = 20;
+	var currentPage = 0;
+	var totalCount = 0;
+
+	frappe.ready(function () {
+		loadHistory();
+	});
+
+	function loadHistory() {
+		var loading = document.getElementById('history-loading');
+		var timeline = document.getElementById('history-timeline');
+		var error = document.getElementById('history-error');
+		var empty = document.getElementById('history-empty');
+		var filters = document.getElementById('filters-bar');
+		var pagination = document.getElementById('history-pagination');
+
+		loading.style.display = 'flex';
+		timeline.style.display = 'none';
+		error.style.display = 'none';
+		empty.style.display = 'none';
+		pagination.style.display = 'none';
+
+		frappe.call({
+			method: 'qalcuity.api.subscription_history.get_my_subscription_history',
+			args: {
+				limit_page_length: PAGE_SIZE,
+				start: currentPage * PAGE_SIZE
+			},
+			callback: function (r) {
+				loading.style.display = 'none';
+
+				if (r.message) {
+					var data = r.message.data || [];
+					totalCount = r.message.total || 0;
+
+					if (data.length === 0 && currentPage === 0) {
+						empty.style.display = 'block';
+						return;
+					}
+
+					filters.style.display = 'flex';
+					renderTimeline(data);
+					timeline.style.display = 'block';
+					updatePagination();
+				} else {
+					error.style.display = 'block';
+				}
+			},
+			error: function (err) {
+				loading.style.display = 'none';
+				error.style.display = 'block';
+			}
+		});
+	}
+
+	function renderTimeline(data) {
+		var timeline = document.getElementById('history-timeline');
+		var html = '';
+
+		data.forEach(function (entry) {
+			var actionClass = getActionClass(entry.action);
+			var actionIcon = getActionIcon(entry.action);
+			var actionLabel = getActionLabel(entry.action);
+			var date = formatDate(entry.timestamp);
+			var performedBy = entry.performed_by || 'System';
+
+			html += '<div class="qalcuity-sub-history-entry ' + actionClass + '">';
+			html += '  <div class="qalcuity-sub-history-entry-dot">';
+			html += '    <span class="octicon ' + actionIcon + '"></span>';
+			html += '  </div>';
+			html += '  <div class="qalcuity-sub-history-entry-content">';
+			html += '    <div class="qalcuity-sub-history-entry-header">';
+			html += '      <span class="qalcuity-sub-history-entry-action">' + actionLabel + '</span>';
+			html += '      <span class="qalcuity-sub-history-entry-date">' + date + '</span>';
+			html += '    </div>';
+			html += '    <div class="qalcuity-sub-history-entry-details">';
+			if (entry.subscription) {
+				html += '<span class="qalcuity-sub-history-entry-sub">Subscription: <strong>' + entry.subscription + '</strong></span>';
+			}
+			if (entry.old_status || entry.new_status) {
+				html += '<span class="qalcuity-sub-history-entry-status">';
+				if (entry.old_status) {
+					html += '<span class="qalcuity-status qalcuity-status-' + entry.old_status.toLowerCase().replace(/ /g, '-') + '">' + entry.old_status + '</span>';
+					html += ' → ';
+				}
+				if (entry.new_status) {
+					html += '<span class="qalcuity-status qalcuity-status-' + entry.new_status.toLowerCase().replace(/ /g, '-') + '">' + entry.new_status + '</span>';
+				}
+				html += '</span>';
+			}
+			if (entry.old_plan || entry.new_plan) {
+				html += '<span class="qalcuity-sub-history-entry-plan">';
+				if (entry.old_plan && entry.new_plan) {
+					html += 'Plan: ' + entry.old_plan + ' → ' + entry.new_plan;
+				} else if (entry.new_plan) {
+					html += 'Plan: ' + entry.new_plan;
+				}
+				html += '</span>';
+			}
+			html += '    </div>';
+			if (entry.notes) {
+				html += '    <div class="qalcuity-sub-history-entry-notes">' + escapeHtml(entry.notes) + '</div>';
+			}
+			html += '    <div class="qalcuity-sub-history-entry-performer">';
+			html += '      <span class="octicon octicon-person"></span> ' + escapeHtml(performedBy);
+			html += '    </div>';
+			html += '  </div>';
+			html += '</div>';
+		});
+
+		timeline.innerHTML = html;
+	}
+
+	function getActionClass(action) {
+		var map = {
+			'Created': 'action-created',
+			'Activated': 'action-activated',
+			'Suspended': 'action-suspended',
+			'Reactivated': 'action-reactivated',
+			'Cancelled': 'action-cancelled',
+			'Expired': 'action-expired',
+			'Extended': 'action-extended',
+			'Plan Changed': 'action-plan-changed'
+		};
+		return map[action] || 'action-default';
+	}
+
+	function getActionIcon(action) {
+		var map = {
+			'Created': 'octicon-plus',
+			'Activated': 'octicon-check',
+			'Suspended': 'octicon-alert',
+			'Reactivated': 'octicon-sync',
+			'Cancelled': 'octicon-x',
+			'Expired': 'octicon-clock',
+			'Extended': 'octicon-arrow-right',
+			'Plan Changed': 'octicon-arrow-switch'
+		};
+		return map[action] || 'octicon-circle-slash';
+	}
+
+	function getActionLabel(action) {
+		var map = {
+			'Created': 'Dibuat',
+			'Activated': 'Diaktifkan',
+			'Suspended': 'Ditangguhkan',
+			'Reactivated': 'Diaktifkan Kembali',
+			'Cancelled': 'Dibatalkan',
+			'Expired': 'Kedaluwarsa',
+			'Extended': 'Diperpanjang',
+			'Plan Changed': 'Ganti Paket'
+		};
+		return map[action] || action;
+	}
+
+	function formatDate(timestamp) {
+		if (!timestamp) return '-';
+		var d = new Date(timestamp);
+		var options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+		return d.toLocaleDateString('id-ID', options);
+	}
+
+	function escapeHtml(str) {
+		if (!str) return '';
+		var div = document.createElement('div');
+		div.appendChild(document.createTextNode(str));
+		return div.innerHTML;
+	}
+
+	function changePage(delta) {
+		currentPage += delta;
+		if (currentPage < 0) currentPage = 0;
+		loadHistory();
+	}
+
+	function updatePagination() {
+		var pagination = document.getElementById('history-pagination');
+		var btnPrev = document.getElementById('btn-prev');
+		var btnNext = document.getElementById('btn-next');
+		var pageInfo = document.getElementById('page-info');
+
+		if (totalCount <= PAGE_SIZE) {
+			pagination.style.display = 'none';
+			return;
+		}
+
+		pagination.style.display = 'flex';
+		var totalPages = Math.ceil(totalCount / PAGE_SIZE);
+		btnPrev.disabled = currentPage === 0;
+		btnNext.disabled = currentPage >= totalPages - 1;
+		pageInfo.textContent = 'Halaman ' + (currentPage + 1) + ' dari ' + totalPages;
+	}
+</script>
+{% endblock %}

@@ -1,0 +1,311 @@
+{
+    "app": "qalcuity",
+    "charts": [],
+    "content": "[{\"id\":\"erpHdr01\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Qalcuity ERP</b></span>\",\"col\":12}},{\"id\":\"erpHdr02\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"text-muted\\\">Your Business Operations Workspace</span>\",\"col\":12}},{\"id\":\"erpSpc01\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"erpHdr03\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Sales & CRM</b></span>\",\"col\":12}},{\"id\":\"erpSht01\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quotation\",\"col\":3}},{\"id\":\"erpSht02\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":3}},{\"id\":\"erpSht03\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"erpSht04\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Lead\",\"col\":3}},{\"id\":\"erpSpc02\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"erpHdr04\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Purchasing & Stock</b></span>\",\"col\":12}},{\"id\":\"erpSht05\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order\",\"col\":3}},{\"id\":\"erpSht06\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Invoice\",\"col\":3}},{\"id\":\"erpSht07\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Entry\",\"col\":3}},{\"id\":\"erpSht08\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Warehouse\",\"col\":3}},{\"id\":\"erpSpc03\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"erpHdr05\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Accounting</b></span>\",\"col\":12}},{\"id\":\"erpSht09\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"id\":\"erpSht10\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"id\":\"erpSht11\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chart of Accounts\",\"col\":3}},{\"id\":\"erpSpc04\",\"type\":\"spacer\",\"data\":{\"col\":12}}]",
+    "creation": "2026-08-25 14:00:00.000000",
+    "custom_blocks": [],
+    "docstatus": 0,
+    "doctype": "Workspace",
+    "for_user": "",
+    "hide_custom": 0,
+    "icon": "octicon octicon-package",
+    "idx": 0,
+    "is_hidden": 0,
+    "label": "Qalcuity ERP Customer",
+    "links": [
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Selling",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Quotation",
+            "link_count": 0,
+            "link_to": "Quotation",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Sales Order",
+            "link_count": 0,
+            "link_to": "Sales Order",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Sales Invoice",
+            "link_count": 0,
+            "link_to": "Sales Invoice",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Customer",
+            "link_count": 0,
+            "link_to": "Customer",
+            "link_type": "DocType",
+            "onboard": 0,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Buying",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Purchase Order",
+            "link_count": 0,
+            "link_to": "Purchase Order",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Purchase Invoice",
+            "link_count": 0,
+            "link_to": "Purchase Invoice",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Supplier",
+            "link_count": 0,
+            "link_to": "Supplier",
+            "link_type": "DocType",
+            "onboard": 0,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Stock",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Stock Entry",
+            "link_count": 0,
+            "link_to": "Stock Entry",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Warehouse",
+            "link_count": 0,
+            "link_to": "Warehouse",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Item",
+            "link_count": 0,
+            "link_to": "Item",
+            "link_type": "DocType",
+            "onboard": 0,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Accounts",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Journal Entry",
+            "link_count": 0,
+            "link_to": "Journal Entry",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Payment Entry",
+            "link_count": 0,
+            "link_to": "Payment Entry",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Chart of Accounts",
+            "link_count": 0,
+            "link_to": "Chart of Accounts",
+            "link_type": "Page",
+            "onboard": 0,
+            "type": "Link"
+        },
+        {
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "CRM",
+            "link_count": 0,
+            "onboard": 0,
+            "type": "Card Break"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Lead",
+            "link_count": 0,
+            "link_to": "Lead",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        },
+        {
+            "dependencies": "",
+            "hidden": 0,
+            "is_query_report": 0,
+            "label": "Opportunity",
+            "link_count": 0,
+            "link_to": "Opportunity",
+            "link_type": "DocType",
+            "onboard": 1,
+            "type": "Link"
+        }
+    ],
+    "modified": "2026-08-25 14:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity ERP Customer",
+    "number_cards": [],
+    "owner": "Administrator",
+    "parent_page": "",
+    "public": 1,
+    "quick_lists": [],
+    "restrict_to_domain": "",
+    "roles": [
+        {
+            "role": "Qalcuity ERP User"
+        }
+    ],
+    "sequence_id": 2.0,
+    "shortcuts": [
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Quotation",
+            "link_to": "Quotation",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Sales Order",
+            "link_to": "Sales Order",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Sales Invoice",
+            "link_to": "Sales Invoice",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Purchase Order",
+            "link_to": "Purchase Order",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Purchase Invoice",
+            "link_to": "Purchase Invoice",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Stock Entry",
+            "link_to": "Stock Entry",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Warehouse",
+            "link_to": "Warehouse",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Journal Entry",
+            "link_to": "Journal Entry",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Payment Entry",
+            "link_to": "Payment Entry",
+            "type": "DocType"
+        },
+        {
+            "color": "#2490EF",
+            "doc_view": "List",
+            "label": "Lead",
+            "link_to": "Lead",
+            "type": "DocType"
+        }
+    ],
+    "type": "Workspace"
+}

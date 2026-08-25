@@ -1,0 +1,413 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-register-container">
+  <div class="qalcuity-register-card">
+    <!-- Logo & Header -->
+    <div class="qalcuity-register-header">
+      <img src="/assets/qalcuity/images/logo-dark.png"
+           class="qalcuity-register-logo-light"
+           alt="Qalcuity ERP"
+           style="height: 40px;">
+      <img src="/assets/qalcuity/images/logo-light.png"
+           class="qalcuity-register-logo-dark"
+           alt="Qalcuity ERP"
+           style="height: 40px; display: none;">
+      <h1 class="qalcuity-register-title">Buat Akun Baru</h1>
+      <p class="qalcuity-register-subtitle">Daftar untuk memulai menggunakan Qalcuity ERP</p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div id="register-alert" class="qalcuity-register-alert" style="display: none;"></div>
+
+    <!-- Registration Form -->
+    <form id="register-form" class="qalcuity-register-form" novalidate>
+      <!-- Full Name -->
+      <div class="qalcuity-form-group">
+        <label for="full_name" class="qalcuity-form-label">
+          <span class="octicon octicon-person"></span>
+          Nama Lengkap
+        </label>
+        <input type="text"
+               id="full_name"
+               name="full_name"
+               class="qalcuity-form-input"
+               placeholder="Masukkan nama lengkap"
+               required
+               autocomplete="name">
+        <div class="qalcuity-form-error" id="error-full_name"></div>
+      </div>
+
+      <!-- Email -->
+      <div class="qalcuity-form-group">
+        <label for="email" class="qalcuity-form-label">
+          <span class="octicon octicon-mail"></span>
+          Email
+        </label>
+        <input type="email"
+               id="email"
+               name="email"
+               class="qalcuity-form-input"
+               placeholder="contoh@perusahaan.com"
+               required
+               autocomplete="email">
+        <div class="qalcuity-form-error" id="error-email"></div>
+      </div>
+
+      <!-- Company Name -->
+      <div class="qalcuity-form-group">
+        <label for="company_name" class="qalcuity-form-label">
+          <span class="octicon octicon-organization"></span>
+          Nama Perusahaan
+        </label>
+        <input type="text"
+               id="company_name"
+               name="company_name"
+               class="qalcuity-form-input"
+               placeholder="Masukkan nama perusahaan"
+               required
+               autocomplete="organization">
+        <div class="qalcuity-form-error" id="error-company_name"></div>
+      </div>
+
+      <!-- Phone -->
+      <div class="qalcuity-form-group">
+        <label for="phone" class="qalcuity-form-label">
+          <span class="octicon octicon-device-mobile"></span>
+          Nomor Telepon
+        </label>
+        <input type="tel"
+               id="phone"
+               name="phone"
+               class="qalcuity-form-input"
+               placeholder="+62xxxxxxxxxx atau 08xxxxxxxxxx"
+               required
+               autocomplete="tel">
+        <div class="qalcuity-form-error" id="error-phone"></div>
+      </div>
+
+      <!-- Password -->
+      <div class="qalcuity-form-group">
+        <label for="password" class="qalcuity-form-label">
+          <span class="octicon octicon-lock"></span>
+          Password
+        </label>
+        <div class="qalcuity-password-wrapper">
+          <input type="password"
+                 id="password"
+                 name="password"
+                 class="qalcuity-form-input"
+                 placeholder="Minimal 8 karakter, huruf + angka"
+                 required
+                 autocomplete="new-password">
+          <button type="button"
+                  class="qalcuity-password-toggle"
+                  onclick="qalcuity.register.togglePassword('password', this)"
+                  tabindex="-1">
+            <span class="octicon octicon-eye"></span>
+          </button>
+        </div>
+        <div class="qalcuity-form-error" id="error-password"></div>
+        <div class="qalcuity-password-strength" id="password-strength" style="display: none;">
+          <div class="qalcuity-password-strength-bar"></div>
+          <span class="qalcuity-password-strength-text"></span>
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="qalcuity-form-group">
+        <label for="confirm_password" class="qalcuity-form-label">
+          <span class="octicon octicon-lock"></span>
+          Konfirmasi Password
+        </label>
+        <div class="qalcuity-password-wrapper">
+          <input type="password"
+                 id="confirm_password"
+                 name="confirm_password"
+                 class="qalcuity-form-input"
+                 placeholder="Ulangi password"
+                 required
+                 autocomplete="new-password">
+          <button type="button"
+                  class="qalcuity-password-toggle"
+                  onclick="qalcuity.register.togglePassword('confirm_password', this)"
+                  tabindex="-1">
+            <span class="octicon octicon-eye"></span>
+          </button>
+        </div>
+        <div class="qalcuity-form-error" id="error-confirm_password"></div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit"
+              id="register-submit"
+              class="qalcuity-register-submit">
+        <span class="qalcuity-register-submit-text">Daftar Sekarang</span>
+        <span class="qalcuity-register-submit-loading" style="display: none;">
+          <span class="octicon octicon-sync spin"></span> Memproses...
+        </span>
+      </button>
+
+      <!-- Login Link -->
+      <div class="qalcuity-register-footer">
+        <p>Sudah punya akun? <a href="/login" class="qalcuity-register-link">Masuk di sini</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/**
+ * Qalcuity Registration Form — Client-side Logic
+ */
+frappe.provide('qalcuity.register');
+
+qalcuity.register = {
+  /**
+   * Toggle password visibility
+   */
+  togglePassword: function(fieldId, btn) {
+    var input = document.getElementById(fieldId);
+    var icon = btn.querySelector('.octicon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.className = 'octicon octicon-eye-off';
+    } else {
+      input.type = 'password';
+      icon.className = 'octicon octicon-eye';
+    }
+  },
+
+  /**
+   * Validate a single field
+   */
+  validateField: function(name, value) {
+    var error = '';
+    switch (name) {
+      case 'full_name':
+        if (!value.trim()) error = 'Nama lengkap wajib diisi.';
+        else if (value.trim().length < 2) error = 'Nama lengkap minimal 2 karakter.';
+        break;
+      case 'email':
+        if (!value.trim()) error = 'Email wajib diisi.';
+        else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(value.trim()))
+          error = 'Format email tidak valid.';
+        break;
+      case 'company_name':
+        if (!value.trim()) error = 'Nama perusahaan wajib diisi.';
+        break;
+      case 'phone':
+        var cleanPhone = value.replace(/[\s\-\(\)]/g, '');
+        if (!value.trim()) error = 'Nomor telepon wajib diisi.';
+        else if (!/^[\+]?[0-9]{8,15}$/.test(cleanPhone))
+          error = 'Format nomor telepon tidak valid.';
+        break;
+      case 'password':
+        if (!value) error = 'Password wajib diisi.';
+        else if (value.length < 8) error = 'Password minimal 8 karakter.';
+        else if (!/[a-zA-Z]/.test(value)) error = 'Password harus mengandung minimal satu huruf.';
+        else if (!/[0-9]/.test(value)) error = 'Password harus mengandung minimal satu angka.';
+        break;
+      case 'confirm_password':
+        var password = document.getElementById('password').value;
+        if (!value) error = 'Konfirmasi password wajib diisi.';
+        else if (value !== password) error = 'Password tidak cocok.';
+        break;
+    }
+    return error;
+  },
+
+  /**
+   * Show field error
+   */
+  showError: function(name, message) {
+    var errorEl = document.getElementById('error-' + name);
+    var inputEl = document.getElementById(name);
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.style.display = message ? 'block' : 'none';
+    }
+    if (inputEl) {
+      if (message) inputEl.classList.add('qalcuity-form-input-error');
+      else inputEl.classList.remove('qalcuity-form-input-error');
+    }
+  },
+
+  /**
+   * Show global alert
+   */
+  showAlert: function(message, type) {
+    var alertEl = document.getElementById('register-alert');
+    alertEl.textContent = message;
+    alertEl.className = 'qalcuity-register-alert qalcuity-register-alert-' + (type || 'error');
+    alertEl.style.display = 'block';
+    alertEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  },
+
+  /**
+   * Hide global alert
+   */
+  hideAlert: function() {
+    document.getElementById('register-alert').style.display = 'none';
+  },
+
+  /**
+   * Update password strength indicator
+   */
+  updatePasswordStrength: function(password) {
+    var strengthEl = document.getElementById('password-strength');
+    if (!password) {
+      strengthEl.style.display = 'none';
+      return;
+    }
+
+    var score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+    var levels = ['Lemah', 'Sedang', 'Kuat', 'Sangat Kuat'];
+    var colors = ['#dc3545', '#ffc107', '#28a745', '#1a7fd4'];
+    var idx = Math.min(score - 1, levels.length - 1);
+    if (idx < 0) idx = 0;
+
+    strengthEl.style.display = 'flex';
+    strengthEl.querySelector('.qalcuity-password-strength-bar').style.width = ((idx + 1) / levels.length * 100) + '%';
+    strengthEl.querySelector('.qalcuity-password-strength-bar').style.background = colors[idx];
+    strengthEl.querySelector('.qalcuity-password-strength-text').textContent = levels[idx];
+    strengthEl.querySelector('.qalcuity-password-strength-text').style.color = colors[idx];
+  },
+
+  /**
+   * Set loading state
+   */
+  setLoading: function(loading) {
+    var btn = document.getElementById('register-submit');
+    var textEl = btn.querySelector('.qalcuity-register-submit-text');
+    var loadingEl = btn.querySelector('.qalcuity-register-submit-loading');
+    if (loading) {
+      btn.disabled = true;
+      textEl.style.display = 'none';
+      loadingEl.style.display = 'inline-flex';
+    } else {
+      btn.disabled = false;
+      textEl.style.display = 'inline';
+      loadingEl.style.display = 'none';
+    }
+  }
+};
+
+/* ── Form Event Listeners ─────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+  var form = document.getElementById('register-form');
+  if (!form) return;
+
+  // Logo dark mode toggle
+  (function() {
+    var theme = document.documentElement.getAttribute('data-theme')
+      || localStorage.getItem('frappe_theme')
+      || 'light';
+    if (theme === 'dark') {
+      var lightLogo = document.querySelector('.qalcuity-register-logo-light');
+      var darkLogo = document.querySelector('.qalcuity-register-logo-dark');
+      if (lightLogo) lightLogo.style.display = 'none';
+      if (darkLogo) darkLogo.style.display = 'block';
+    }
+  })();
+
+  // Inline validation on blur
+  var fields = ['full_name', 'email', 'company_name', 'phone', 'password', 'confirm_password'];
+  fields.forEach(function(fieldName) {
+    var input = document.getElementById(fieldName);
+    if (input) {
+      input.addEventListener('blur', function() {
+        var error = qalcuity.register.validateField(fieldName, this.value);
+        qalcuity.register.showError(fieldName, error);
+      });
+      input.addEventListener('input', function() {
+        // Clear error on input
+        var errorEl = document.getElementById('error-' + fieldName);
+        if (errorEl && errorEl.style.display === 'block') {
+          var error = qalcuity.register.validateField(fieldName, this.value);
+          qalcuity.register.showError(fieldName, error);
+        }
+      });
+    }
+  });
+
+  // Password strength
+  var passwordInput = document.getElementById('password');
+  if (passwordInput) {
+    passwordInput.addEventListener('input', function() {
+      qalcuity.register.updatePasswordStrength(this.value);
+    });
+  }
+
+  // Form submit
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    qalcuity.register.hideAlert();
+
+    // Validate all fields
+    var hasError = false;
+    fields.forEach(function(fieldName) {
+      var input = document.getElementById(fieldName);
+      var error = qalcuity.register.validateField(fieldName, input ? input.value : '');
+      qalcuity.register.showError(fieldName, error);
+      if (error) hasError = true;
+    });
+
+    if (hasError) return;
+
+    // Collect data
+    var data = {
+      full_name: document.getElementById('full_name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      password: document.getElementById('password').value,
+      company_name: document.getElementById('company_name').value.trim(),
+      phone: document.getElementById('phone').value.trim()
+    };
+
+    // Submit via API
+    qalcuity.register.setLoading(true);
+
+    frappe.call({
+      method: 'qalcuity.api.registration.register_customer',
+      args: data,
+      callback: function(r) {
+        qalcuity.register.setLoading(false);
+        if (r.message && r.message.success) {
+          qalcuity.register.showAlert(r.message.message, 'success');
+          form.reset();
+          document.getElementById('password-strength').style.display = 'none';
+          // Redirect to login after 3 seconds
+          setTimeout(function() {
+            window.location.href = '/login?registered=1';
+          }, 3000);
+        }
+      },
+      error: function(err) {
+        qalcuity.register.setLoading(false);
+        var msg = (err && err._server_messages)
+          ? JSON.parse(err._server_messages)[0].replace(/<[^>]*>/g, '')
+          : 'Terjadi kesalahan. Silakan coba lagi.';
+        qalcuity.register.showAlert(msg, 'error');
+      }
+    });
+  });
+});
+</script>
+
+<style>
+  /* Spin animation for loading icon */
+  @keyframes qalcuity-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .qalcuity-register-submit-loading .spin {
+    animation: qalcuity-spin 1s linear infinite;
+  }
+</style>
+{% endblock %}
