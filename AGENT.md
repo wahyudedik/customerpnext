@@ -599,13 +599,13 @@ Git commit + push ke GitHub
    ↓
 VPS Production (Docker + AAPanel)
    ↓
-cd apps/qalcuity && git pull origin main
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main"
    ↓
-cd ../..
+docker compose exec backend bench --site qalcuity.com migrate
    ↓
-bench migrate
+docker compose exec backend bench --site qalcuity.com clear-cache
    ↓
-bench build
+docker compose exec backend bench build --force
    ↓
 docker compose up -d --force-recreate frontend
    ↓
@@ -744,11 +744,14 @@ bench restart
 
 ### Update dari GitHub (di VPS — Regular Update)
 
+> **⚠️ CRITICAL:** In this Docker setup, the host's `apps/qalcuity/` directory is NOT shared with the container. Always run `git pull` INSIDE the container via `docker compose exec backend`.
+
 ```bash
-cd apps/qalcuity && git pull origin main
-cd ../..
-bench migrate
-bench build
+# All commands run INSIDE the container — host's apps/ directory is separate
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main"
+docker compose exec backend bench --site qalcuity.com migrate
+docker compose exec backend bench --site qalcuity.com clear-cache
+docker compose exec backend bench build --force
 docker compose up -d --force-recreate frontend
 ```
 
@@ -765,9 +768,9 @@ git commit -m "Sprint X: description"
 # 2. Push ke GitHub
 git push origin main
 
-# 3. Berikan instruksi ke user untuk update di VPS
+# 3. Berikan instruksi ke user untuk update di VPS (semua command dijalankan di container)
 # "Silakan jalankan di VPS:"
-# cd apps/qalcuity && git pull origin main && cd ../.. && bench migrate && bench build && docker compose up -d --force-recreate frontend
+# docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose up -d --force-recreate frontend
 ```
 
 ---
