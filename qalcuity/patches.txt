@@ -1,3 +1,5 @@
+[pre_model_sync]
+
 [post_model_sync]
 execute:qalcuity.qalcuity.patches.add_tenant_to_subscription
 execute:qalcuity.qalcuity.patches.seed_bank_accounts
