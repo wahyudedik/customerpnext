@@ -292,22 +292,27 @@ docker compose exec backend bench --site qalcuity.com set-config scheme https
 docker compose exec backend bench --site qalcuity.com set-config host_name https://qalcuity.com
 ```
 
-### 3.6 Build Assets & Force Recreate Frontend
+### 3.6 Build Assets & Sync ke Frontend
 
 Setelah site dan app terinstall, build aset CSS/JS:
 
 ```bash
 cd /opt/qalcuity/frappe_docker
-docker compose exec backend bench build
+docker compose exec backend bench build --force
 ```
 
-Tunggu hingga selesai (40-60 detik). Lalu **force-recreate** frontend agar volume mounts ter-update:
+Tunggu hingga selesai (40-60 detik). Lalu **copy aset dari backend ke frontend**:
 
 ```bash
-docker compose up -d --force-recreate frontend
+# Copy assets dari backend ke frontend
+docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
+docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
+docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
+docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend nginx -s reload
 ```
 
-> **⚠️ Jangan skip force-recreate!** Jika tidak dilakukan, frontend container tidak akan melihat file aset baru karena volume mounts hanya di-mount saat container pertama kali dibuat.
+> **⚠️ Jangan skip asset sync!** Docker named volume TIDAK auto-sync antara backend dan frontend. Setelah `bench build`, frontend masih membaca aset LAMA. Harus copy manual.
 
 ---
 
@@ -510,14 +515,18 @@ docker compose exec backend bench --site qalcuity.com migrate
 docker compose exec backend bench --site qalcuity.com clear-cache
 docker compose exec backend bench build --force
 
-# Step 3: Force-recreate frontend to pick up new assets
-docker compose up -d --force-recreate frontend
+# Step 3: Copy assets from backend to frontend + reload nginx
+docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
+docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
+docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
+docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend nginx -s reload
 ```
 
 **Complete one-liner (copy-paste):**
 
 ```bash
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose up -d --force-recreate frontend
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
 ```
 
 > **Note:** The git remote name inside the container is `upstream` (not `origin`). Verify with `docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git remote -v"`.
@@ -632,16 +641,20 @@ docker compose exec backend bench --site qalcuity.com clear-cache
 # Step 4: Rebuild assets (if UI/CSS/JS changed)
 docker compose exec backend bench build --force
 
-# Step 5: Force-recreate frontend (WAJIB agar aset baru terlihat)
-docker compose up -d --force-recreate frontend
+# Step 5: Copy assets dari backend ke frontend + reload nginx
+docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
+docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
+docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
+docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend nginx -s reload
 ```
 
-> **⚠️ Jangan lupa force-recreate frontend!** Docker hanya meng-mount volumes saat container PERTAMA KALI dibuat. `docker compose restart` TIDAK mengubah volume mounts.
+> **⚠️ Jangan lupa sync assets!** Docker named volume TIDAK auto-sync antara backend dan frontend. `docker compose restart` TIDAK akan membuat frontend melihat aset baru.
 
 ### Shortcut Command (Copy-Paste)
 
 ```bash
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose up -d --force-recreate frontend
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
 ```
 
 > **Note:** Run this from `/opt/qalcuity/frappe_docker/` on the VPS host. The entire command executes inside the `backend` container.
@@ -731,19 +744,22 @@ Masalah umum: halaman login muncul tapi tanpa CSS/JS (terlihat seperti halaman p
 cd /opt/qalcuity/frappe_docker
 
 # 1. Build aset
-docker compose exec backend bench build
+docker compose exec backend bench build --force
 
-# 2. Force-recreate frontend (WAJIB!)
-docker compose up -d --force-recreate frontend
+# 2. Copy assets dari backend ke frontend
+docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
+docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
+docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
+docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend nginx -s reload
 
 # 3. Hard refresh di browser: Ctrl+Shift+R
 ```
 
-> **⚠️ Mengapa harus force-recreate?**
-> Docker hanya meng-mount volumes saat container PERTAMA KALI dibuat.
-> `docker compose restart` TIDAK mengubah volume mounts.
-> Jadi setelah menambahkan `apps` volume ke docker-compose.yml,
-> frontend container harus di-recreate agar volume ter-mount dengan benar.
+> **⚠️ Mengapa harus copy assets manual?**
+> Docker named volume TIDAK auto-sync antara backend dan frontend container.
+> Setelah `bench build`, aset baru hanya ada di backend. Frontend masih membaca aset LAMA.
+> Harus copy manual menggunakan tar + docker cp.
 
 **Cara verifikasi:**
 ```bash
@@ -754,7 +770,7 @@ docker compose exec frontend ls /home/frappe/frappe-bench/sites/assets/frappe/di
 docker compose exec backend ls /home/frappe/frappe-bench/sites/assets/frappe/dist/css/
 ```
 
-Jika hash file berbeda antara frontend dan backend, berarti volume belum ter-mount — jalankan force-recreate lagi.
+Jika hash file berbeda antara frontend dan backend, berarti assets belum di-sync — jalankan command copy di atas lagi.
 
 ### Socket.IO / WebSocket Error
 
@@ -823,8 +839,8 @@ Pastikan Nginx config memiliki block `/socket.io` (lihat Tahap 5.3).
 - **Git remote inside container:** `upstream` (verify with `git remote -v` inside container)
 - **Host ↔ Container files:** SEPARATE — volume mounts do NOT share the host's app directory
 - **Frontend nginx port:** `8080` (bukan 80!) — frappe_docker image mendengarkan di port 8080
-- **Force-recreate = wajib** setelah mengubah volume/port di docker-compose.yml atau setelah build
-- **`docker compose restart` ≠ `docker compose up -d --force-recreate`** — restart tidak mengubah volume mounts!
+- **⚠️ CSS Asset Sync = wajib** setelah `bench build` — Docker named volume TIDAK auto-sync antara backend dan frontend. Harus copy manual: `tar + docker cp` (lihat Section 3.6)
+- **`docker compose restart` TIDAK sync assets** — hanya restart process, tidak mengubah file di volume
 - **site_config.json:** Pastikan `scheme=https` dan `host_name=https://qalcuity.com` agar HTTPS terdeteksi
 - **All `bench` commands:** Must run inside the `backend` container via `docker compose exec backend`
 - **All `git pull` commands:** Must run inside the `backend` container — never on the host
