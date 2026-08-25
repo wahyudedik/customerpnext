@@ -599,13 +599,13 @@ Git commit + push ke GitHub
    ↓
 VPS Production (Docker + AAPanel)
    ↓
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main"
+cd apps/qalcuity && git pull origin main
    ↓
-docker compose exec backend bench --site qalcuity.com migrate
+cd ../..
    ↓
-docker compose exec backend bench --site qalcuity.com clear-cache
+bench migrate
    ↓
-docker compose exec backend bench build --force
+bench build
    ↓
 docker compose up -d --force-recreate frontend
    ↓
@@ -744,14 +744,11 @@ bench restart
 
 ### Update dari GitHub (di VPS — Regular Update)
 
-> **⚠️ CRITICAL:** In this Docker setup, the host's `apps/qalcuity/` directory is NOT shared with the container. Always run `git pull` INSIDE the container via `docker compose exec backend`.
-
 ```bash
-# All commands run INSIDE the container — host's apps/ directory is separate
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main"
-docker compose exec backend bench --site qalcuity.com migrate
-docker compose exec backend bench --site qalcuity.com clear-cache
-docker compose exec backend bench build --force
+cd apps/qalcuity && git pull origin main
+cd ../..
+bench migrate
+bench build
 docker compose up -d --force-recreate frontend
 ```
 
@@ -768,9 +765,9 @@ git commit -m "Sprint X: description"
 # 2. Push ke GitHub
 git push origin main
 
-# 3. Berikan instruksi ke user untuk update di VPS (semua command dijalankan di container)
+# 3. Berikan instruksi ke user untuk update di VPS
 # "Silakan jalankan di VPS:"
-# docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose up -d --force-recreate frontend
+# cd apps/qalcuity && git pull origin main && cd ../.. && bench migrate && bench build && docker compose up -d --force-recreate frontend
 ```
 
 ---
@@ -845,6 +842,272 @@ bench get-app frappe --branch version-17
 * Update Frappe: Saat ada security patch atau bug fix
 * Update Qalcuity: Setelah setiap sprint/task selesai
 * JANGAN update jika tidak ada kebutuhan mendesak
+
+---
+
+# 14a. VPS Deployment Architecture
+
+> **⚠️ CATATAN PENTING:** Section ini mendokumentasikan knowledge spesifik tentang deployment VPS yang telah dipelajari dari pengalaman production. Wajib dibaca sebelum melakukan deployment atau debugging di VPS.
+
+### VPS File Structure
+
+```text
+/opt/qalcuity/
+├── frappe_docker/
+│   ├── docker-compose.yml          ← Main compose file
+│   └── .env                        ← Docker env
+│
+├── apps/                           ← via Docker named volume "apps"
+│   ├── frappe/                     ← Frappe Framework source
+│   ├── erpnext/                    ← ERPNext source
+│   └── qalcuity/                   ← Qalcuity custom app (via git pull)
+│
+└── sites/                          ← via Docker named volume "sites"
+    └── qalcuity.com/
+        ├── site_config.json        ← Site config (scheme, host_name)
+        ├── .env                    ← Qalcuity env vars
+        ├── private/                ← Private files
+        ├── public/                 ← Public files
+        ├── logs/                   ← Log files
+        └── assets/                 ← Built assets (CSS, JS, fonts, icons)
+            ├── frappe/             ← Frappe bundled assets
+            │   ├── dist/css/       ← Bundled CSS (desk.bundle.*, login.bundle.*, etc.)
+            │   ├── dist/js/        ← Bundled JS
+            │   ├── css/fonts/      ← Font files (Inter, FontAwesome)
+            │   ├── icons/          ← Frappe icons (timeless, espresso)
+            │   └── images/         ← UI state images
+            ├── erpnext/            ← ERPNext bundled assets
+            │   ├── dist/css/
+            │   └── dist/js/
+            └── qalcuity/           ← Qalcuity custom assets
+                ├── css/            ← qalcuity.css, qalcuity-admin.css
+                └── js/             ← qalcuity.js
+```
+
+**Penting:**
+- Path `/opt/qalcuity/` adalah host path — di dalam container berbeda (biasanya `/home/frappe/frappe-bench/`)
+- Named volumes `apps` dan `sites` adalah INDEPENDENT dari host filesystem
+- Host's `apps/qalcuity/` TIDAK di-share ke container → harus `git pull` DI DALAM container
+
+### Docker Container Architecture
+
+```text
+┌─────────────────────────────────────────┐
+│              Docker Network              │
+│                                          │
+│  ┌──────────┐  ┌──────────┐  ┌────────┐ │
+│  │ backend   │  │ frontend │  │ db     │ │
+│  │ (8000)   │  │ (8080)   │  │(3306)  │ │
+│  │ Frappe   │  │ Nginx    │  │MariaDB │ │
+│  │ worker   │  │ serve    │  │        │ │
+│  │ scheduler│  │ static   │  │        │ │
+│  └──────────┘  └──────────┘  └────────┘ │
+│       │              │                   │
+│       ▼              ▼                   │
+│  ┌──────────────────────────┐           │
+│  │    Shared Volumes:       │           │
+│  │  • apps (Frappe/ERPNext/ │           │
+│  │    Qalcuity source)      │           │
+│  │  • sites (assets, config,│           │
+│  │    logs, files)          │           │
+│  │  • bench-env (.env)      │           │
+│  └──────────────────────────┘           │
+└─────────────────────────────────────────┘
+```
+
+**Container roles:**
+- **backend** — Menjalankan Frappe application, worker, scheduler. Port 8000.
+- **frontend** — Nginx yang serve static assets dan reverse proxy ke backend. Port 8080.
+- **db** — MariaDB database. Port 3306.
+
+### Critical Docker Volume Issues
+
+> **⚠️ INI ADALAH ISSUE YANG PALING SERING MEMBUAT BINGUNG — WAJIB DIPAHAMI**
+
+1. **Host's `apps/qalcuity/` is NOT shared with container** — Named volume `apps` di container adalah copy terpisah. Untuk update code, harus `git pull` DI DALAM container, bukan di host.
+
+2. **Named volumes `apps:` dan `sites:` are INDEPENDENT of host filesystem** — Tidak ada automatic sync antara host path dan named volume.
+
+3. **`docker compose restart` does NOT update volume mounts** — Restart hanya restart container, tidak update isi volume.
+
+4. **After `bench build`, assets are only in backend container's `sites/` volume** — Frontend container punya copy `sites/` volume yang TERPISAH. Assets harus di-sync manual.
+
+5. **Frontend container has SEPARATE copy of `sites/` volume** — Ini karena Docker named volume behavior. Assets yang dibuat di backend tidak otomatis muncul di frontend.
+
+### Asset Serving Architecture
+
+```text
+Browser Request
+    │
+    ▼
+nginx (frontend container)
+    │
+    ├── /assets/*  → try_files $uri =404 (serve dari filesystem)
+    │                  TIDAK proxy ke backend!
+    │
+    └── /api/*, /app/*  → proxy ke backend (port 8000)
+```
+
+**Jenis-jenis assets:**
+
+| Type | Location | How to Build/Copy |
+|------|----------|-------------------|
+| **Bundled assets** | `sites/assets/frappe/dist/`, `sites/assets/erpnext/dist/` | Dibuat oleh `bench build` |
+| **Static assets** (fonts, icons, images) | `sites/assets/*/css/fonts/`, `sites/assets/*/icons/` | Harus di-copy dari `apps/*/public/` ke `sites/assets/` |
+| **App-specific assets** | `sites/assets/qalcuity/` | Harus di-copy dari `apps/qalcuity/qalcuity/public/` ke `sites/assets/qalcuity/` |
+
+**Penting:** nginx config: `location /assets { try_files $uri =404; }` — hanya serve dari filesystem, TIDAK proxy ke backend. Jadi assets harus ADA di filesystem container frontend.
+
+### Deployment Workflow (Complete)
+
+Setelah code changes di local machine:
+
+```bash
+# ============================================
+# STEP 1: Local — Git push
+# ============================================
+cd qalcuity && git push origin main
+
+# ============================================
+# STEP 2: VPS — Pull inside container + migrate + build
+# ============================================
+# Pull code di DALAM backend container
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main"
+
+# Migrate database
+docker compose exec backend bench --site qalcuity.com migrate
+
+# Clear cache
+docker compose exec backend bench --site qalcuity.com clear-cache
+
+# Build assets (force rebuild)
+docker compose exec backend bench build --force
+
+# ============================================
+# STEP 3: Copy static assets dari apps ke sites/assets
+# ============================================
+# ⚠️ HARUS dilakukan SEBELUM tar sync!
+# bench build hanya copy bundled assets, bukan static files (fonts, icons, dll)
+
+# Buat direktori tujuan
+docker compose exec backend mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/{css,js,images}
+
+# Copy Qalcuity assets
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/js/* /home/frappe/frappe-bench/sites/assets/qalcuity/js/
+
+# Copy Frappe static assets (fonts, icons) — jika diperlukan
+docker compose exec backend cp -rn /home/frappe/frappe-bench/apps/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/ 2>/dev/null || true
+docker compose exec backend cp -rn /home/frappe/frappe-bench/apps/frappe/public/js/frappe/icons/* /home/frappe/frappe-bench/sites/assets/frappe/icons/ 2>/dev/null || true
+
+# ============================================
+# STEP 4: Sync all assets dari backend ke frontend
+# ============================================
+# ⚠️ KRUSIAL! Frontend container punya copy sites/ volume yang TERPISAH
+
+# Tar semua assets di backend
+docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/
+
+# Copy tar file dari backend container ke host
+docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz
+
+# Copy tar file dari host ke frontend container
+docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/
+
+# Extract di frontend container
+docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/
+
+# Reload nginx di frontend
+docker compose exec frontend nginx -s reload
+
+# Bersihkan tar file
+rm -f /tmp/qalcuity-assets.tar.gz
+docker compose exec backend rm -f /tmp/assets.tar.gz
+docker compose exec frontend rm -f /tmp/qalcuity-assets.tar.gz
+```
+
+### Known Issues & Fixes
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| CSS 404 after bench build | Docker named volume tidak auto-sync antara backend/frontend | Manual copy assets via tar + docker cp (Step 4) |
+| Font files 404 | Fonts di `apps/*/public/css/fonts/`, bukan di `sites/assets/` | `cp -rn apps/frappe/public/css/fonts/* sites/assets/frappe/css/fonts/` |
+| Qalcuity CSS/JS 404 | `cp -rn public/*` gagal jika destination dir belum ada | `mkdir -p` dulu, lalu `cp` individual |
+| Frappe icons 404 | Source path `public/js/frappe/icons/` ≠ URL path `assets/frappe/icons/` | Cari source path yang benar dan copy ke `sites/assets/frappe/icons/` |
+| `git pull upstream` fails on host | Remote `upstream` hanya ada di dalam container | Gunakan `docker compose exec backend bash -c "cd ... && git pull upstream main"` |
+| MandatoryError in patches | `settings.save()` trigger mandatory validation | Gunakan `settings.flags.ignore_mandatory = True` sebelum save |
+| Fiscal Year error | Tidak ada fiscal year yang didefinisikan untuk tanggal saat ini | Buat fiscal year di ERPNext Setup > Fiscal Year |
+
+### Container Management
+
+```bash
+# ============================================
+# Monitoring
+# ============================================
+# Cek status container
+docker compose ps
+
+# View logs
+docker compose logs backend
+docker compose logs frontend
+docker compose logs db
+
+# View logs (follow mode)
+docker compose logs -f backend
+
+# ============================================
+# Container Access
+# ============================================
+# Masuk ke container
+docker compose exec backend bash
+docker compose exec frontend bash
+
+# ============================================
+# Restart & Rebuild
+# ============================================
+# Restart specific service
+docker compose up -d --force-recreate frontend
+
+# Restart backend
+docker compose up -d --force-recreate backend
+
+# Full rebuild (nuclear option)
+docker compose down && docker compose up -d
+
+# ============================================
+# Database Access
+# ============================================
+# MariaDB shell
+docker compose exec db mariadb -u root -p
+
+# ============================================
+# Bench Commands (di dalam backend container)
+# ============================================
+docker compose exec backend bench --site qalcuity.com migrate
+docker compose exec backend bench --site qalcuity.com clear-cache
+docker compose exec backend bench build --force
+docker compose exec backend bench restart
+```
+
+### Quick Reference: Common Deployment Commands
+
+```bash
+# Deploy biasa (code change + build)
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && \
+docker compose exec backend bench --site qalcuity.com migrate && \
+docker compose exec backend bench --site qalcuity.com clear-cache && \
+docker compose exec backend bench build --force
+
+# Copy assets + sync (setelah bench build)
+docker compose exec backend mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/{css,js,images} && \
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/ && \
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/js/* /home/frappe/frappe-bench/sites/assets/qalcuity/js/ && \
+docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
+docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
+docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
+docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend nginx -s reload
+```
 
 ---
 
