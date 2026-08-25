@@ -301,10 +301,16 @@ cd /opt/qalcuity/frappe_docker
 docker compose exec backend bench build --force
 ```
 
-Tunggu hingga selesai (40-60 detik). Lalu **copy aset dari backend ke frontend**:
+Tunggu hingga selesai (40-60 detik). Lalu **copy font files, app CSS, dan aset ke frontend**:
 
 ```bash
-# Copy assets dari backend ke frontend
+# 1. Copy font files (Inter, FontAwesome) ke sites/assets
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/frappe/css/fonts && cp -r /home/frappe/frappe-bench/apps/frappe/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/"
+
+# 2. Copy Qalcuity CSS ke sites/assets
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/css && cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/"
+
+# 3. Copy semua assets dari backend ke frontend
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
@@ -312,7 +318,10 @@ docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe
 docker compose exec frontend nginx -s reload
 ```
 
-> **⚠️ Jangan skip asset sync!** Docker named volume TIDAK auto-sync antara backend dan frontend. Setelah `bench build`, frontend masih membaca aset LAMA. Harus copy manual.
+> **⚠️ Jangan skip!** 3 langkah ini WAJIB setelah `bench build`:
+> 1. **Font files** — ada di `apps/frappe/public/css/fonts/`, harus dicopy ke `sites/assets/` agar nginx bisa serve
+> 2. **Qalcuity CSS** — ada di `apps/qalcuity/public/css/`, harus dicopy ke `sites/assets/` agar nginx bisa serve
+> 3. **Asset sync** — Docker named volume TIDAK auto-sync antara backend dan frontend
 
 ---
 
@@ -515,7 +524,9 @@ docker compose exec backend bench --site qalcuity.com migrate
 docker compose exec backend bench --site qalcuity.com clear-cache
 docker compose exec backend bench build --force
 
-# Step 3: Copy assets from backend to frontend + reload nginx
+# Step 3: Copy font files, app CSS, dan sync assets ke frontend
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/frappe/css/fonts && cp -r /home/frappe/frappe-bench/apps/frappe/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/" && \
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/css && cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/" && \
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
@@ -526,7 +537,7 @@ docker compose exec frontend nginx -s reload
 **Complete one-liner (copy-paste):**
 
 ```bash
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/frappe/css/fonts && cp -r /home/frappe/frappe-bench/apps/frappe/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/" && docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/css && cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/" && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
 ```
 
 > **Note:** The git remote name inside the container is `upstream` (not `origin`). Verify with `docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git remote -v"`.
@@ -641,7 +652,9 @@ docker compose exec backend bench --site qalcuity.com clear-cache
 # Step 4: Rebuild assets (if UI/CSS/JS changed)
 docker compose exec backend bench build --force
 
-# Step 5: Copy assets dari backend ke frontend + reload nginx
+# Step 5: Copy font files, app CSS, dan sync assets ke frontend
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/frappe/css/fonts && cp -r /home/frappe/frappe-bench/apps/frappe/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/" && \
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/css && cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/" && \
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
@@ -654,7 +667,7 @@ docker compose exec frontend nginx -s reload
 ### Shortcut Command (Copy-Paste)
 
 ```bash
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/frappe/css/fonts && cp -r /home/frappe/frappe-bench/apps/frappe/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/" && docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/css && cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/" && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
 ```
 
 > **Note:** Run this from `/opt/qalcuity/frappe_docker/` on the VPS host. The entire command executes inside the `backend` container.
@@ -746,7 +759,9 @@ cd /opt/qalcuity/frappe_docker
 # 1. Build aset
 docker compose exec backend bench build --force
 
-# 2. Copy assets dari backend ke frontend
+# 2. Copy font files, app CSS, dan sync assets ke frontend
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/frappe/css/fonts && cp -r /home/frappe/frappe-bench/apps/frappe/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/" && \
+docker compose exec backend bash -c "mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/css && cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/" && \
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
@@ -756,10 +771,10 @@ docker compose exec frontend nginx -s reload
 # 3. Hard refresh di browser: Ctrl+Shift+R
 ```
 
-> **⚠️ Mengapa harus copy assets manual?**
-> Docker named volume TIDAK auto-sync antara backend dan frontend container.
-> Setelah `bench build`, aset baru hanya ada di backend. Frontend masih membaca aset LAMA.
-> Harus copy manual menggunakan tar + docker cp.
+> **⚠️ Mengapa harus copy manual?**
+> 1. **Font files & app CSS** — berada di `apps/*/public/`, bukan di `sites/assets/`. Nginx hanya serve dari `sites/assets/`.
+> 2. **Docker named volume** — TIDAK auto-sync antara backend dan frontend container.
+> Harus copy ke `sites/assets/` lalu sync ke frontend menggunakan tar + docker cp.
 
 **Cara verifikasi:**
 ```bash
@@ -839,8 +854,9 @@ Pastikan Nginx config memiliki block `/socket.io` (lihat Tahap 5.3).
 - **Git remote inside container:** `upstream` (verify with `git remote -v` inside container)
 - **Host ↔ Container files:** SEPARATE — volume mounts do NOT share the host's app directory
 - **Frontend nginx port:** `8080` (bukan 80!) — frappe_docker image mendengarkan di port 8080
-- **⚠️ CSS Asset Sync = wajib** setelah `bench build` — Docker named volume TIDAK auto-sync antara backend dan frontend. Harus copy manual: `tar + docker cp` (lihat Section 3.6)
-- **`docker compose restart` TIDAK sync assets** — hanya restart process, tidak mengubah file di volume
+- **⚠️ Font & App CSS = copy manual** — Font files (`apps/frappe/public/css/fonts/`) dan Qalcuity CSS (`apps/qalcuity/public/css/`) harus dicopy ke `sites/assets/` agar nginx bisa serve. Harus dilakukan setiap kali `bench build --force` dijalankan (lihat Section 3.6).
+- **⚠️ CSS Asset Sync = wajib** setelah `bench build` — Docker named volume TIDAK auto-sync antara backend dan frontend. Harus copy manual: `tar + docker cp` (lihat Section 3.6).
+- **`docker compose restart` TIDAK sync assets** — hanya restart process, tidak mengubah file di volume.
 - **site_config.json:** Pastikan `scheme=https` dan `host_name=https://qalcuity.com` agar HTTPS terdeteksi
 - **All `bench` commands:** Must run inside the `backend` container via `docker compose exec backend`
 - **All `git pull` commands:** Must run inside the `backend` container — never on the host
