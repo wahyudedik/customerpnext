@@ -308,7 +308,7 @@ Tunggu hingga selesai (40-60 detik). Lalu **copy aset dari backend ke frontend**
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
-docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
 docker compose exec frontend nginx -s reload
 ```
 
@@ -519,14 +519,14 @@ docker compose exec backend bench build --force
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
-docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
 docker compose exec frontend nginx -s reload
 ```
 
 **Complete one-liner (copy-paste):**
 
 ```bash
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
 ```
 
 > **Note:** The git remote name inside the container is `upstream` (not `origin`). Verify with `docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git remote -v"`.
@@ -645,7 +645,7 @@ docker compose exec backend bench build --force
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
-docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
 docker compose exec frontend nginx -s reload
 ```
 
@@ -654,7 +654,7 @@ docker compose exec frontend nginx -s reload
 ### Shortcut Command (Copy-Paste)
 
 ```bash
-docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
+docker compose exec backend bash -c "cd /home/frappe/frappe-bench/apps/qalcuity && git pull upstream main" && docker compose exec backend bench --site qalcuity.com migrate && docker compose exec backend bench --site qalcuity.com clear-cache && docker compose exec backend bench build --force && docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && docker compose exec frontend nginx -s reload
 ```
 
 > **Note:** Run this from `/opt/qalcuity/frappe_docker/` on the VPS host. The entire command executes inside the `backend` container.
@@ -750,7 +750,7 @@ docker compose exec backend bench build --force
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
-docker compose exec frontend tar xzf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
+docker compose exec frontend tar xzf /tmp/qalcuity-assets.tar.gz -C /home/frappe/frappe-bench/sites/ && \
 docker compose exec frontend nginx -s reload
 
 # 3. Hard refresh di browser: Ctrl+Shift+R
