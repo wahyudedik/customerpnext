@@ -36,6 +36,21 @@ override_website_page_render_context = {
 }
 
 # =============================================================================
+# Website Context — override ERPNext website branding defaults
+# =============================================================================
+website_context = {
+    "favicon": "/assets/qalcuity/images/logo-dark.png",
+    "splash_image": "/assets/qalcuity/images/logo-dark.png",
+    "app_name": "Qalcuity ERP",
+    "app_logo": "/assets/qalcuity/images/logo-dark.png",
+}
+
+# =============================================================================
+# Website Script — inject JS/CSS into ALL website pages (including login)
+# =============================================================================
+website_script = "qalcuity.qalcuity.website_script.get_website_script"
+
+# =============================================================================
 # Doc Events — Audit Log & Lifecycle Hooks
 # =============================================================================
 doc_events = {
@@ -62,6 +77,7 @@ has_permission = {
     "Qalcuity Payment": "qalcuity.qalcuity.doctype.qalcuity_payment.qalcuity_payment.has_permission",
     "Qalcuity Tenant": "qalcuity.qalcuity.doctype.qalcuity_tenant.qalcuity_tenant.has_permission",
     "Qalcuity Notification": "qalcuity.qalcuity.doctype.qalcuity_notification.qalcuity_notification.has_permission",
+    "Qalcuity Plan Change": "qalcuity.qalcuity.doctype.qalcuity_plan_change.qalcuity_plan_change.has_permission",
     # ERPNext DocTypes — tenant isolation
     "Customer": "qalcuity.qalcuity.erpnext_hooks.has_customer_permission",
     "Sales Order": "qalcuity.qalcuity.erpnext_hooks.has_sales_order_permission",
@@ -76,6 +92,7 @@ get_permission_query_conditions = {
     "Qalcuity Subscription": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
     "Qalcuity Payment": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
     "Qalcuity Tenant": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
+    "Qalcuity Plan Change": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
     # ERPNext DocTypes — tenant isolation via customer field
     "Customer": "qalcuity.qalcuity.erpnext_hooks.get_customer_permission_query_conditions",
     "Sales Order": "qalcuity.qalcuity.erpnext_hooks.get_sales_order_permission_query_conditions",
@@ -112,6 +129,10 @@ website_route_rules = [
         "to_route": "admin-reviews",
     },
     {
+        "from_route": "/admin-dashboard",
+        "to_route": "admin-dashboard",
+    },
+    {
         "from_route": "/profile",
         "to_route": "profile",
     },
@@ -122,6 +143,26 @@ website_route_rules = [
     {
         "from_route": "/subscription-history",
         "to_route": "subscription-history",
+    },
+    {
+        "from_route": "/2fa-setup",
+        "to_route": "2fa-setup",
+    },
+    {
+        "from_route": "/2fa-verify",
+        "to_route": "2fa-verify",
+    },
+    {
+        "from_route": "/sessions",
+        "to_route": "sessions",
+    },
+    {
+        "from_route": "/admin-health",
+        "to_route": "admin-health",
+    },
+    {
+        "from_route": "/plan-change",
+        "to_route": "plan-change",
     },
 ]
 
@@ -142,13 +183,19 @@ fixtures = [
             ["name", "in", [
                 "Website Settings-app_name",
                 "Website Settings-app_logo",
+                "Website Settings-favicon",
+                "Website Settings-splash_image",
                 "System Settings-setup_wizard_completed",
             ]],
         ],
     },
     {
         "dt": "Role",
-        "filters": [["role_name", "in", ["Qalcuity Superadmin", "Qalcuity Admin"]]],
+        "filters": [["role_name", "in", ["Qalcuity Superadmin", "Qalcuity Admin", "Qalcuity ERP User"]]],
+    },
+    {
+        "dt": "Workspace",
+        "filters": [["name", "=", "Qalcuity ERP Customer"]],
     },
     {
         "dt": "Qalcuity Plan",
@@ -162,6 +209,10 @@ fixtures = [
         "dt": "Qalcuity Settings",
         "filters": [],
     },
+    {
+        "dt": "Qalcuity Plan Module",
+        "filters": [],
+    },
 ]
 
 # =============================================================================
@@ -171,6 +222,7 @@ scheduler_events = {
     "daily": [
         "qalcuity.tasks.check_subscription_expiry",
         "qalcuity.tasks.run_scheduled_backup",
+        "qalcuity.tasks.retry_failed_provisioning",
     ],
 }
 

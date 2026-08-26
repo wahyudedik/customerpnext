@@ -1,0 +1,244 @@
+{
+    "actions": [],
+    "autoname": "format:PC-{YYYYMMDD}-{####}",
+    "creation": "2026-08-26 10:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "customer",
+        "subscription",
+        "current_plan",
+        "new_plan",
+        "change_type",
+        "column_break_01",
+        "status",
+        "effective_date",
+        "reason",
+        "section_break_pricing",
+        "current_plan_price",
+        "new_plan_price",
+        "column_break_pricing",
+        "prorated_credit",
+        "amount_to_pay",
+        "section_break_review",
+        "reviewed_by",
+        "review_date",
+        "column_break_review",
+        "rejection_reason"
+    ],
+    "fields": [
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Customer",
+            "options": "Customer",
+            "reqd": 1
+        },
+        {
+            "fieldname": "subscription",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Subscription",
+            "options": "Qalcuity Subscription",
+            "reqd": 1
+        },
+        {
+            "fieldname": "current_plan",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Current Plan",
+            "options": "Qalcuity Plan",
+            "read_only": 1
+        },
+        {
+            "fieldname": "new_plan",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "New Plan",
+            "options": "Qalcuity Plan",
+            "reqd": 1
+        },
+        {
+            "fieldname": "change_type",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Change Type",
+            "options": "\nUpgrade\nDowngrade",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": "Pending",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "options": "Pending\nApproved\nRejected\nCompleted\nCancelled",
+            "reqd": 1
+        },
+        {
+            "fieldname": "effective_date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Effective Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "reason",
+            "fieldtype": "Small Text",
+            "label": "Reason"
+        },
+        {
+            "fieldname": "section_break_pricing",
+            "fieldtype": "Section Break",
+            "label": "Pricing"
+        },
+        {
+            "fieldname": "current_plan_price",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Current Plan Price",
+            "options": "currency",
+            "read_only": 1
+        },
+        {
+            "fieldname": "new_plan_price",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "New Plan Price",
+            "options": "currency",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_pricing",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "prorated_credit",
+            "fieldtype": "Currency",
+            "label": "Prorated Credit",
+            "options": "currency",
+            "read_only": 1
+        },
+        {
+            "fieldname": "amount_to_pay",
+            "fieldtype": "Currency",
+            "label": "Amount to Pay",
+            "options": "currency",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_review",
+            "fieldtype": "Section Break",
+            "label": "Review"
+        },
+        {
+            "fieldname": "reviewed_by",
+            "fieldtype": "Link",
+            "label": "Reviewed By",
+            "options": "User",
+            "read_only": 1
+        },
+        {
+            "fieldname": "review_date",
+            "fieldtype": "Datetime",
+            "label": "Review Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_review",
+            "fieldtype": "Column Break"
+        },
+        {
+            "depends_on": "eval:doc.status==='Rejected'",
+            "fieldname": "rejection_reason",
+            "fieldtype": "Long Text",
+            "label": "Rejection Reason"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2026-08-26 10:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Plan Change",
+    "naming_rule": "Expression",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "submit": 1,
+            "cancel": 1,
+            "delete": 1,
+            "amend": 0
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "submit": 1,
+            "cancel": 1,
+            "delete": 0,
+            "amend": 0
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 1,
+            "create": 0,
+            "delete": 0,
+            "submit": 0,
+            "cancel": 0,
+            "amend": 0
+        },
+        {
+            "role": "Customer",
+            "read": 1,
+            "write": 0,
+            "create": 1,
+            "delete": 0,
+            "submit": 0,
+            "cancel": 0,
+            "amend": 0
+        }
+    ],
+    "search_fields": "customer,subscription,current_plan,new_plan,change_type,status",
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [
+        {
+            "color": "orange",
+            "title": "Pending"
+        },
+        {
+            "color": "blue",
+            "title": "Approved"
+        },
+        {
+            "color": "red",
+            "title": "Rejected"
+        },
+        {
+            "color": "green",
+            "title": "Completed"
+        },
+        {
+            "color": "darkgray",
+            "title": "Cancelled"
+        }
+    ],
+    "title_field": "change_type",
+    "track_changes": 1
+}

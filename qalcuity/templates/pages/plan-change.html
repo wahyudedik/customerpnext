@@ -1,0 +1,1040 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
+<div class="qalcuity-pc-container">
+	<!-- Header -->
+	<div class="qalcuity-pc-header">
+		<div class="qalcuity-pc-header-left">
+			<h1 class="qalcuity-pc-title">Ganti Paket</h1>
+			<p class="qalcuity-pc-subtitle">Upgrade atau downgrade paket langganan Anda.</p>
+	</div>
+		<div class="qalcuity-pc-header-right">
+			<a href="/dashboard" class="qalcuity-btn qalcuity-btn-outline">
+				<span class="octicon octicon-arrow-left"></span> Kembali
+			</a>
+		</div>
+	</div>
+
+	<!-- No Active Subscription -->
+	<div id="pc-no-subscription" class="qalcuity-pc-no-sub" style="display: none;">
+		<div class="qalcuity-pc-empty-icon">
+			<span class="octicon octicon-package" style="font-size: 48px; color: var(--qalcuity-text-muted);"></span>
+		</div>
+		<h3>Tidak ada subscription aktif</h3>
+		<p>Anda harus memiliki subscription aktif untuk bisa mengganti paket.</p>
+		<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary">
+			<span class="octicon octicon-tag"></span> Lihat Paket
+		</a>
+	</div>
+
+	<!-- Main Content (shown when subscription exists) -->
+	<div id="pc-main-content" style="display: none;">
+
+		<!-- Current Plan Card -->
+		<div id="pc-current-plan" class="qalcuity-pc-current-card">
+			<div class="qalcuity-pc-current-header">
+				<span class="octicon octicon-package"></span>
+				<h3>Paket Saat Ini</h3>
+			</div>
+			<div class="qalcuity-pc-current-body">
+				<div class="qalcuity-pc-current-info">
+					<div class="qalcuity-pc-current-plan-name" id="pc-current-plan-name"></div>
+					<div class="qalcuity-pc-current-plan-price" id="pc-current-plan-price"></div>
+				</div>
+				<div class="qalcuity-pc-current-meta">
+					<div class="qalcuity-pc-meta-item">
+						<span class="octicon octicon-calendar"></span>
+						<span>Periode: <span id="pc-current-period"></span></span>
+					</div>
+					<div class="qalcuity-pc-meta-item">
+						<span class="octicon octicon-clock"></span>
+						<span>Sisa: <span id="pc-remaining-days"></span></span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Select New Plan -->
+		<div class="qalcuity-pc-section">
+			<h2 class="qalcuity-pc-section-title">
+				<span class="octicon octicon-arrow-right"></span> Pilih Paket Baru
+			</h2>
+			<div class="qalcuity-pc-plans-grid" id="pc-plans-grid">
+				<!-- Plans rendered by JS -->
+			</div>
+		</div>
+
+		<!-- Preview Calculation -->
+		<div id="pc-preview" class="qalcuity-pc-preview" style="display: none;">
+			<div class="qalcuity-pc-preview-header">
+				<span class="octicon octicon-device-desktop"></span>
+				<h3>Preview Perhitungan</h3>
+			</div>
+			<div class="qalcuity-pc-preview-body">
+				<div class="qalcuity-pc-preview-row">
+					<span>Paket Baru</span>
+					<strong id="pc-preview-new-plan"></strong>
+				</div>
+				<div class="qalcuity-pc-preview-row">
+					<span>Tipe Perubahan</span>
+					<span id="pc-preview-change-type" class="qalcuity-badge"></span>
+				</div>
+				<div class="qalcuity-pc-preview-row">
+					<span>Harga Paket Baru</span>
+					<span id="pc-preview-new-price"></span>
+				</div>
+				<div class="qalcuity-pc-preview-row">
+					<span>Kredit Prorated (sisa hari plan lama)</span>
+					<span id="pc-preview-credit" class="qalcuity-pc-positive"></span>
+				</div>
+				<div class="qalcuity-pc-preview-divider"></div>
+				<div class="qalcuity-pc-preview-row qalcuity-pc-preview-total">
+					<span>Yang Harus Dibayar</span>
+					<strong id="pc-preview-amount"></strong>
+				</div>
+				<div class="qalcuity-pc-preview-detail" id="pc-preview-detail"></div>
+			</div>
+		</div>
+
+		<!-- Reason & Submit -->
+		<div id="pc-submit-section" class="qalcuity-pc-section" style="display: none;">
+			<h2 class="qalcuity-pc-section-title">
+				<span class="octicon octicon-pencil"></span> Konfirmasi Perubahan
+			</h2>
+			<div class="qalcuity-pc-form">
+				<div class="qalcuity-form-group">
+					<label class="qalcuity-form-label">Alasan (opsional)</label>
+					<textarea id="pc-reason" class="qalcuity-form-input qalcuity-form-textarea" rows="3"
+						placeholder="Contoh: Butuh lebih banyak user untuk tim saya..."></textarea>
+				</div>
+				<div class="qalcuity-pc-form-actions">
+					<input type="hidden" id="pc-csrf_token" value="{{ frappe.session.csrf_token or '' }}">
+					<button id="pc-btn-submit" class="qalcuity-btn qalcuity-btn-primary qalcuity-btn-lg" onclick="submitPlanChange()" disabled>
+						<span class="octicon octicon-check"></span> Konfirmasi Ganti Paket
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Plan Change History -->
+		<div class="qalcuity-pc-section">
+			<h2 class="qalcuity-pc-section-title">
+				<span class="octicon octicon-history"></span> Riwayat Perubahan Paket
+			</h2>
+			<div id="pc-history-loading" class="qalcuity-pricing-loading" style="display: none;">
+				<div class="qalcuity-pricing-spinner"></div>
+				<p>Memuat riwayat...</p>
+			</div>
+			<div id="pc-history-list" class="qalcuity-pc-history-list"></div>
+			<div id="pc-history-empty" class="qalcuity-pc-empty" style="display: none;">
+				<p>Belum ada riwayat perubahan paket.</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Success Toast -->
+	<div id="pc-toast" class="qalcuity-pc-toast" style="display: none;">
+		<span class="octicon octicon-check"></span>
+		<span id="pc-toast-message"></span>
+	</div>
+
+	<!-- Error Toast -->
+	<div id="pc-error-toast" class="qalcuity-pc-toast qalcuity-pc-toast-error" style="display: none;">
+		<span class="octicon octicon-alert"></span>
+		<span id="pc-error-message"></span>
+	</div>
+</div>
+
+<script>
+	var selectedPlan = null;
+
+	frappe.ready(function () {
+		initPlanChangePage();
+	});
+
+	function initPlanChangePage() {
+		var subscription = {{ subscription | json | safe }};
+		var plans = {{ plans | json | safe }};
+		var planChanges = {{ plan_changes | json | safe }};
+
+		if (!subscription) {
+			document.getElementById('pc-no-subscription').style.display = 'block';
+			document.getElementById('pc-main-content').style.display = 'none';
+			return;
+		}
+
+		document.getElementById('pc-no-subscription').style.display = 'none';
+		document.getElementById('pc-main-content').style.display = 'block';
+
+		// Render current plan
+		renderCurrentPlan(subscription);
+
+		// Render available plans
+		renderPlans(plans, subscription.plan);
+
+		// Render history
+		renderHistory(planChanges);
+	}
+
+	function renderCurrentPlan(sub) {
+		var currentPlan = {{ current_plan | json | safe }} || {};
+
+		document.getElementById('pc-current-plan-name').textContent = currentPlan.plan_name || sub.plan;
+		document.getElementById('pc-current-plan-price').textContent = formatCurrency(currentPlan.price || 0) + ' / ' + (currentPlan.billing_period || 'Monthly');
+
+		if (sub.start_date && sub.end_date) {
+			document.getElementById('pc-current-period').textContent =
+				formatDate(sub.start_date) + ' — ' + formatDate(sub.end_date);
+
+			// Calculate remaining days
+			var endDate = new Date(sub.end_date);
+			var now = new Date();
+			var diff = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+			document.getElementById('pc-remaining-days').textContent =
+				diff > 0 ? diff + ' hari' : 'Berakhir hari ini';
+		}
+	}
+
+	function renderPlans(plans, currentPlanName) {
+		var grid = document.getElementById('pc-plans-grid');
+		var html = '';
+
+		plans.forEach(function (plan) {
+			if (plan.name === currentPlanName) return; // Skip current plan
+
+			var cardClass = 'qalcuity-pc-plan-card';
+			html += '<div class="' + cardClass + '" data-plan="' + frappe.utils.escape_html(plan.name) + '" onclick="selectPlan(this, \'' + frappe.utils.escape_html(plan.name) + '\')">';
+			html += '  <div class="qalcuity-pc-plan-header">';
+			html += '    <h4 class="qalcuity-pc-plan-name">' + frappe.utils.escape_html(plan.plan_name) + '</h4>';
+			html += '    <div class="qalcuity-pc-plan-price">' + formatCurrency(plan.price) + '</div>';
+			html += '    <div class="qalcuity-pc-plan-period">per ' + frappe.utils.escape_html(plan.billing_period) + '</div>';
+			html += '  </div>';
+			html += '  <div class="qalcuity-pc-plan-body">';
+
+			if (plan.description) {
+				html += '    <p class="qalcuity-pc-plan-desc">' + frappe.utils.escape_html(plan.description) + '</p>';
+			}
+
+			if (plan.max_users) {
+				html += '    <div class="qalcuity-pc-plan-feature"><span class="octicon octicon-person"></span> Max ' + plan.max_users + ' users</div>';
+			}
+			if (plan.max_storage_gb) {
+				html += '    <div class="qalcuity-pc-plan-feature"><span class="octicon octicon-file-directory"></span> ' + plan.max_storage_gb + ' GB storage</div>';
+			}
+
+			html += '  </div>';
+			html += '  <div class="qalcuity-pc-plan-check" style="display: none;">';
+			html += '    <span class="octicon octicon-check"></span>';
+			html += '  </div>';
+			html += '</div>';
+		});
+
+		if (!html) {
+			html = '<div class="qalcuity-pc-empty"><p>Tidak ada paket lain yang tersedia.</p></div>';
+		}
+
+		grid.innerHTML = html;
+	}
+
+	function selectPlan(el, planName) {
+		// Deselect all
+		var cards = document.querySelectorAll('.qalcuity-pc-plan-card');
+		cards.forEach(function (card) {
+			card.classList.remove('selected');
+			var check = card.querySelector('.qalcuity-pc-plan-check');
+			if (check) check.style.display = 'none';
+		});
+
+		// Select clicked card
+		el.classList.add('selected');
+		var check = el.querySelector('.qalcuity-pc-plan-check');
+		if (check) check.style.display = 'flex';
+
+		selectedPlan = planName;
+
+		// Preview calculation
+		previewPlanChange(planName);
+	}
+
+	function previewPlanChange(newPlan) {
+		var subscription = {{ subscription | json | safe }};
+		if (!subscription || !subscription.name) return;
+
+		frappe.call({
+			method: 'qalcuity.api.plan_change.preview_plan_change',
+			args: {
+				subscription_id: subscription.name,
+				new_plan_id: newPlan
+			},
+			callback: function (r) {
+				if (r.message) {
+					renderPreview(r.message);
+				}
+			},
+			error: function (err) {
+				showError(err.message || 'Gagal menghitung prorated billing.');
+			}
+		});
+	}
+
+	function renderPreview(data) {
+		var preview = document.getElementById('pc-preview');
+		var submitSection = document.getElementById('pc-submit-section');
+
+		document.getElementById('pc-preview-new-plan').textContent = data.new_plan;
+
+		var changeTypeEl = document.getElementById('pc-preview-change-type');
+		changeTypeEl.textContent = data.change_type;
+		changeTypeEl.className = 'qalcuity-badge ' + (data.change_type === 'Upgrade' ? 'qalcuity-badge-success' : 'qalcuity-badge-warning');
+
+		document.getElementById('pc-preview-new-price').textContent = formatCurrency(data.new_plan_price);
+		document.getElementById('pc-preview-credit').textContent = '-' + formatCurrency(data.prorated_credit);
+		document.getElementById('pc-preview-amount').textContent = formatCurrency(data.amount_to_pay);
+
+		var detail = '';
+		if (data.remaining_days > 0) {
+			detail = 'Sisa ' + data.remaining_days + ' dari ' + data.total_days + ' hari akan dikreditkan ke paket baru.';
+		} else {
+			detail = 'Tidak ada kredit prorated (sudah di akhir periode).';
+		}
+		document.getElementById('pc-preview-detail').textContent = detail;
+
+		preview.style.display = 'block';
+		submitSection.style.display = 'block';
+
+		// Enable submit button
+		document.getElementById('pc-btn-submit').disabled = false;
+	}
+
+	function submitPlanChange() {
+		if (!selectedPlan) {
+			showError('Pilih paket baru terlebih dahulu.');
+			return;
+		}
+
+		var subscription = {{ subscription | json | safe }};
+		if (!subscription || !subscription.name) return;
+
+		var reason = document.getElementById('pc-reason').value;
+		var btn = document.getElementById('pc-btn-submit');
+		btn.disabled = true;
+		btn.innerHTML = '<span class="octicon octicon-sync"></span> Memproses...';
+
+		frappe.call({
+			method: 'qalcuity.api.plan_change.submit_plan_change',
+			args: {
+				subscription_id: subscription.name,
+				new_plan_id: selectedPlan,
+				reason: reason || ''
+			},
+			callback: function (r) {
+				btn.disabled = false;
+				btn.innerHTML = '<span class="octicon octicon-check"></span> Konfirmasi Ganti Paket';
+
+				if (r.message) {
+					showToast('Permintaan perubahan paket berhasil dikirim! Status: ' + r.message.status);
+
+					// Reload page after short delay
+					setTimeout(function () {
+						window.location.reload();
+					}, 2000);
+				}
+			},
+			error: function (err) {
+				btn.disabled = false;
+				btn.innerHTML = '<span class="octicon octicon-check"></span> Konfirmasi Ganti Paket';
+				showError(err.message || 'Gagal mengirim permintaan perubahan paket.');
+			}
+		});
+	}
+
+	function renderHistory(changes) {
+		var list = document.getElementById('pc-history-list');
+		var empty = document.getElementById('pc-history-empty');
+
+		if (!changes || changes.length === 0) {
+			list.style.display = 'none';
+			empty.style.display = 'block';
+			return;
+		}
+
+		var html = '';
+		changes.forEach(function (pc) {
+			var statusClass = 'qalcuity-badge';
+			if (pc.status === 'Completed') statusClass += ' qalcuity-badge-success';
+			else if (pc.status === 'Pending') statusClass += ' qalcuity-badge-warning';
+			else if (pc.status === 'Rejected') statusClass += ' qalcuity-badge-danger';
+			else if (pc.status === 'Cancelled') statusClass += ' qalcuity-badge-secondary';
+
+			var typeIcon = pc.change_type === 'Upgrade' ? 'octicon-arrow-up' : 'octicon-arrow-down';
+			var typeClass = pc.change_type === 'Upgrade' ? 'qalcuity-pc-positive' : 'qalcuity-pc-negative';
+
+			html += '<div class="qalcuity-pc-history-item">';
+			html += '  <div class="qalcuity-pc-history-icon">';
+			html += '    <span class="octicon ' + typeIcon + ' ' + typeClass + '"></span>';
+			html += '  </div>';
+			html += '  <div class="qalcuity-pc-history-info">';
+			html += '    <div class="qalcuity-pc-history-main">';
+			html += '      <span class="qalcuity-pc-history-type">' + frappe.utils.escape_html(pc.change_type) + '</span>';
+			html += '      <span class="qalcuity-pc-history-arrow">:</span>';
+			html += '      <span class="qalcuity-pc-history-plan">' + frappe.utils.escape_html(pc.current_plan) + '</span>';
+			html += '      <span class="octicon octicon-arrow-right qalcuity-pc-history-arrow-icon"></span>';
+			html += '      <span class="qalcuity-pc-history-plan">' + frappe.utils.escape_html(pc.new_plan) + '</span>';
+			html += '    </div>';
+			html += '    <div class="qalcuity-pc-history-meta">';
+			html += '      <span>' + formatDate(pc.effective_date) + '</span>';
+			if (pc.amount_to_pay > 0) {
+				html += '      <span>•</span><span>Bayar: ' + formatCurrency(pc.amount_to_pay) + '</span>';
+			}
+			html += '    </div>';
+			if (pc.rejection_reason) {
+				html += '    <div class="qalcuity-pc-history-rejection">';
+				html += '      <span class="octicon octicon-x"></span> ' + frappe.utils.escape_html(pc.rejection_reason);
+				html += '    </div>';
+			}
+			html += '  </div>';
+			html += '  <div class="qalcuity-pc-history-right">';
+			html += '    <span class="' + statusClass + '">' + frappe.utils.escape_html(pc.status) + '</span>';
+			html += '    <span class="qalcuity-pc-history-id">' + frappe.utils.escape_html(pc.name) + '</span>';
+			html += '  </div>';
+			html += '</div>';
+		});
+
+		list.innerHTML = html;
+	}
+
+	function formatCurrency(amount) {
+		return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
+	}
+
+	function formatDate(dateStr) {
+		if (!dateStr) return '-';
+		var d = new Date(dateStr);
+		return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+	}
+
+	function showToast(message) {
+		var toast = document.getElementById('pc-toast');
+		document.getElementById('pc-toast-message').textContent = message;
+		toast.style.display = 'flex';
+		setTimeout(function () { toast.style.display = 'none'; }, 5000);
+	}
+
+	function showError(message) {
+		var toast = document.getElementById('pc-error-toast');
+		document.getElementById('pc-error-message').textContent = message;
+		toast.style.display = 'flex';
+		setTimeout(function () { toast.style.display = 'none'; }, 5000);
+	}
+</script>
+
+<style>
+	/* Plan Change Page Styles */
+	.qalcuity-pc-container {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 24px 16px;
+	}
+
+	.qalcuity-pc-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 32px;
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+
+	.qalcuity-pc-title {
+		font-size: 28px;
+		font-weight: 700;
+		color: var(--qalcuity-heading-color, #1a202c);
+		margin: 0 0 4px 0;
+	}
+
+	.qalcuity-pc-subtitle {
+		font-size: 15px;
+		color: var(--qalcuity-text-muted, #718096);
+		margin: 0;
+	}
+
+	/* No Subscription */
+	.qalcuity-pc-no-sub {
+		text-align: center;
+		padding: 60px 20px;
+		background: var(--qalcuity-card-bg, #fff);
+		border-radius: 12px;
+		border: 1px solid var(--qalcuity-border-color, #e2e8f0);
+	}
+
+	.qalcuity-pc-empty-icon {
+		margin-bottom: 16px;
+	}
+
+	.qalcuity-pc-no-sub h3 {
+		font-size: 20px;
+		color: var(--qalcuity-heading-color, #1a202c);
+		margin: 0 0 8px 0;
+	}
+
+	.qalcuity-pc-no-sub p {
+		color: var(--qalcuity-text-muted, #718096);
+		margin: 0 0 20px 0;
+	}
+
+	/* Current Plan Card */
+	.qalcuity-pc-current-card {
+		background: var(--qalcuity-card-bg, #fff);
+		border-radius: 12px;
+		border: 1px solid var(--qalcuity-border-color, #e2e8f0);
+		overflow: hidden;
+		margin-bottom: 32px;
+	}
+
+	.qalcuity-pc-current-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 16px 20px;
+		background: var(--qalcuity-surface-bg, #f7fafc);
+		border-bottom: 1px solid var(--qalcuity-border-color, #e2e8f0);
+	}
+
+	.qalcuity-pc-current-header .octicon {
+		color: var(--qalcuity-primary, #3182ce);
+	}
+
+	.qalcuity-pc-current-header h3 {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--qalcuity-heading-color, #1a202c);
+		margin: 0;
+	}
+
+	.qalcuity-pc-current-body {
+		padding: 20px;
+	}
+
+	.qalcuity-pc-current-info {
+		display: flex;
+		align-items: baseline;
+		gap: 16px;
+		margin-bottom: 12px;
+	}
+
+	.qalcuity-pc-current-plan-name {
+		font-size: 20px;
+		font-weight: 700;
+		color: var(--qalcuity-heading-color, #1a202c);
+	}
+
+	.qalcuity-pc-current-plan-price {
+		font-size: 16px;
+		color: var(--qalcuity-primary, #3182ce);
+		font-weight: 600;
+	}
+
+	.qalcuity-pc-current-meta {
+		display: flex;
+		gap: 24px;
+		flex-wrap: wrap;
+	}
+
+	.qalcuity-pc-meta-item {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 13px;
+		color: var(--qalcuity-text-muted, #718096);
+	}
+
+	.qalcuity-pc-meta-item .octicon {
+		font-size: 14px;
+	}
+
+	/* Section */
+	.qalcuity-pc-section {
+		margin-bottom: 32px;
+	}
+
+	.qalcuity-pc-section-title {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--qalcuity-heading-color, #1a202c);
+		margin: 0 0 16px 0;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.qalcuity-pc-section-title .octicon {
+		color: var(--qalcuity-primary, #3182ce);
+	}
+
+	/* Plans Grid */
+	.qalcuity-pc-plans-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: 16px;
+	}
+
+	.qalcuity-pc-plan-card {
+		background: var(--qalcuity-card-bg, #fff);
+		border-radius: 12px;
+		border: 2px solid var(--qalcuity-border-color, #e2e8f0);
+		padding: 20px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.qalcuity-pc-plan-card:hover {
+		border-color: var(--qalcuity-primary, #3182ce);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+
+	.qalcuity-pc-plan-card.selected {
+		border-color: var(--qalcuity-primary, #3182ce);
+		background: var(--qalcuity-primary-light, #ebf8ff);
+	}
+
+	.qalcuity-pc-plan-header {
+		margin-bottom: 12px;
+	}
+
+	.qalcuity-pc-plan-name {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--qalcuity-heading-color, #1a202c);
+		margin: 0 0 4px 0;
+	}
+
+	.qalcuity-pc-plan-price {
+		font-size: 22px;
+		font-weight: 700;
+		color: var(--qalcuity-primary, #3182ce);
+	}
+
+	.qalcuity-pc-plan-period {
+		font-size: 12px;
+		color: var(--qalcuity-text-muted, #718096);
+	}
+
+	.qalcuity-pc-plan-body {
+		font-size: 13px;
+		color: var(--qalcuity-text-color, #4a5568);
+	}
+
+	.qalcuity-pc-plan-desc {
+		margin: 0 0 8px 0;
+	}
+
+	.qalcuity-pc-plan-feature {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 0;
+		font-size: 13px;
+		color: var(--qalcuity-text-color, #4a5568);
+	}
+
+	.qalcuity-pc-plan-feature .octicon {
+		color: var(--qalcuity-primary, #3182ce);
+		font-size: 14px;
+	}
+
+	.qalcuity-pc-plan-check {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: var(--qalcuity-primary, #3182ce);
+		color: #fff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 14px;
+	}
+
+	/* Preview */
+	.qalcuity-pc-preview {
+		background: var(--qalcuity-card-bg, #fff);
+		border-radius: 12px;
+		border: 1px solid var(--qalcuity-border-color, #e2e8f0);
+		overflow: hidden;
+		margin-bottom: 24px;
+	}
+
+	.qalcuity-pc-preview-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 16px 20px;
+		background: var(--qalcuity-surface-bg, #f7fafc);
+		border-bottom: 1px solid var(--qalcuity-border-color, #e2e8f0);
+	}
+
+	.qalcuity-pc-preview-header .octicon {
+		color: var(--qalcuity-primary, #3182ce);
+	}
+
+	.qalcuity-pc-preview-header h3 {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--qalcuity-heading-color, #1a202c);
+		margin: 0;
+	}
+
+	.qalcuity-pc-preview-body {
+		padding: 20px;
+	}
+
+	.qalcuity-pc-preview-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px 0;
+		font-size: 14px;
+		color: var(--qalcuity-text-color, #4a5568);
+	}
+
+	.qalcuity-pc-preview-divider {
+		height: 1px;
+		background: var(--qalcuity-border-color, #e2e8f0);
+		margin: 8px 0;
+	}
+
+	.qalcuity-pc-preview-total {
+		font-size: 16px;
+		color: var(--qalcuity-heading-color, #1a202c);
+	}
+
+	.qalcuity-pc-preview-detail {
+		font-size: 13px;
+		color: var(--qalcuity-text-muted, #718096);
+		margin-top: 8px;
+		font-style: italic;
+	}
+
+	.qalcuity-pc-positive {
+		color: var(--qalcuity-success, #38a169) !important;
+	}
+
+	.qalcuity-pc-negative {
+		color: var(--qalcuity-danger, #e53e3e) !important;
+	}
+
+	/* Badge */
+	.qalcuity-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 2px 10px;
+		border-radius: 12px;
+		font-size: 12px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.qalcuity-badge-success {
+		background: var(--qalcuity-success-bg, #f0fff4);
+		color: var(--qalcuity-success, #38a169);
+	}
+
+	.qalcuity-badge-warning {
+		background: var(--qalcuity-warning-bg, #fffff0);
+		color: var(--qalcuity-warning, #d69e2e);
+	}
+
+	.qalcuity-badge-danger {
+		background: var(--qalcuity-danger-bg, #fff5f5);
+		color: var(--qalcuity-danger, #e53e3e);
+	}
+
+	.qalcuity-badge-secondary {
+		background: var(--qalcuity-surface-bg, #f7fafc);
+		color: var(--qalcuity-text-muted, #718096);
+	}
+
+	/* Form */
+	.qalcuity-pc-form {
+		background: var(--qalcuity-card-bg, #fff);
+		border-radius: 12px;
+		border: 1px solid var(--qalcuity-border-color, #e2e8f0);
+		padding: 20px;
+	}
+
+	.qalcuity-form-group {
+		margin-bottom: 16px;
+	}
+
+	.qalcuity-form-label {
+		display: block;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--qalcuity-heading-color, #1a202c);
+		margin-bottom: 6px;
+	}
+
+	.qalcuity-form-input {
+		width: 100%;
+		padding: 10px 12px;
+		border: 1px solid var(--qalcuity-border-color, #e2e8f0);
+		border-radius: 8px;
+		font-size: 14px;
+		color: var(--qalcuity-text-color, #4a5568);
+		background: var(--qalcuity-card-bg, #fff);
+		box-sizing: border-box;
+		transition: border-color 0.2s;
+	}
+
+	.qalcuity-form-input:focus {
+		outline: none;
+		border-color: var(--qalcuity-primary, #3182ce);
+		box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+	}
+
+	.qalcuity-form-textarea {
+		resize: vertical;
+		min-height: 80px;
+	}
+
+	.qalcuity-pc-form-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin-top: 16px;
+	}
+
+	/* History */
+	.qalcuity-pc-history-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.qalcuity-pc-history-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		background: var(--qalcuity-card-bg, #fff);
+		border-radius: 10px;
+		border: 1px solid var(--qalcuity-border-color, #e2e8f0);
+		padding: 16px;
+	}
+
+	.qalcuity-pc-history-icon {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: var(--qalcuity-surface-bg, #f7fafc);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.qalcuity-pc-history-icon .octicon {
+		font-size: 16px;
+	}
+
+	.qalcuity-pc-history-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.qalcuity-pc-history-main {
+		font-size: 14px;
+		color: var(--qalcuity-text-color, #4a5568);
+		margin-bottom: 4px;
+	}
+
+	.qalcuity-pc-history-type {
+		font-weight: 600;
+	}
+
+	.qalcuity-pc-history-arrow {
+		color: var(--qalcuity-text-muted, #718096);
+		margin: 0 4px;
+	}
+
+	.qalcuity-pc-history-plan {
+		font-weight: 500;
+	}
+
+	.qalcuity-pc-history-arrow-icon {
+		margin: 0 4px;
+		font-size: 12px;
+		color: var(--qalcuity-text-muted, #718096);
+	}
+
+	.qalcuity-pc-history-meta {
+		font-size: 12px;
+		color: var(--qalcuity-text-muted, #718096);
+		display: flex;
+		gap: 6px;
+		align-items: center;
+	}
+
+	.qalcuity-pc-history-rejection {
+		font-size: 12px;
+		color: var(--qalcuity-danger, #e53e3e);
+		margin-top: 4px;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.qalcuity-pc-history-right {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 4px;
+		flex-shrink: 0;
+	}
+
+	.qalcuity-pc-history-id {
+		font-size: 11px;
+		color: var(--qalcuity-text-muted, #718096);
+		font-family: monospace;
+	}
+
+	.qalcuity-pc-empty {
+		text-align: center;
+		padding: 30px;
+		color: var(--qalcuity-text-muted, #718096);
+	}
+
+	.qalcuity-pc-empty p {
+		margin: 0;
+	}
+
+	/* Toast */
+	.qalcuity-pc-toast {
+		position: fixed;
+		bottom: 24px;
+		right: 24px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 20px;
+		background: var(--qalcuity-success, #38a169);
+		color: #fff;
+		border-radius: 10px;
+		font-size: 14px;
+		font-weight: 500;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+		z-index: 9999;
+		animation: pcSlideIn 0.3s ease;
+	}
+
+	.qalcuity-pc-toast-error {
+		background: var(--qalcuity-danger, #e53e3e);
+	}
+
+	@keyframes pcSlideIn {
+		from {
+			transform: translateY(20px);
+			opacity: 0;
+		}
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+
+	/* Buttons */
+	.qalcuity-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 16px;
+		border-radius: 8px;
+		font-size: 14px;
+		font-weight: 500;
+		text-decoration: none;
+		cursor: pointer;
+		border: 1px solid transparent;
+		transition: all 0.2s;
+	}
+
+	.qalcuity-btn-primary {
+		background: var(--qalcuity-primary, #3182ce);
+		color: #fff;
+		border-color: var(--qalcuity-primary, #3182ce);
+	}
+
+	.qalcuity-btn-primary:hover {
+		background: var(--qalcuity-primary-dark, #2b6cb0);
+	}
+
+	.qalcuity-btn-primary:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.qalcuity-btn-outline {
+		background: transparent;
+		color: var(--qalcuity-text-color, #4a5568);
+		border-color: var(--qalcuity-border-color, #e2e8f0);
+	}
+
+	.qalcuity-btn-outline:hover {
+		background: var(--qalcuity-surface-bg, #f7fafc);
+	}
+
+	.qalcuity-btn-lg {
+		padding: 12px 24px;
+		font-size: 15px;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.qalcuity-pc-container {
+			padding: 16px 12px;
+		}
+
+		.qalcuity-pc-title {
+			font-size: 22px;
+		}
+
+		.qalcuity-pc-header {
+			flex-direction: column;
+			gap: 12px;
+		}
+
+		.qalcuity-pc-plans-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.qalcuity-pc-current-info {
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		.qalcuity-pc-history-item {
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.qalcuity-pc-history-right {
+			flex-direction: row;
+			align-items: center;
+		}
+
+		.qalcuity-pc-preview-row {
+			font-size: 13px;
+		}
+
+		.qalcuity-pc-toast {
+			left: 16px;
+			right: 16px;
+			bottom: 16px;
+		}
+	}
+</style>
+{% endblock %}
