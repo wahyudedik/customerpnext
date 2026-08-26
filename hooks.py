@@ -36,6 +36,21 @@ override_website_page_render_context = {
 }
 
 # =============================================================================
+# Website Context — override ERPNext website branding defaults
+# =============================================================================
+website_context = {
+    "favicon": "/assets/qalcuity/images/logo-dark.png",
+    "splash_image": "/assets/qalcuity/images/logo-dark.png",
+    "app_name": "Qalcuity ERP",
+    "app_logo": "/assets/qalcuity/images/logo-dark.png",
+}
+
+# =============================================================================
+# Website Script — inject JS/CSS into ALL website pages (including login)
+# =============================================================================
+website_script = "qalcuity.qalcuity.website_script.get_website_script"
+
+# =============================================================================
 # Doc Events — Audit Log & Lifecycle Hooks
 # =============================================================================
 doc_events = {
@@ -142,6 +157,8 @@ fixtures = [
             ["name", "in", [
                 "Website Settings-app_name",
                 "Website Settings-app_logo",
+                "Website Settings-favicon",
+                "Website Settings-splash_image",
                 "System Settings-setup_wizard_completed",
             ]],
         ],
