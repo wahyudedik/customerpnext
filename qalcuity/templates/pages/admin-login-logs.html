@@ -1,0 +1,908 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
+<div class="qalcuity-ll-container">
+	<!-- Header -->
+	<div class="qalcuity-ll-header">
+		<div class="qalcuity-ll-header-left">
+			<h1 class="qalcuity-ll-title">
+				<span class="octicon octicon-eye"></span> Login Audit Trail
+			</h1>
+			<p class="qalcuity-ll-subtitle">Monitoring semua percobaan login untuk keamanan sistem</p>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="ll-loading" class="qalcuity-ll-loading">
+		<div class="qalcuity-ll-spinner"></div>
+		<p>Memuat data login logs...</p>
+	</div>
+
+	<!-- Content -->
+	<div id="ll-content" style="display: none;">
+
+		<!-- Stats Cards -->
+		<div class="qalcuity-ll-stats" id="ll-stats">
+			<div class="qalcuity-ll-stat-card">
+				<div class="qalcuity-ll-stat-icon">
+					<span class="octicon octicon-sign-in"></span>
+				</div>
+				<div class="qalcuity-ll-stat-info">
+					<span class="qalcuity-ll-stat-value" id="ll-total-today">0</span>
+					<span class="qalcuity-ll-stat-label">Percobaan Hari Ini</span>
+				</div>
+			</div>
+			<div class="qalcuity-ll-stat-card qalcuity-ll-stat-danger">
+				<div class="qalcuity-ll-stat-icon">
+					<span class="octicon octicon-x-circle"></span>
+				</div>
+				<div class="qalcuity-ll-stat-info">
+					<span class="qalcuity-ll-stat-value" id="ll-failed-today">0</span>
+					<span class="qalcuity-ll-stat-label">Gagal Hari Ini</span>
+				</div>
+			</div>
+			<div class="qalcuity-ll-stat-card qalcuity-ll-stat-warning">
+				<div class="qalcuity-ll-stat-icon">
+					<span class="octicon octicon-shield"></span>
+				</div>
+				<div class="qalcuity-ll-stat-info">
+					<span class="qalcuity-ll-stat-value" id="ll-blocked-today">0</span>
+					<span class="qalcuity-ll-stat-label">Blocked Hari Ini</span>
+				</div>
+			</div>
+			<div class="qalcuity-ll-stat-card qalcuity-ll-stat-info">
+				<div class="qalcuity-ll-stat-icon">
+					<span class="octicon octicon-globe"></span>
+				</div>
+				<div class="qalcuity-ll-stat-info">
+					<span class="qalcuity-ll-stat-value" id="ll-unique-ips">0</span>
+					<span class="qalcuity-ll-stat-label">IP Unik Hari Ini</span>
+				</div>
+			</div>
+			<div class="qalcuity-ll-stat-card qalcuity-ll-stat-success">
+				<div class="qalcuity-ll-stat-icon">
+					<span class="octicon octicon-check"></span>
+				</div>
+				<div class="qalcuity-ll-stat-info">
+					<span class="qalcuity-ll-stat-value" id="ll-success-rate">100%</span>
+					<span class="qalcuity-ll-stat-label">Success Rate</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Failed Attempts Chart -->
+		<div class="qalcuity-ll-chart-section">
+			<h3 class="qalcuity-ll-section-title">
+				<span class="octicon octicon-graph"></span> Percobaan Gagal (7 Hari Terakhir)
+			</h3>
+			<div class="qalcuity-ll-chart-container" id="ll-chart">
+				<div class="qalcuity-ll-chart-bars" id="ll-chart-bars"></div>
+			</div>
+		</div>
+
+		<!-- Top Failed IPs -->
+		<div class="qalcuity-ll-top-ips-section" id="ll-top-ips-section" style="display: none;">
+			<h3 class="qalcuity-ll-section-title">
+				<span class="octicon octicon-alert"></span> IP dengan Percobaan Gagal Terbanyak
+			</h3>
+			<div class="qalcuity-ll-top-ips-list" id="ll-top-ips"></div>
+		</div>
+
+		<!-- Filter Bar -->
+		<div class="qalcuity-ll-filters">
+			<div class="qalcuity-ll-filter-group">
+				<label class="qalcuity-ll-filter-label">User</label>
+				<input type="text" id="ll-filter-user" class="qalcuity-ll-filter-input" placeholder="Cari username...">
+			</div>
+			<div class="qalcuity-ll-filter-group">
+				<label class="qalcuity-ll-filter-label">Status</label>
+				<select id="ll-filter-status" class="qalcuity-ll-filter-select">
+					<option value="">Semua</option>
+					<option value="Success">Success</option>
+					<option value="Failed">Failed</option>
+					<option value="Blocked">Blocked</option>
+				</select>
+			</div>
+			<div class="qalcuity-ll-filter-group">
+				<label class="qalcuity-ll-filter-label">Dari Tanggal</label>
+				<input type="date" id="ll-filter-date-from" class="qalcuity-ll-filter-input">
+			</div>
+			<div class="qalcuity-ll-filter-group">
+				<label class="qalcuity-ll-filter-label">Sampai Tanggal</label>
+				<input type="date" id="ll-filter-date-to" class="qalcuity-ll-filter-input">
+			</div>
+			<button class="qalcuity-ll-btn qalcuity-ll-btn-primary" id="ll-btn-filter">
+				<span class="octicon octicon-search"></span> Filter
+			</button>
+			<button class="qalcuity-ll-btn qalcuity-ll-btn-outline" id="ll-btn-reset">
+				<span class="octicon octicon-x"></span> Reset
+			</button>
+		</div>
+
+		<!-- Login Logs Table -->
+		<div class="qalcuity-ll-table-wrapper">
+			<table class="qalcuity-ll-table">
+				<thead>
+					<tr>
+						<th>User</th>
+						<th>Status</th>
+						<th>Method</th>
+						<th>IP Address</th>
+						<th>User Agent</th>
+						<th>Failure Reason</th>
+						<th>Timestamp</th>
+					</tr>
+				</thead>
+				<tbody id="ll-table-body">
+				</tbody>
+			</table>
+		</div>
+
+		<!-- Empty State -->
+		<div class="qalcuity-ll-empty" id="ll-empty" style="display: none;">
+			<span class="octicon octicon-eye qalcuity-ll-empty-icon"></span>
+			<p>Tidak ada data login log ditemukan.</p>
+		</div>
+
+		<!-- Pagination -->
+		<div class="qalcuity-ll-pagination" id="ll-pagination" style="display: none;">
+			<button class="qalcuity-ll-btn qalcuity-ll-btn-outline" id="ll-btn-prev" disabled>
+				<span class="octicon octicon-chevron-left"></span> Sebelumnya
+			</button>
+			<span class="qalcuity-ll-page-info" id="ll-page-info">Halaman 1</span>
+			<button class="qalcuity-ll-btn qalcuity-ll-btn-outline" id="ll-btn-next">
+				Selanjutnya <span class="octicon octicon-chevron-right"></span>
+			</button>
+		</div>
+	</div>
+</div>
+
+<style>
+	.qalcuity-ll-container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 20px;
+	}
+
+	.qalcuity-ll-header {
+		margin-bottom: 24px;
+	}
+
+	.qalcuity-ll-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--qalcuity-text);
+		margin: 0 0 4px 0;
+	}
+
+	.qalcuity-ll-subtitle {
+		color: var(--qalcuity-text-muted);
+		margin: 0;
+		font-size: 0.9rem;
+	}
+
+	.qalcuity-ll-loading {
+		text-align: center;
+		padding: 60px 20px;
+		color: var(--qalcuity-text-muted);
+	}
+
+	.qalcuity-ll-spinner {
+		width: 36px;
+		height: 36px;
+		border: 3px solid var(--qalcuity-border);
+		border-top-color: var(--qalcuity-primary);
+		border-radius: 50%;
+		animation: ll-spin 0.8s linear infinite;
+		margin: 0 auto 12px;
+	}
+
+	@keyframes ll-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	/* Stats Cards */
+	.qalcuity-ll-stats {
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 16px;
+		margin-bottom: 24px;
+	}
+
+	.qalcuity-ll-stat-card {
+		background: var(--qalcuity-bg-card);
+		border: 1px solid var(--qalcuity-border);
+		border-radius: var(--qalcuity-radius);
+		padding: 16px;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		box-shadow: var(--qalcuity-shadow);
+	}
+
+	.qalcuity-ll-stat-icon {
+		width: 40px;
+		height: 40px;
+		border-radius: var(--qalcuity-radius);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.2rem;
+		background: var(--qalcuity-bg);
+		color: var(--qalcuity-primary);
+	}
+
+	.qalcuity-ll-stat-danger .qalcuity-ll-stat-icon {
+		color: var(--qalcuity-danger);
+		background: rgba(220, 53, 69, 0.1);
+	}
+
+	.qalcuity-ll-stat-warning .qalcuity-ll-stat-icon {
+		color: var(--qalcuity-warning);
+		background: rgba(255, 193, 7, 0.1);
+	}
+
+	.qalcuity-ll-stat-info .qalcuity-ll-stat-icon {
+		color: var(--qalcuity-info);
+		background: rgba(23, 162, 184, 0.1);
+	}
+
+	.qalcuity-ll-stat-success .qalcuity-ll-stat-icon {
+		color: var(--qalcuity-success);
+		background: rgba(40, 167, 69, 0.1);
+	}
+
+	.qalcuity-ll-stat-info {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.qalcuity-ll-stat-value {
+		font-size: 1.4rem;
+		font-weight: 700;
+		color: var(--qalcuity-text);
+		line-height: 1.2;
+	}
+
+	.qalcuity-ll-stat-label {
+		font-size: 0.75rem;
+		color: var(--qalcuity-text-muted);
+		margin-top: 2px;
+	}
+
+	/* Chart Section */
+	.qalcuity-ll-chart-section {
+		background: var(--qalcuity-bg-card);
+		border: 1px solid var(--qalcuity-border);
+		border-radius: var(--qalcuity-radius);
+		padding: 20px;
+		margin-bottom: 24px;
+		box-shadow: var(--qalcuity-shadow);
+	}
+
+	.qalcuity-ll-section-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--qalcuity-text);
+		margin: 0 0 16px 0;
+	}
+
+	.qalcuity-ll-chart-container {
+		position: relative;
+	}
+
+	.qalcuity-ll-chart-bars {
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+		height: 120px;
+		padding: 0 4px;
+	}
+
+	.qalcuity-ll-chart-bar-wrapper {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.qalcuity-ll-chart-bar {
+		width: 100%;
+		max-width: 48px;
+		background: var(--qalcuity-danger);
+		border-radius: 4px 4px 0 0;
+		min-height: 2px;
+		transition: height 0.3s ease;
+		opacity: 0.8;
+	}
+
+	.qalcuity-ll-chart-bar:hover {
+		opacity: 1;
+	}
+
+	.qalcuity-ll-chart-bar-count {
+		font-size: 0.7rem;
+		color: var(--qalcuity-text-muted);
+		font-weight: 600;
+	}
+
+	.qalcuity-ll-chart-bar-date {
+		font-size: 0.65rem;
+		color: var(--qalcuity-text-muted);
+		text-align: center;
+		word-break: break-all;
+	}
+
+	/* Top IPs */
+	.qalcuity-ll-top-ips-section {
+		background: var(--qalcuity-bg-card);
+		border: 1px solid var(--qalcuity-border);
+		border-radius: var(--qalcuity-radius);
+		padding: 20px;
+		margin-bottom: 24px;
+		box-shadow: var(--qalcuity-shadow);
+	}
+
+	.qalcuity-ll-top-ips-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.qalcuity-ll-ip-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 6px 12px;
+		background: rgba(220, 53, 69, 0.08);
+		border: 1px solid rgba(220, 53, 69, 0.2);
+		border-radius: 20px;
+		font-size: 0.8rem;
+		color: var(--qalcuity-danger);
+		font-family: monospace;
+	}
+
+	.qalcuity-ll-ip-count {
+		font-weight: 700;
+	}
+
+	/* Filters */
+	.qalcuity-ll-filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		align-items: flex-end;
+		margin-bottom: 20px;
+		padding: 16px;
+		background: var(--qalcuity-bg-card);
+		border: 1px solid var(--qalcuity-border);
+		border-radius: var(--qalcuity-radius);
+	}
+
+	.qalcuity-ll-filter-group {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.qalcuity-ll-filter-label {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--qalcuity-text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.qalcuity-ll-filter-input,
+	.qalcuity-ll-filter-select {
+		padding: 8px 12px;
+		border: 1px solid var(--qalcuity-border);
+		border-radius: var(--qalcuity-radius-sm);
+		background: var(--qalcuity-bg);
+		color: var(--qalcuity-text);
+		font-size: 0.85rem;
+		min-width: 140px;
+	}
+
+	/* Buttons */
+	.qalcuity-ll-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 16px;
+		border: 1px solid var(--qalcuity-border);
+		border-radius: var(--qalcuity-radius-sm);
+		cursor: pointer;
+		font-size: 0.85rem;
+		font-weight: 500;
+		transition: all 0.15s ease;
+		background: var(--qalcuity-bg);
+		color: var(--qalcuity-text);
+	}
+
+	.qalcuity-ll-btn:hover {
+		background: var(--qalcuity-border);
+	}
+
+	.qalcuity-ll-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.qalcuity-ll-btn-primary {
+		background: var(--qalcuity-primary);
+		color: #fff;
+		border-color: var(--qalcuity-primary);
+	}
+
+	.qalcuity-ll-btn-primary:hover {
+		background: var(--qalcuity-primary-dark);
+	}
+
+	.qalcuity-ll-btn-outline {
+		background: transparent;
+	}
+
+	/* Table */
+	.qalcuity-ll-table-wrapper {
+		overflow-x: auto;
+		background: var(--qalcuity-bg-card);
+		border: 1px solid var(--qalcuity-border);
+		border-radius: var(--qalcuity-radius);
+		box-shadow: var(--qalcuity-shadow);
+	}
+
+	.qalcuity-ll-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.85rem;
+	}
+
+	.qalcuity-ll-table thead {
+		background: var(--qalcuity-bg);
+		border-bottom: 2px solid var(--qalcuity-border);
+	}
+
+	.qalcuity-ll-table th {
+		padding: 12px 14px;
+		text-align: left;
+		font-weight: 600;
+		color: var(--qalcuity-text-muted);
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		white-space: nowrap;
+	}
+
+	.qalcuity-ll-table td {
+		padding: 10px 14px;
+		border-bottom: 1px solid var(--qalcuity-border);
+		color: var(--qalcuity-text);
+		vertical-align: middle;
+	}
+
+	.qalcuity-ll-table tbody tr:hover {
+		background: var(--qalcuity-bg);
+	}
+
+	.qalcuity-ll-table tbody tr:last-child td {
+		border-bottom: none;
+	}
+
+	/* Status Badge */
+	.qalcuity-ll-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 3px 10px;
+		border-radius: 12px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+
+	.qalcuity-ll-badge-success {
+		background: rgba(40, 167, 69, 0.1);
+		color: var(--qalcuity-success);
+		border: 1px solid rgba(40, 167, 69, 0.2);
+	}
+
+	.qalcuity-ll-badge-failed {
+		background: rgba(220, 53, 69, 0.1);
+		color: var(--qalcuity-danger);
+		border: 1px solid rgba(220, 53, 69, 0.2);
+	}
+
+	.qalcuity-ll-badge-blocked {
+		background: rgba(255, 193, 7, 0.1);
+		color: #e67e00;
+		border: 1px solid rgba(255, 193, 7, 0.3);
+	}
+
+	/* Method Badge */
+	.qalcuity-ll-method {
+		font-size: 0.75rem;
+		padding: 2px 8px;
+		border-radius: 10px;
+		background: var(--qalcuity-bg);
+		color: var(--qalcuity-text-muted);
+		border: 1px solid var(--qalcuity-border);
+		white-space: nowrap;
+	}
+
+	/* IP Cell */
+	.qalcuity-ll-ip {
+		font-family: monospace;
+		font-size: 0.8rem;
+	}
+
+	/* User Agent Cell */
+	.qalcuity-ll-ua {
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 0.75rem;
+		color: var(--qalcuity-text-muted);
+	}
+
+	/* Failure Reason */
+	.qalcuity-ll-failure {
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 0.8rem;
+		color: var(--qalcuity-danger);
+	}
+
+	/* Timestamp */
+	.qalcuity-ll-timestamp {
+		white-space: nowrap;
+		font-size: 0.8rem;
+		color: var(--qalcuity-text-muted);
+	}
+
+	/* Empty State */
+	.qalcuity-ll-empty {
+		text-align: center;
+		padding: 40px 20px;
+		color: var(--qalcuity-text-muted);
+	}
+
+	.qalcuity-ll-empty-icon {
+		font-size: 2.5rem;
+		margin-bottom: 12px;
+		display: block;
+		opacity: 0.4;
+	}
+
+	/* Pagination */
+	.qalcuity-ll-pagination {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 16px;
+		margin-top: 20px;
+		padding: 12px;
+	}
+
+	.qalcuity-ll-page-info {
+		font-size: 0.85rem;
+		color: var(--qalcuity-text-muted);
+	}
+
+	/* ===========================
+	   Responsive Mobile
+	   =========================== */
+	@media (max-width: 768px) {
+		.qalcuity-ll-container {
+			padding: 12px;
+		}
+
+		.qalcuity-ll-stats {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 10px;
+		}
+
+		.qalcuity-ll-stat-card {
+			padding: 12px;
+		}
+
+		.qalcuity-ll-stat-value {
+			font-size: 1.1rem;
+		}
+
+		.qalcuity-ll-filters {
+			flex-direction: column;
+		}
+
+		.qalcuity-ll-filter-group {
+			width: 100%;
+		}
+
+		.qalcuity-ll-filter-input,
+		.qalcuity-ll-filter-select {
+			min-width: auto;
+			width: 100%;
+		}
+
+		.qalcuity-ll-btn {
+			width: 100%;
+			justify-content: center;
+		}
+
+		.qalcuity-ll-chart-bars {
+			height: 80px;
+		}
+
+		.qalcuity-ll-table {
+			font-size: 0.75rem;
+		}
+
+		.qalcuity-ll-table th,
+		.qalcuity-ll-table td {
+			padding: 8px 10px;
+		}
+
+		.qalcuity-ll-ua {
+			max-width: 120px;
+		}
+
+		.qalcuity-ll-failure {
+			max-width: 120px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.qalcuity-ll-stats {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
+
+<script>
+	(function () {
+		var PAGE_SIZE = 20;
+		var currentPage = 0;
+		var currentFilters = {};
+
+		// --- Load Stats ---
+		function loadStats() {
+			frappe.call({
+				method: 'qalcuity.api.login_logs.get_login_stats',
+				callback: function (r) {
+					if (r.message) {
+						var s = r.message;
+						document.getElementById('ll-total-today').textContent = s.total_today || 0;
+						document.getElementById('ll-failed-today').textContent = s.failed_today || 0;
+						document.getElementById('ll-blocked-today').textContent = s.blocked_today || 0;
+						document.getElementById('ll-unique-ips').textContent = s.unique_ips_today || 0;
+						document.getElementById('ll-success-rate').textContent = (s.success_rate || 100) + '%';
+
+						// Render chart
+						renderChart(s.failed_last_7 || []);
+
+						// Render top IPs
+						renderTopIps(s.top_failed_ips || []);
+					}
+				}
+			});
+		}
+
+		// --- Render Chart ---
+		function renderChart(data) {
+			var container = document.getElementById('ll-chart-bars');
+			container.innerHTML = '';
+			var maxVal = Math.max.apply(null, data.map(function (d) { return d.count; }).concat([1]));
+
+			data.forEach(function (item) {
+				var wrapper = document.createElement('div');
+				wrapper.className = 'qalcuity-ll-chart-bar-wrapper';
+
+				var countEl = document.createElement('span');
+				countEl.className = 'qalcuity-ll-chart-bar-count';
+				countEl.textContent = item.count;
+
+				var bar = document.createElement('div');
+				bar.className = 'qalcuity-ll-chart-bar';
+				bar.style.height = Math.max((item.count / maxVal) * 100, 2) + 'px';
+				bar.title = item.date + ': ' + item.count + ' gagal';
+
+				var dateEl = document.createElement('span');
+				dateEl.className = 'qalcuity-ll-chart-bar-date';
+				var d = new Date(item.date);
+				var days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+				dateEl.textContent = days[d.getDay()] + '\n' + d.getDate() + '/' + (d.getMonth() + 1);
+
+				wrapper.appendChild(countEl);
+				wrapper.appendChild(bar);
+				wrapper.appendChild(dateEl);
+				container.appendChild(wrapper);
+			});
+		}
+
+		// --- Render Top IPs ---
+		function renderTopIps(ips) {
+			var section = document.getElementById('ll-top-ips-section');
+			var container = document.getElementById('ll-top-ips');
+			if (!ips || ips.length === 0) {
+				section.style.display = 'none';
+				return;
+			}
+			section.style.display = 'block';
+			container.innerHTML = '';
+			ips.forEach(function (ip) {
+				var badge = document.createElement('div');
+				badge.className = 'qalcuity-ll-ip-badge';
+				badge.innerHTML = '<span>' + escapeHtml(ip.ip_address) + '</span><span class="qalcuity-ll-ip-count">(' + ip.count + ')</span>';
+				container.appendChild(badge);
+			});
+		}
+
+		// --- Load Logs ---
+		function loadLogs(resetPage) {
+			if (resetPage) currentPage = 0;
+
+			var args = {
+				limit_page_length: PAGE_SIZE,
+				start: currentPage * PAGE_SIZE,
+			};
+
+			if (currentFilters.user) args.user = currentFilters.user;
+			if (currentFilters.status) args.status = currentFilters.status;
+			if (currentFilters.from_date) args.from_date = currentFilters.from_date;
+			if (currentFilters.to_date) args.to_date = currentFilters.to_date;
+
+			frappe.call({
+				method: 'qalcuity.api.login_logs.get_login_logs',
+				args: args,
+				callback: function (r) {
+					document.getElementById('ll-loading').style.display = 'none';
+					document.getElementById('ll-content').style.display = 'block';
+
+					if (r.message) {
+						renderTable(r.message.logs);
+						updatePagination(r.message.total);
+					}
+				},
+				error: function () {
+					document.getElementById('ll-loading').style.display = 'none';
+					document.getElementById('ll-content').style.display = 'block';
+				}
+			});
+		}
+
+		// --- Render Table ---
+		function renderTable(logs) {
+			var tbody = document.getElementById('ll-table-body');
+			var empty = document.getElementById('ll-empty');
+			tbody.innerHTML = '';
+
+			if (!logs || logs.length === 0) {
+				empty.style.display = 'block';
+				return;
+			}
+			empty.style.display = 'none';
+
+			logs.forEach(function (log) {
+				var tr = document.createElement('tr');
+
+				// User
+				var tdUser = document.createElement('td');
+				tdUser.innerHTML = '<strong>' + escapeHtml(log.user) + '</strong>';
+				tr.appendChild(tdUser);
+
+				// Status badge
+				var tdStatus = document.createElement('td');
+				var badgeClass = 'qalcuity-ll-badge-success';
+				var badgeIcon = 'octicon-check';
+				if (log.status === 'Failed') { badgeClass = 'qalcuity-ll-badge-failed'; badgeIcon = 'octicon-x'; }
+				if (log.status === 'Blocked') { badgeClass = 'qalcuity-ll-badge-blocked'; badgeIcon = 'octicon-alert'; }
+				tdStatus.innerHTML = '<span class="qalcuity-ll-badge ' + badgeClass + '"><span class="octicon ' + badgeIcon + '"></span> ' + escapeHtml(log.status) + '</span>';
+				tr.appendChild(tdStatus);
+
+				// Method
+				var tdMethod = document.createElement('td');
+				tdMethod.innerHTML = '<span class="qalcuity-ll-method">' + escapeHtml(log.login_method || 'Password') + '</span>';
+				tr.appendChild(tdMethod);
+
+				// IP
+				var tdIp = document.createElement('td');
+				tdIp.innerHTML = '<span class="qalcuity-ll-ip">' + escapeHtml(log.ip_address || '-') + '</span>';
+				tr.appendChild(tdIp);
+
+				// User Agent
+				var tdUa = document.createElement('td');
+				tdUa.innerHTML = '<span class="qalcuity-ll-ua" title="' + escapeHtml(log.user_agent || '') + '">' + escapeHtml(log.user_agent || '-') + '</span>';
+				tr.appendChild(tdUa);
+
+				// Failure Reason
+				var tdFail = document.createElement('td');
+				tdFail.innerHTML = '<span class="qalcuity-ll-failure" title="' + escapeHtml(log.failure_reason || '') + '">' + escapeHtml(log.failure_reason || '-') + '</span>';
+				tr.appendChild(tdFail);
+
+				// Timestamp
+				var tdTs = document.createElement('td');
+				tdTs.innerHTML = '<span class="qalcuity-ll-timestamp">' + formatDateTime(log.timestamp) + '</span>';
+				tr.appendChild(tdTs);
+
+				tbody.appendChild(tr);
+			});
+		}
+
+		// --- Update Pagination ---
+		function updatePagination(total) {
+			var totalPages = Math.ceil(total / PAGE_SIZE);
+			var pagination = document.getElementById('ll-pagination');
+			var pageInfo = document.getElementById('ll-page-info');
+			var btnPrev = document.getElementById('ll-btn-prev');
+			var btnNext = document.getElementById('ll-btn-next');
+
+			if (totalPages <= 1) {
+				pagination.style.display = 'none';
+				return;
+			}
+
+			pagination.style.display = 'flex';
+			pageInfo.textContent = 'Halaman ' + (currentPage + 1) + ' dari ' + totalPages + ' (' + total + ' total)';
+			btnPrev.disabled = currentPage === 0;
+			btnNext.disabled = currentPage >= totalPages - 1;
+		}
+
+		// --- Filter Handlers ---
+		document.getElementById('ll-btn-filter').addEventListener('click', function () {
+			currentFilters = {
+				user: document.getElementById('ll-filter-user').value.trim(),
+				status: document.getElementById('ll-filter-status').value,
+				from_date: document.getElementById('ll-filter-date-from').value,
+				to_date: document.getElementById('ll-filter-date-to').value,
+			};
+			loadLogs(true);
+		});
+
+		document.getElementById('ll-btn-reset').addEventListener('click', function () {
+			document.getElementById('ll-filter-user').value = '';
+			document.getElementById('ll-filter-status').value = '';
+			document.getElementById('ll-filter-date-from').value = '';
+			document.getElementById('ll-filter-date-to').value = '';
+			currentFilters = {};
+			loadLogs(true);
+		});
+
+		document.getElementById('ll-btn-prev').addEventListener('click', function () {
+			if (currentPage > 0) { currentPage--; loadLogs(false); }
+		});
+
+		document.getElementById('ll-btn-next').addEventListener('click', function () {
+			currentPage++;
+			loadLogs(false);
+		});
+
+		// --- Helpers ---
+		function escapeHtml(str) {
+			if (!str) return '';
+			var div = document.createElement('div');
+			div.textContent = str;
+			return div.innerHTML;
+		}
+
+		function formatDateTime(dtStr) {
+			if (!dtStr) return '-';
+			var d = new Date(dtStr);
+			if (isNaN(d.getTime())) return dtStr;
+			var pad = function (n) { return n < 10 ? '0' + n : n; };
+			return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' '
+				+ pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+		}
+
+		// --- Init ---
+		loadStats();
+		loadLogs(true);
+	})();
+</script>
+{% endblock %}

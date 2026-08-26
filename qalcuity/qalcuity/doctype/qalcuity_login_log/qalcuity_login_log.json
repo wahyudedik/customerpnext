@@ -1,0 +1,140 @@
+{
+    "actions": [],
+    "autoname": "format:LOG-{YYYYMMDD}-{####}",
+    "creation": "2026-08-26 17:39:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "user",
+        "customer",
+        "status",
+        "login_method",
+        "column_break_01",
+        "ip_address",
+        "timestamp",
+        "session_id",
+        "section_break_details",
+        "user_agent",
+        "failure_reason"
+    ],
+    "fields": [
+        {
+            "fieldname": "user",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "User",
+            "options": "User",
+            "reqd": 1
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Customer",
+            "options": "Customer"
+        },
+        {
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "options": "Success\nFailed\nBlocked",
+            "reqd": 1
+        },
+        {
+            "default": "Password",
+            "fieldname": "login_method",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Login Method",
+            "options": "Password\n2FA\nBackup Code\nAPI Key"
+        },
+        {
+            "fieldname": "column_break_01",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "ip_address",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "IP Address"
+        },
+        {
+            "default": "Now",
+            "fieldname": "timestamp",
+            "fieldtype": "Datetime",
+            "in_list_view": 1,
+            "label": "Timestamp",
+            "reqd": 1
+        },
+        {
+            "fieldname": "session_id",
+            "fieldtype": "Data",
+            "label": "Session ID",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_details",
+            "fieldtype": "Section Break",
+            "label": "Details"
+        },
+        {
+            "fieldname": "user_agent",
+            "fieldtype": "Small Text",
+            "label": "User Agent"
+        },
+        {
+            "fieldname": "failure_reason",
+            "fieldtype": "Small Text",
+            "label": "Failure Reason"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2026-08-26 17:39:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Login Log",
+    "naming_rule": "Expression",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        },
+        {
+            "role": "Customer",
+            "read": 1,
+            "write": 0,
+            "create": 0,
+            "delete": 0
+        }
+    ],
+    "search_fields": "user,customer,status,ip_address",
+    "sort_field": "timestamp",
+    "sort_order": "DESC",
+    "states": [],
+    "title_field": "status",
+    "track_changes": 0
+}

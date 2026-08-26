@@ -36,6 +36,11 @@ override_website_page_render_context = {
 }
 
 # =============================================================================
+# Login Manager Complete — log login attempts (success/fail)
+# =============================================================================
+login_manager_complete = "qalcuity.qalcuity.login.on_login_complete"
+
+# =============================================================================
 # Website Context — override ERPNext website branding defaults
 # =============================================================================
 website_context = {
@@ -78,6 +83,8 @@ has_permission = {
     "Qalcuity Tenant": "qalcuity.qalcuity.doctype.qalcuity_tenant.qalcuity_tenant.has_permission",
     "Qalcuity Notification": "qalcuity.qalcuity.doctype.qalcuity_notification.qalcuity_notification.has_permission",
     "Qalcuity Plan Change": "qalcuity.qalcuity.doctype.qalcuity_plan_change.qalcuity_plan_change.has_permission",
+    "Qalcuity Api Key": "qalcuity.qalcuity.doctype.qalcuity_api_key.qalcuity_api_key.has_permission",
+    "Qalcuity Login Log": "qalcuity.qalcuity.doctype.qalcuity_login_log.qalcuity_login_log.has_permission",
     # ERPNext DocTypes — tenant isolation
     "Customer": "qalcuity.qalcuity.erpnext_hooks.has_customer_permission",
     "Sales Order": "qalcuity.qalcuity.erpnext_hooks.has_sales_order_permission",
@@ -93,6 +100,7 @@ get_permission_query_conditions = {
     "Qalcuity Payment": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
     "Qalcuity Tenant": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
     "Qalcuity Plan Change": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
+    "Qalcuity Login Log": "qalcuity.qalcuity.isolation.get_permission_query_conditions",
     # ERPNext DocTypes — tenant isolation via customer field
     "Customer": "qalcuity.qalcuity.erpnext_hooks.get_customer_permission_query_conditions",
     "Sales Order": "qalcuity.qalcuity.erpnext_hooks.get_sales_order_permission_query_conditions",
@@ -161,12 +169,20 @@ website_route_rules = [
         "to_route": "admin-health",
     },
     {
+        "from_route": "/admin-login-logs",
+        "to_route": "admin-login-logs",
+    },
+    {
         "from_route": "/admin-reports",
         "to_route": "admin-reports",
     },
     {
         "from_route": "/plan-change",
         "to_route": "plan-change",
+    },
+    {
+        "from_route": "/api-keys",
+        "to_route": "api-keys",
     },
 ]
 

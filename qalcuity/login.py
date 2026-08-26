@@ -71,3 +71,72 @@ def login(context):
     context.title = "Qalcuity ERP - Login"
     context.no_header = True
     context.no_breadcrumbs = True
+
+
+def log_login_attempt(user, status, ip_address=None, user_agent=None, login_method="Password", failure_reason=None):
+    """Log login attempt ke Qalcuity Login Log.
+
+    Args:
+        user: Username yang mencoba login
+        status: Success | Failed | Blocked
+        ip_address: IP address client
+        user_agent: Browser/OS info
+        login_method: Password | 2FA | Backup Code | API Key
+        failure_reason: Alasan kegagalan (jika gagal)
+    """
+    try:
+        # Get customer via Portal User
+        customer = frappe.db.get_value("Portal User", {"user": user}, "parent")
+
+        # Get IP from request if not provided
+        if not ip_address:
+            ip_address = frappe.local.request_ip if hasattr(frappe.local, "request_ip") else None
+        if not ip_address:
+            try:
+                ip_address = frappe.get_request_header("X-Forwarded-For") or frappe.get_request_header("Remote-Addr")
+            except Exception:
+                ip_address = None
+
+        # Get user agent from request if not provided
+        if not user_agent:
+            try:
+                user_agent = frappe.get_request_header("User-Agent")
+            except Exception:
+                user_agent = None
+
+        # Get session ID if login was successful
+        session_id = None
+        if status == "Success":
+            try:
+                session_id = frappe.session.sid
+            except Exception:
+                pass
+
+        frappe.get_doc({
+            "doctype": "Qalcuity Login Log",
+            "user": user,
+            "customer": customer or None,
+            "status": status,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+            "login_method": login_method,
+            "failure_reason": failure_reason,
+            "session_id": session_id,
+        }).insert(ignore_permissions=True)
+        frappe.db.commit()
+    except Exception:
+        pass  # Jangan crash jika logging gagal
+
+
+def on_login_complete(login_manager):
+    """Hook setelah login selesai — log login attempt.
+
+    Registered via hooks.py: login_manager_complete
+    """
+    user = login_manager.user
+    status = "Success" if login_manager.user != "Guest" else "Failed"
+    log_login_attempt(
+        user=user,
+        status=status,
+        login_method="Password",
+    )
