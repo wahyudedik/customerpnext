@@ -1,6 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
 <style>
 	/* ===== Checkout Page Styles ===== */
 	.qalcuity-checkout-container {
@@ -734,6 +735,8 @@
 					</h3>
 
 					<form id="checkout-form" enctype="multipart/form-data" novalidate>
+						<!-- Hidden CSRF token -->
+						<input type="hidden" name="csrf_token" value="{{ frappe.session.csrf_token }}">
 						<!-- Hidden plan field -->
 						<input type="hidden" id="plan-name" value="{{ plan_name }}">
 

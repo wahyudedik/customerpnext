@@ -167,12 +167,16 @@ def get_payment_status(payment_name):
 
 
 @frappe.whitelist()
-def get_my_payments():
+def get_my_payments(page=1, page_size=10):
     """
-    Get payments for the current user (Customer role).
+    Get payments for the current user (Customer role) with pagination.
+
+    Args:
+        page: Page number (default: 1)
+        page_size: Items per page (default: 10)
 
     Returns:
-        list: List of payment records
+        dict: {data: [...], total: int, page: int, page_size: int, total_pages: int}
     """
     user = frappe.session.user
 
@@ -189,9 +193,28 @@ def get_my_payments():
     )
 
     if not subscriptions:
-        return []
+        return {
+            "data": [],
+            "total": 0,
+            "page": 1,
+            "page_size": int(page_size),
+            "total_pages": 0,
+        }
 
-    # Get payments for these subscriptions
+    # Validate pagination params
+    page = max(1, int(page))
+    page_size = max(1, min(50, int(page_size)))
+    start = (page - 1) * page_size
+
+    # Get total count
+    total = frappe.db.count(
+        "Qalcuity Payment",
+        filters={"subscription": ["in", subscriptions]},
+    )
+
+    total_pages = max(1, -(-total // page_size))  # Ceiling division
+
+    # Get paginated payments
     payments = frappe.get_all(
         "Qalcuity Payment",
         filters={"subscription": ["in", subscriptions]},
@@ -206,9 +229,17 @@ def get_my_payments():
             "reference_number",
         ],
         order_by="creation desc",
+        limit_page_length=page_size,
+        start=start,
     )
 
-    return payments
+    return {
+        "data": payments,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages,
+    }
 
 
 @frappe.whitelist()

@@ -1,6 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
 <div class="qalcuity-my-payments-container">
 	<!-- Header -->
 	<div class="qalcuity-my-payments-header">
@@ -51,6 +52,17 @@
 	<!-- Payments List -->
 	<div id="payments-list" class="qalcuity-my-payments-list" style="display: none;"></div>
 
+	<!-- Pagination -->
+	<div id="payments-pagination" class="qalcuity-my-payments-pagination" style="display: none;">
+		<button id="mp-btn-prev" class="qalcuity-btn qalcuity-btn-outline" onclick="changePage(-1)" disabled>
+			<span class="octicon octicon-chevron-left"></span> Sebelumnya
+		</button>
+		<div id="mp-page-numbers" class="qalcuity-my-payments-page-numbers"></div>
+		<button id="mp-btn-next" class="qalcuity-btn qalcuity-btn-outline" onclick="changePage(1)">
+			Selanjutnya <span class="octicon octicon-chevron-right"></span>
+		</button>
+	</div>
+
 	<!-- Empty State -->
 	<div id="payments-empty" class="qalcuity-my-payments-empty" style="display: none;">
 		<div class="qalcuity-my-payments-empty-icon">
@@ -73,7 +85,90 @@
 	</div>
 </div>
 
+<style>
+	/* ===== Pagination Styles ===== */
+	.qalcuity-my-payments-pagination {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		margin-top: 24px;
+		padding: 16px 0;
+	}
+
+	.qalcuity-my-payments-page-numbers {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.qalcuity-my-payments-page-numbers button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 36px;
+		height: 36px;
+		padding: 0 8px;
+		font-size: 13px;
+		font-weight: 500;
+		border: 1px solid var(--border-color, #e2e8f0);
+		border-radius: 8px;
+		background: var(--card-bg, #ffffff);
+		color: var(--text-color, #1a202c);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.qalcuity-my-payments-page-numbers button:hover:not(.active):not(:disabled) {
+		border-color: var(--primary, #6366f1);
+		color: var(--primary, #6366f1);
+		background: rgba(99, 102, 241, 0.04);
+	}
+
+	.qalcuity-my-payments-page-numbers button.active {
+		background: var(--primary, #6366f1);
+		color: #ffffff;
+		border-color: var(--primary, #6366f1);
+		font-weight: 600;
+	}
+
+	.qalcuity-my-payments-page-numbers button:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.qalcuity-my-payments-page-ellipsis {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 36px;
+		height: 36px;
+		font-size: 13px;
+		color: var(--text-light, #718096);
+	}
+
+	/* Responsive pagination */
+	@media (max-width: 640px) {
+		.qalcuity-my-payments-pagination {
+			flex-wrap: wrap;
+			gap: 6px;
+		}
+
+		.qalcuity-my-payments-page-numbers button {
+			min-width: 32px;
+			height: 32px;
+			font-size: 12px;
+		}
+	}
+</style>
+
 <script>
+	var PAGE_SIZE = 10;
+	var currentPage = 1;
+	var totalCount = 0;
+	var totalPages = 0;
+	var allStats = null; /* Track cumulative stats across all payments */
+
 	frappe.ready(function () {
 		// Show success alert if redirected after payment
 		var urlParams = new URLSearchParams(window.location.search);
@@ -96,25 +191,48 @@
 		var error = document.getElementById('payments-error');
 		var empty = document.getElementById('payments-empty');
 		var stats = document.getElementById('payments-stats');
+		var pagination = document.getElementById('payments-pagination');
 
 		loading.style.display = 'flex';
 		list.style.display = 'none';
 		error.style.display = 'none';
 		empty.style.display = 'none';
 		stats.style.display = 'none';
+		pagination.style.display = 'none';
 
 		frappe.call({
 			method: 'qalcuity.api.payment.get_my_payments',
+			args: {
+				page: currentPage,
+				page_size: PAGE_SIZE
+			},
 			callback: function (r) {
 				loading.style.display = 'none';
 
-				if (r.message && r.message.length > 0) {
-					renderPayments(r.message);
+				if (r.message) {
+					var data = r.message.data || [];
+					totalCount = r.message.total || 0;
+					totalPages = r.message.total_pages || 0;
+
+					if (data.length === 0 && currentPage === 1) {
+						empty.style.display = 'block';
+						return;
+					}
+
+					if (data.length === 0 && currentPage > 1) {
+						/* Went past last page, go back */
+						currentPage = 1;
+						loadPayments();
+						return;
+					}
+
+					renderPayments(data);
 					list.style.display = 'block';
 					stats.style.display = 'grid';
 					updateStats(r.message);
+					updatePagination();
 				} else {
-					empty.style.display = 'block';
+					error.style.display = 'block';
 				}
 			},
 			error: function (err) {
@@ -124,17 +242,18 @@
 		});
 	}
 
-	function updateStats(payments) {
-		var total = payments.length;
+	function updateStats(result) {
+		/* Use total from API for the "Total" stat; count status from current page */
+		var data = result.data || [];
 		var pending = 0, approved = 0, rejected = 0;
 
-		payments.forEach(function (p) {
+		data.forEach(function (p) {
 			if (p.status === 'Pending') pending++;
 			else if (p.status === 'Approved') approved++;
 			else if (p.status === 'Rejected') rejected++;
 		});
 
-		document.getElementById('stat-total').textContent = total;
+		document.getElementById('stat-total').textContent = result.total || 0;
 		document.getElementById('stat-pending').textContent = pending;
 		document.getElementById('stat-approved').textContent = approved;
 		document.getElementById('stat-rejected').textContent = rejected;
@@ -198,6 +317,81 @@
 		});
 
 		list.innerHTML = html;
+	}
+
+	function changePage(delta) {
+		currentPage += delta;
+		if (currentPage < 1) currentPage = 1;
+		if (currentPage > totalPages) currentPage = totalPages;
+		loadPayments();
+		/* Scroll to top of list */
+		var list = document.getElementById('payments-list');
+		if (list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
+	function goToPage(page) {
+		currentPage = page;
+		loadPayments();
+		var list = document.getElementById('payments-list');
+		if (list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
+	function updatePagination() {
+		var pagination = document.getElementById('payments-pagination');
+		var btnPrev = document.getElementById('mp-btn-prev');
+		var btnNext = document.getElementById('mp-btn-next');
+		var pageNumbers = document.getElementById('mp-page-numbers');
+
+		if (totalPages <= 1) {
+			pagination.style.display = 'none';
+			return;
+		}
+
+		pagination.style.display = 'flex';
+		btnPrev.disabled = currentPage <= 1;
+		btnNext.disabled = currentPage >= totalPages;
+
+		/* Build page number buttons with ellipsis */
+		var html = '';
+		var pages = getPageNumbers(currentPage, totalPages);
+		for (var i = 0; i < pages.length; i++) {
+			if (pages[i] === '...') {
+				html += '<span class="qalcuity-my-payments-page-ellipsis">…</span>';
+			} else {
+				var activeClass = pages[i] === currentPage ? ' active' : '';
+				html += '<button class="' + activeClass + '" onclick="goToPage(' + pages[i] + ')" ' +
+					(pages[i] === currentPage ? 'disabled' : '') + '>' + pages[i] + '</button>';
+			}
+		}
+		pageNumbers.innerHTML = html;
+	}
+
+	function getPageNumbers(current, total) {
+		if (total <= 7) {
+			var arr = [];
+			for (var i = 1; i <= total; i++) arr.push(i);
+			return arr;
+		}
+
+		var pages = [1];
+
+		if (current > 3) {
+			pages.push('...');
+		}
+
+		var start = Math.max(2, current - 1);
+		var end = Math.min(total - 1, current + 1);
+
+		for (var j = start; j <= end; j++) {
+			pages.push(j);
+		}
+
+		if (current < total - 2) {
+			pages.push('...');
+		}
+
+		pages.push(total);
+		return pages;
 	}
 
 	function formatNumber(num) {

@@ -1,6 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
 <div class="qalcuity-profile-container">
 	<!-- Header -->
 	<div class="qalcuity-profile-header">
@@ -43,6 +44,7 @@
 			</div>
 			<div class="qalcuity-profile-card-body">
 				<form id="profile-form" class="qalcuity-profile-form">
+					<input type="hidden" name="csrf_token" value="{{ frappe.session.csrf_token }}">
 					<div class="qalcuity-profile-form-grid">
 						<div class="qalcuity-form-group">
 							<label class="qalcuity-form-label">
@@ -91,6 +93,7 @@
 			</div>
 			<div class="qalcuity-profile-card-body">
 				<form id="password-form" class="qalcuity-profile-form">
+					<input type="hidden" name="csrf_token" value="{{ frappe.session.csrf_token }}">
 					<div class="qalcuity-profile-form-grid">
 						<div class="qalcuity-form-group">
 							<label class="qalcuity-form-label">
@@ -110,7 +113,7 @@
 							</label>
 							<div class="qalcuity-password-wrapper">
 								<input type="password" id="new-password" class="qalcuity-form-input"
-									placeholder="Masukkan password baru (min. 6 karakter)" autocomplete="new-password">
+									placeholder="Minimal 8 karakter, huruf + angka" autocomplete="new-password">
 								<button type="button" class="qalcuity-password-toggle" data-target="new-password">
 									<span class="octicon octicon-eye"></span>
 								</button>
@@ -267,8 +270,16 @@
 				showError('Password baru tidak boleh kosong.');
 				return;
 			}
-			if (newPwd.length < 6) {
-				showError('Password baru minimal 6 karakter.');
+			if (newPwd.length < 8) {
+				showError('Password baru minimal 8 karakter.');
+				return;
+			}
+			if (!/[a-zA-Z]/.test(newPwd)) {
+				showError('Password harus mengandung minimal satu huruf.');
+				return;
+			}
+			if (!/[0-9]/.test(newPwd)) {
+				showError('Password harus mengandung minimal satu angka.');
 				return;
 			}
 			if (newPwd !== confirmPwd) {
@@ -316,11 +327,11 @@
 
 			strengthEl.style.display = 'flex';
 			var score = 0;
-			if (pwd.length >= 6) score++;
-			if (pwd.length >= 10) score++;
-			if (/[A-Z]/.test(pwd)) score++;
+			if (pwd.length >= 8) score++;
+			if (pwd.length >= 12) score++;
+			if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
 			if (/[0-9]/.test(pwd)) score++;
-			if (/[^A-Za-z0-9]/.test(pwd)) score++;
+			if (/[^a-zA-Z0-9]/.test(pwd)) score++;
 
 			var levels = [
 				{ width: '20%', color: '#dc3545', text: 'Sangat Lemah' },
