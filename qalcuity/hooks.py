@@ -184,6 +184,10 @@ website_route_rules = [
         "from_route": "/api-keys",
         "to_route": "api-keys",
     },
+    {
+        "from_route": "/data-export",
+        "to_route": "data-export",
+    },
 ]
 
 # =============================================================================
