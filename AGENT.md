@@ -934,8 +934,9 @@ docker compose exec backend bench build --force
 docker compose exec backend mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/{css,js,images}
 
 # Copy Qalcuity assets
-docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/
-docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/js/* /home/frappe/frappe-bench/sites/assets/qalcuity/js/
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/qalcuity.css /home/frappe/frappe-bench/sites/assets/qalcuity/css/
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/qalcuity-admin.css /home/frappe/frappe-bench/sites/assets/qalcuity/css/
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/js/qalcuity.js /home/frappe/frappe-bench/sites/assets/qalcuity/js/
 
 # Copy Frappe static assets (fonts, icons) — jika diperlukan
 docker compose exec backend cp -rn /home/frappe/frappe-bench/apps/frappe/public/css/fonts/* /home/frappe/frappe-bench/sites/assets/frappe/css/fonts/ 2>/dev/null || true
@@ -1041,8 +1042,9 @@ docker compose exec backend bench build --force
 
 # Copy assets + sync (setelah bench build)
 docker compose exec backend mkdir -p /home/frappe/frappe-bench/sites/assets/qalcuity/{css,js,images} && \
-docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/* /home/frappe/frappe-bench/sites/assets/qalcuity/css/ && \
-docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/js/* /home/frappe/frappe-bench/sites/assets/qalcuity/js/ && \
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/qalcuity.css /home/frappe/frappe-bench/sites/assets/qalcuity/css/ && \
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/css/qalcuity-admin.css /home/frappe/frappe-bench/sites/assets/qalcuity/css/ && \
+docker compose exec backend cp /home/frappe/frappe-bench/apps/qalcuity/qalcuity/public/js/qalcuity.js /home/frappe/frappe-bench/sites/assets/qalcuity/js/ && \
 docker compose exec backend tar czf /tmp/assets.tar.gz -C /home/frappe/frappe-bench/sites assets/ && \
 docker cp $(docker compose ps -q backend):/tmp/assets.tar.gz /tmp/qalcuity-assets.tar.gz && \
 docker cp /tmp/qalcuity-assets.tar.gz $(docker compose ps -q frontend):/tmp/ && \
