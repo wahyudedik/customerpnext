@@ -27,10 +27,13 @@ def check_subscription_expiry():
     settings = frappe.get_single("Qalcuity Settings")
     warning_days = settings.subscription_expiry_warning_days or 7
 
-    # Get active subscriptions
+    # Get active + grace period subscriptions that have an end_date
     active_subs = frappe.get_all(
         "Qalcuity Subscription",
-        filters={"status": "Active", "end_date": ["is", "set"]},
+        filters={
+            "status": ["in", ["Active", "Grace Period"]],
+            "end_date": ["is", "set"],
+        },
         fields=["name", "customer", "plan", "end_date", "is_trial", "tenant"],
     )
 
@@ -45,10 +48,28 @@ def check_subscription_expiry():
             _expire_subscription(sub)
             continue
 
-        # Check if past end_date but within grace period → send grace warning
+        # Check if past end_date but within grace period → set "Grace Period" status + warn
         if end_date < today:
             days_in_grace = (today - end_date).days
             remaining_grace = GRACE_PERIOD_DAYS - days_in_grace
+
+            # Set status to "Grace Period" if not already
+            current_status = frappe.db.get_value(
+                "Qalcuity Subscription", sub.name, "status"
+            )
+            if current_status != "Grace Period":
+                frappe.db.set_value(
+                    "Qalcuity Subscription",
+                    sub.name,
+                    {"status": "Grace Period"},
+                )
+                frappe.db.commit()
+                frappe.logger().info(
+                    "Qalcuity: Subscription {0} entered grace period ({1} days remaining)".format(
+                        sub.name, remaining_grace
+                    )
+                )
+
             _send_grace_period_warning(sub, remaining_grace)
             continue
 
@@ -382,6 +403,39 @@ def retry_failed_provisioning():
     except Exception as e:
         frappe.log_error(
             title="Qalcuity Scheduler: Provisioning retry failed",
+            message=str(e),
+        )
+
+
+# =============================================================================
+# Renewal Reminder Scheduler
+# =============================================================================
+
+
+def check_renewal_reminders():
+    """
+    Daily: send renewal reminders for expiring subscriptions.
+    Called from hooks.py scheduler_events -> daily.
+
+    Flow:
+        1. Import and call check_and_send_renewal_reminders from renewal API
+        2. Handles Active subscriptions expiring within warning_days
+        3. Handles Grace Period subscriptions approaching final expiry
+    """
+    try:
+        from qalcuity.qalcuity.api.renewal import check_and_send_renewal_reminders
+
+        frappe.logger().info(
+            "Qalcuity Scheduler: Starting renewal reminder check"
+        )
+        check_and_send_renewal_reminders()
+        frappe.logger().info(
+            "Qalcuity Scheduler: Renewal reminder check completed"
+        )
+
+    except Exception as e:
+        frappe.log_error(
+            title="Qalcuity Scheduler: Renewal reminder check failed",
             message=str(e),
         )
 

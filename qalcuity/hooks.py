@@ -243,6 +243,7 @@ scheduler_events = {
         "qalcuity.tasks.check_subscription_expiry",
         "qalcuity.tasks.run_scheduled_backup",
         "qalcuity.tasks.retry_failed_provisioning",
+        "qalcuity.tasks.check_renewal_reminders",
     ],
 }
 
