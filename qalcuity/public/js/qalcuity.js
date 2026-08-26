@@ -165,11 +165,21 @@ qalcuity.notifications = {
 	 * Initialize bell icon di navbar
 	 */
 	init() {
-		// Tunggu DOM ready
-		if (document.readyState === "loading") {
-			document.addEventListener("DOMContentLoaded", () => this._create());
-		} else {
-			this._create();
+		try {
+			// Tunggu DOM ready
+			if (document.readyState === "loading") {
+				document.addEventListener("DOMContentLoaded", () => {
+					try {
+						this._create();
+					} catch (e) {
+						console.warn("Qalcuity: Failed to create bell icon:", e);
+					}
+				});
+			} else {
+				this._create();
+			}
+		} catch (e) {
+			console.warn("Qalcuity: Notification module init failed:", e);
 		}
 	},
 
@@ -308,30 +318,43 @@ qalcuity.notifications = {
 	 * Load notifikasi via API
 	 */
 	_loadNotifications() {
-		const listEl = document.querySelector(".qalcuity-bell-list");
-		if (!listEl) return;
+		try {
+			const listEl = document.querySelector(".qalcuity-bell-list");
+			if (!listEl) return;
 
-		// Show loading
-		listEl.innerHTML = `<div class="qalcuity-bell-loading">Memuat notifikasi...</div>`;
+			// Show loading
+			listEl.innerHTML = `<div class="qalcuity-bell-loading">Memuat notifikasi...</div>`;
 
-		frappe.call({
-			method: "qalcuity.qalcuity.api.notification.get_my_notifications",
-			args: {
-				limit_page_length: 10,
-				start: 0,
-			},
-			callback: (r) => {
-				if (r.message) {
-					this._renderNotifications(listEl, r.message.notifications || []);
-					// Update badge
-					frappe.boot.qalcuity_unread_notifications = r.message.unread_count || 0;
-					this._updateBadge();
-				}
-			},
-			error: () => {
-				listEl.innerHTML = `<div class="qalcuity-bell-empty">Gagal memuat notifikasi</div>`;
-			},
-		});
+			frappe.call({
+				method: "qalcuity.qalcuity.api.notification.get_my_notifications",
+				args: {
+					limit_page_length: 10,
+					start: 0,
+				},
+				callback: (r) => {
+					if (r.message) {
+						this._renderNotifications(listEl, r.message.notifications || []);
+						// Update badge
+						frappe.boot.qalcuity_unread_notifications = r.message.unread_count || 0;
+						this._updateBadge();
+					}
+				},
+				error: (err) => {
+					console.warn("Qalcuity: Notification API not available:", err);
+					// Graceful fallback — show empty state
+					if (listEl) {
+						listEl.innerHTML = `<div class="qalcuity-bell-empty">Notifikasi tidak tersedia</div>`;
+					}
+				},
+			});
+		} catch (e) {
+			console.warn("Qalcuity: Failed to load notifications:", e);
+			// Graceful fallback — bell icon tetap render tanpa notification
+			const listEl = document.querySelector(".qalcuity-bell-list");
+			if (listEl) {
+				listEl.innerHTML = `<div class="qalcuity-bell-empty">Notifikasi tidak tersedia</div>`;
+			}
+		}
 	},
 
 	/**
@@ -388,38 +411,52 @@ qalcuity.notifications = {
 	 * Mark notification sebagai read
 	 */
 	_markAsRead(name) {
-		frappe.call({
-			method: "qalcuity.qalcuity.api.notification.mark_as_read",
-			args: { notification_name: name },
-			callback: () => {
-				// Update UI
-				const item = document.querySelector(`.qalcuity-bell-item[data-name="${name}"]`);
-				if (item) {
-					item.classList.remove("qalcuity-bell-unread");
-				}
-				// Decrease badge
-				const current = frappe.boot.qalcuity_unread_notifications || 0;
-				frappe.boot.qalcuity_unread_notifications = Math.max(0, current - 1);
-				this._updateBadge();
-			},
-		});
+		try {
+			frappe.call({
+				method: "qalcuity.qalcuity.api.notification.mark_as_read",
+				args: { notification_name: name },
+				callback: () => {
+					// Update UI
+					const item = document.querySelector(`.qalcuity-bell-item[data-name="${name}"]`);
+					if (item) {
+						item.classList.remove("qalcuity-bell-unread");
+					}
+					// Decrease badge
+					const current = frappe.boot.qalcuity_unread_notifications || 0;
+					frappe.boot.qalcuity_unread_notifications = Math.max(0, current - 1);
+					this._updateBadge();
+				},
+				error: (err) => {
+					console.warn("Qalcuity: Failed to mark notification as read:", err);
+				},
+			});
+		} catch (e) {
+			console.warn("Qalcuity: Failed to mark notification as read:", e);
+		}
 	},
 
 	/**
 	 * Mark all sebagai read
 	 */
 	_markAllAsRead() {
-		frappe.call({
-			method: "qalcuity.qalcuity.api.notification.mark_all_as_read",
-			callback: () => {
-				// Update UI
-				document.querySelectorAll(".qalcuity-bell-unread").forEach((el) => {
-					el.classList.remove("qalcuity-bell-unread");
-				});
-				frappe.boot.qalcuity_unread_notifications = 0;
-				this._updateBadge();
-			},
-		});
+		try {
+			frappe.call({
+				method: "qalcuity.qalcuity.api.notification.mark_all_as_read",
+				callback: () => {
+					// Update UI
+					document.querySelectorAll(".qalcuity-bell-unread").forEach((el) => {
+						el.classList.remove("qalcuity-bell-unread");
+					});
+					frappe.boot.qalcuity_unread_notifications = 0;
+					this._updateBadge();
+				},
+				error: (err) => {
+					console.warn("Qalcuity: Failed to mark all as read:", err);
+				},
+			});
+		} catch (e) {
+			console.warn("Qalcuity: Failed to mark all as read:", e);
+		}
 	},
 };
 
