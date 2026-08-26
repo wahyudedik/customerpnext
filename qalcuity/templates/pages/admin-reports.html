@@ -1,0 +1,516 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
+<div class="qalcuity-ad-container">
+	<!-- Header Section -->
+	<div class="qalcuity-ad-header">
+		<div>
+			<h1 class="qalcuity-ad-title">
+				<span class="octicon octicon-graph"></span> Reports
+			</h1>
+			<p class="qalcuity-ad-subtitle">Laporan revenue, MRR, churn, dan distribusi plan</p>
+		</div>
+		<div class="qalcuity-ad-header-actions">
+			<div class="qalcuity-ad-date-filter">
+				<label class="qalcuity-ad-filter-label">Dari</label>
+				<input type="date" id="ar-filter-date-from" class="qalcuity-ad-filter-input">
+			</div>
+			<div class="qalcuity-ad-date-filter">
+				<label class="qalcuity-ad-filter-label">Sampai</label>
+				<input type="date" id="ar-filter-date-to" class="qalcuity-ad-filter-input">
+			</div>
+			<button class="qalcuity-ad-btn qalcuity-ad-btn-primary" id="ar-refresh-btn">
+				<span class="octicon octicon-sync"></span> Refresh
+			</button>
+			<button class="qalcuity-ad-btn qalcuity-ad-btn-secondary" id="ar-export-btn" title="Export CSV (Coming Soon)">
+				<span class="octicon octicon-download"></span> Export
+			</button>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="ar-loading" class="qalcuity-ad-loading">
+		<div class="qalcuity-ad-spinner"></div>
+		<p>Memuat data laporan...</p>
+	</div>
+
+	<!-- Content -->
+	<div id="ar-content" style="display: none;">
+
+		<!-- ========== OVERVIEW STATS ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-pulse"></span> Overview
+			</h2>
+			<div class="qalcuity-ad-stats-grid qalcuity-ad-stats-4" id="ar-overview-stats"></div>
+		</div>
+
+		<!-- ========== REVENUE REPORT ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-dollar"></span> Revenue Report
+			</h2>
+			<p class="qalcuity-ad-section-desc">Total revenue dari payments yang disetujui per bulan</p>
+			<div class="qalcuity-ad-chart-wrapper" id="ar-revenue-chart"></div>
+			<div class="qalcuity-ad-report-summary" id="ar-revenue-summary"></div>
+		</div>
+
+		<!-- ========== MRR REPORT ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-graph"></span> Monthly Recurring Revenue (MRR)
+			</h2>
+			<p class="qalcuity-ad-section-desc">Revenue bulanan dari subscription aktif</p>
+			<div class="qalcuity-ad-chart-wrapper" id="ar-mrr-chart"></div>
+			<div class="qalcuity-ad-report-summary" id="ar-mrr-summary"></div>
+		</div>
+
+		<!-- ========== CHURN REPORT ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-alert"></span> Churn Report
+			</h2>
+			<p class="qalcuity-ad-section-desc">Jumlah subscription yang expired/cancelled per bulan</p>
+			<div class="qalcuity-ad-chart-wrapper" id="ar-churn-chart"></div>
+			<div class="qalcuity-ad-report-summary" id="ar-churn-summary"></div>
+		</div>
+
+		<!-- ========== PLAN DISTRIBUTION ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-list-unordered"></span> Distribusi Plan
+			</h2>
+			<p class="qalcuity-ad-section-desc">Jumlah subscription aktif per plan</p>
+			<div id="ar-plan-distribution"></div>
+		</div>
+	</div>
+
+	<!-- Error State -->
+	<div id="ar-error" class="qalcuity-ad-empty" style="display: none;">
+		<span class="octicon octicon-alert" style="font-size: 40px; color: var(--qalcuity-danger);"></span>
+		<h3>Gagal memuat data</h3>
+		<p id="ar-error-msg">Terjadi kesalahan saat memuat data laporan.</p>
+		<button class="qalcuity-ad-btn qalcuity-ad-btn-primary" onclick="loadAdminReports()">
+			<span class="octicon octicon-sync"></span> Coba Lagi
+		</button>
+	</div>
+</div>
+
+<script>
+	(function () {
+		'use strict';
+
+		// ============================================================
+		// Admin Reports — Main Logic
+		// ============================================================
+
+		/**
+		 * Format currency as IDR
+		 */
+		function formatIDR(amount) {
+			if (amount === null || amount === undefined) return 'Rp 0';
+			return 'Rp ' + Number(amount).toLocaleString('id-ID');
+		}
+
+		/**
+		 * Format number with locale
+		 */
+		function formatNumber(num) {
+			if (num === null || num === undefined) return '0';
+			return Number(num).toLocaleString('id-ID');
+		}
+
+		// ============================================================
+		// Render Functions
+		// ============================================================
+
+		function renderOverviewStats(data) {
+			var container = document.getElementById('ar-overview-stats');
+			container.innerHTML = '' +
+			'<div class="qalcuity-ad-stat-card">' +
+				'<div class="qalcuity-ad-stat-icon" style="background: #d1ecf1; color: #0c5460;">' +
+					'<span class="octicon octicon-dollar"></span>' +
+				'</div>' +
+				'<div class="qalcuity-ad-stat-info">' +
+					'<div class="qalcuity-ad-stat-value">' + formatIDR(data.total_revenue) + '</div>' +
+					'<div class="qalcuity-ad-stat-label">Total Revenue</div>' +
+				'</div>' +
+			'</div>' +
+			'<div class="qalcuity-ad-stat-card">' +
+				'<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">' +
+					'<span class="octicon octicon-graph"></span>' +
+				'</div>' +
+				'<div class="qalcuity-ad-stat-info">' +
+					'<div class="qalcuity-ad-stat-value">' + formatIDR(data.mrr) + '</div>' +
+					'<div class="qalcuity-ad-stat-label">MRR (Bulan Ini)</div>' +
+				'</div>' +
+			'</div>' +
+			'<div class="qalcuity-ad-stat-card">' +
+				'<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">' +
+					'<span class="octicon octicon-check"></span>' +
+				'</div>' +
+				'<div class="qalcuity-ad-stat-info">' +
+					'<div class="qalcuity-ad-stat-value">' + formatNumber(data.active_subs) + '</div>' +
+					'<div class="qalcuity-ad-stat-label">Active Subscriptions</div>' +
+				'</div>' +
+			'</div>' +
+			'<div class="qalcuity-ad-stat-card">' +
+				'<div class="qalcuity-ad-stat-icon" style="background: ' + (data.churn_rate > 0 ? '#f8d7da' : '#d4edda') + '; color: ' + (data.churn_rate > 0 ? '#721c24' : '#155724') + ';">' +
+					'<span class="octicon octicon-alert"></span>' +
+				'</div>' +
+				'<div class="qalcuity-ad-stat-info">' +
+					'<div class="qalcuity-ad-stat-value">' + data.churn_rate + '%</div>' +
+					'<div class="qalcuity-ad-stat-label">Churn Rate</div>' +
+				'</div>' +
+			'</div>';
+		}
+
+		/**
+		 * Render a bar chart for report data
+		 */
+		function renderBarChart(containerId, labels, values, color, formatter) {
+			var container = document.getElementById(containerId);
+			if (!labels || labels.length === 0) {
+				container.innerHTML = '<div class="qalcuity-ad-empty"><p>Tidak ada data untuk ditampilkan.</p></div>';
+				return;
+			}
+
+			var fmt = formatter || formatIDR;
+			var maxVal = Math.max.apply(null, values) || 1;
+			var chartHeight = 200;
+
+			var barWidth = Math.floor(100 / labels.length) - 2;
+			var bars = '';
+			for (var i = 0; i < labels.length; i++) {
+				var barH = Math.round((values[i] / maxVal) * chartHeight);
+				var x = (i * (100 / labels.length)) + 1;
+				var barColor = color || 'var(--qalcuity-primary)';
+				bars += '<div class="qalcuity-ad-chart-bar-group" style="left:' + x + '%;width:' + (100 / labels.length) + '%;">';
+				bars += '<div class="qalcuity-ad-chart-bar-value">' + fmt(values[i]) + '</div>';
+				bars += '<div class="qalcuity-ad-chart-bar" style="height:' + barH + 'px;background:' + barColor + ';"></div>';
+				bars += '<div class="qalcuity-ad-chart-bar-label">' + labels[i] + '</div>';
+				bars += '</div>';
+			}
+
+			container.innerHTML =
+				'<div class="qalcuity-ad-chart">' +
+				'<div class="qalcuity-ad-chart-bars">' + bars + '</div>' +
+				'</div>';
+		}
+
+		function renderReportSummary(containerId, total, count, label) {
+			var container = document.getElementById(containerId);
+			container.innerHTML = '' +
+			'<div class="qalcuity-ad-report-summary-inner">' +
+				'<span class="qalcuity-ad-report-summary-label">Total ' + label + ':</span> ' +
+				'<span class="qalcuity-ad-report-summary-value">' + formatIDR(total) + '</span>' +
+				'<span class="qalcuity-ad-report-summary-divider">|</span>' +
+				'<span class="qalcuity-ad-report-summary-label">Periode:</span> ' +
+				'<span class="qalcuity-ad-report-summary-value">' + count + ' bulan</span>' +
+			'</div>';
+		}
+
+		function renderChurnSummary(containerId, total, count) {
+			var container = document.getElementById(containerId);
+			container.innerHTML = '' +
+			'<div class="qalcuity-ad-report-summary-inner">' +
+				'<span class="qalcuity-ad-report-summary-label">Total Churn:</span> ' +
+				'<span class="qalcuity-ad-report-summary-value">' + formatNumber(total) + ' subscription</span>' +
+				'<span class="qalcuity-ad-report-summary-divider">|</span>' +
+				'<span class="qalcuity-ad-report-summary-label">Periode:</span> ' +
+				'<span class="qalcuity-ad-report-summary-value">' + count + ' bulan</span>' +
+			'</div>';
+		}
+
+		function renderPlanDistribution(data) {
+			var container = document.getElementById('ar-plan-distribution');
+			if (!data || !data.labels || data.labels.length === 0) {
+				container.innerHTML = '<div class="qalcuity-ad-empty"><p>Tidak ada data plan distribution.</p></div>';
+				return;
+			}
+
+			var maxVal = Math.max.apply(null, data.data) || 1;
+			var total = data.data.reduce(function (a, b) { return a + b; }, 0);
+
+			var colors = ['#2490EF', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c'];
+			var html = '<div class="qalcuity-ad-plan-dist">';
+
+			for (var i = 0; i < data.labels.length; i++) {
+				var pct = total > 0 ? Math.round((data.data[i] / total) * 100) : 0;
+				var color = colors[i % colors.length];
+				html += '' +
+				'<div class="qalcuity-ad-plan-dist-row">' +
+					'<div class="qalcuity-ad-plan-dist-info">' +
+						'<div class="qalcuity-ad-plan-dist-dot" style="background:' + color + ';"></div>' +
+						'<span class="qalcuity-ad-plan-dist-name">' + data.labels[i] + '</span>' +
+						'<span class="qalcuity-ad-plan-dist-count">' + formatNumber(data.data[i]) + ' (' + pct + '%)</span>' +
+					'</div>' +
+					'<div class="qalcuity-ad-plan-dist-bar-track">' +
+						'<div class="qalcuity-ad-plan-dist-bar" style="width:' + pct + '%;background:' + color + ';"></div>' +
+					'</div>' +
+				'</div>';
+			}
+
+			html += '</div>';
+			container.innerHTML = html;
+		}
+
+		// ============================================================
+		// Data Loading
+		// ============================================================
+
+		function loadAdminReports() {
+			var loading = document.getElementById('ar-loading');
+			var content = document.getElementById('ar-content');
+			var errorEl = document.getElementById('ar-error');
+
+			loading.style.display = 'flex';
+			content.style.display = 'none';
+			errorEl.style.display = 'none';
+
+			var dateFrom = document.getElementById('ar-filter-date-from').value || '';
+			var dateTo = document.getElementById('ar-filter-date-to').value || '';
+
+			var args = {};
+			if (dateFrom) args.from_date = dateFrom;
+			if (dateTo) args.to_date = dateTo;
+
+			// Load overview stats
+			frappe.call({
+				method: 'qalcuity.api.reports.get_overview_stats',
+				args: {},
+				callback: function (r) {
+					if (r.message) {
+						renderOverviewStats(r.message);
+					}
+				},
+				error: function (err) {
+					console.error('Failed to load overview stats:', err);
+				}
+			});
+
+			// Load revenue report
+			frappe.call({
+				method: 'qalcuity.api.reports.get_revenue_report',
+				args: args,
+				callback: function (r) {
+					if (r.message) {
+						var d = r.message;
+						renderBarChart('ar-revenue-chart', d.labels, d.data, 'var(--qalcuity-primary)', formatIDR);
+						renderReportSummary('ar-revenue-summary', d.total, d.labels.length, 'Revenue');
+					}
+				},
+				error: function (err) {
+					console.error('Failed to load revenue report:', err);
+				}
+			});
+
+			// Load MRR report
+			frappe.call({
+				method: 'qalcuity.api.reports.get_mrr_report',
+				args: args,
+				callback: function (r) {
+					if (r.message) {
+						var d = r.message;
+						renderBarChart('ar-mrr-chart', d.labels, d.data, '#28a745', formatIDR);
+						renderReportSummary('ar-mrr-summary', d.total, d.labels.length, 'MRR');
+					}
+				},
+				error: function (err) {
+					console.error('Failed to load MRR report:', err);
+				}
+			});
+
+			// Load churn report
+			frappe.call({
+				method: 'qalcuity.api.reports.get_churn_report',
+				args: args,
+				callback: function (r) {
+					if (r.message) {
+						var d = r.message;
+						renderBarChart('ar-churn-chart', d.labels, d.data, '#dc3545', formatNumber);
+						renderChurnSummary('ar-churn-summary', d.total, d.labels.length);
+					}
+				},
+				error: function (err) {
+					console.error('Failed to load churn report:', err);
+				}
+			});
+
+			// Load plan distribution
+			frappe.call({
+				method: 'qalcuity.api.reports.get_plan_distribution',
+				args: {},
+				callback: function (r) {
+					if (r.message) {
+						renderPlanDistribution(r.message);
+					}
+				},
+				error: function (err) {
+					console.error('Failed to load plan distribution:', err);
+				}
+			});
+
+			// All loaded — show content
+			setTimeout(function () {
+				loading.style.display = 'none';
+				content.style.display = 'block';
+			}, 500);
+		}
+
+		// ============================================================
+		// Export (placeholder)
+		// ============================================================
+
+		function exportCSV() {
+			frappe.msgprint({
+				title: 'Export CSV',
+				message: 'Fitur export CSV akan tersedia di update berikutnya.',
+				indicator: 'orange'
+			});
+		}
+
+		// ============================================================
+		// Initialization
+		// ============================================================
+
+		function init() {
+			// Set default date range (last 12 months)
+			var now = new Date();
+			var twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth() + 1, 1);
+
+			document.getElementById('ar-filter-date-from').value = twelveMonthsAgo.toISOString().split('T')[0];
+			document.getElementById('ar-filter-date-to').value = now.toISOString().split('T')[0];
+
+			// Refresh button
+			document.getElementById('ar-refresh-btn').addEventListener('click', function () {
+				loadAdminReports();
+			});
+
+			// Export button
+			document.getElementById('ar-export-btn').addEventListener('click', function () {
+				exportCSV();
+			});
+
+			// Load data
+			loadAdminReports();
+		}
+
+		// Run on DOM ready
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
+
+		// Expose for global access
+		window.loadAdminReports = loadAdminReports;
+	})();
+</script>
+
+<style>
+	/* ============================================================
+	   Admin Reports — Custom Styles
+	   ============================================================ */
+
+	.qalcuity-ad-section-desc {
+		color: var(--qalcuity-text-muted, #6c757d);
+		font-size: 13px;
+		margin: -8px 0 16px 0;
+	}
+
+	.qalcuity-ad-report-summary {
+		margin-top: 16px;
+		padding: 12px 16px;
+		background: var(--qalcuity-card-bg, #f8f9fa);
+		border-radius: 8px;
+		border: 1px solid var(--qalcuity-border, #e9ecef);
+	}
+
+	.qalcuity-ad-report-summary-inner {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+		font-size: 13px;
+	}
+
+	.qalcuity-ad-report-summary-label {
+		color: var(--qalcuity-text-muted, #6c757d);
+	}
+
+	.qalcuity-ad-report-summary-value {
+		font-weight: 600;
+		color: var(--qalcuity-text, #1a202c);
+	}
+
+	.qalcuity-ad-report-summary-divider {
+		color: var(--qalcuity-border, #e9ecef);
+		margin: 0 4px;
+	}
+
+	/* Plan Distribution */
+	.qalcuity-ad-plan-dist {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.qalcuity-ad-plan-dist-row {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.qalcuity-ad-plan-dist-info {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.qalcuity-ad-plan-dist-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.qalcuity-ad-plan-dist-name {
+		font-weight: 500;
+		color: var(--qalcuity-text, #1a202c);
+		font-size: 14px;
+	}
+
+	.qalcuity-ad-plan-dist-count {
+		color: var(--qalcuity-text-muted, #6c757d);
+		font-size: 13px;
+	}
+
+	.qalcuity-ad-plan-dist-bar-track {
+		height: 8px;
+		background: var(--qalcuity-border, #e9ecef);
+		border-radius: 4px;
+		overflow: hidden;
+	}
+
+	.qalcuity-ad-plan-dist-bar {
+		height: 100%;
+		border-radius: 4px;
+		transition: width 0.3s ease;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.qalcuity-ad-report-summary-inner {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 4px;
+		}
+
+		.qalcuity-ad-report-summary-divider {
+			display: none;
+		}
+	}
+</style>
+{% endblock %}

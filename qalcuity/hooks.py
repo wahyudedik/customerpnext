@@ -161,6 +161,10 @@ website_route_rules = [
         "to_route": "admin-health",
     },
     {
+        "from_route": "/admin-reports",
+        "to_route": "admin-reports",
+    },
+    {
         "from_route": "/plan-change",
         "to_route": "plan-change",
     },
