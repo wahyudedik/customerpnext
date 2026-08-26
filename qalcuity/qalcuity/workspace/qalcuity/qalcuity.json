@@ -143,17 +143,6 @@
             "type": "Link"
         },
         {
-            "dependencies": "",
-            "hidden": 0,
-            "is_query_report": 0,
-            "label": "Payment Review (Admin)",
-            "link_count": 0,
-            "link_to": "/admin-reviews",
-            "link_type": "Page",
-            "onboard": 0,
-            "type": "Link"
-        },
-        {
             "hidden": 0,
             "is_query_report": 0,
             "label": "Tenant Management",
@@ -280,12 +269,6 @@
             "label": "Qalcuity Settings",
             "link_to": "Qalcuity Settings",
             "type": "DocType"
-        },
-        {
-            "color": "Red",
-            "label": "Payment Review",
-            "link_to": "/admin-reviews",
-            "type": "URL"
         }
     ],
     "sidebar_items": [
