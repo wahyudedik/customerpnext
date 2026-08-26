@@ -101,9 +101,10 @@ Fitur-fitur berikut **DIKEMBANGKAN SENDIRI** di custom app [`qalcuity/`](qalcuit
 ### SaaS Subscription
 * [`Qalcuity Plan`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_plan/) — Subscription plans (Starter, Professional, Enterprise, Trial)
 * [`Qalcuity Subscription`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_subscription/) — Subscription lifecycle management
-* Grace period 7 hari
+* Grace period 7 hari dengan status `Grace Period` terpisah
 * Subscription enforcement (ERPNext access block)
 * Plan limits enforcement (max_users, max_storage)
+* Status transitions: `Draft → Pending Payment → Active → Grace Period → Expired/Suspended/Cancelled`
 
 ### Payment System
 * [`Qalcuity Payment`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_payment/) — Manual payment records
@@ -154,6 +155,27 @@ Fitur-fitur berikut **DIKEMBANGKAN SENDIRI** di custom app [`qalcuity/`](qalcuit
 * Custom workspace
 * Professional navigation icons
 * Responsive design
+* **Reusable navigation template** ([`navigation.html`](qalcuity/qalcuity/templates/includes/navigation.html)) — Shared header bar untuk semua halaman
+* **Hamburger menu** untuk mobile (< 768px)
+* **Responsive grid** (1 kolom mobile, 2 kolom tablet, 3+ kolom desktop)
+* **Responsive forms** (full-width di mobile, 16px font-size)
+* **Responsive tables** (horizontal scroll)
+* **Touch-friendly** (min 44px touch target)
+* **Desk branding hide rules** — Footer, sidebar, navbar ERPNext di-hide di [`qalcuity.js`](qalcuity/qalcuity/public/js/qalcuity.js)
+
+### Security
+* **Registration rate limiting** — Max 5 registrasi per jam per IP ([`registration.py`](qalcuity/qalcuity/api/registration.py))
+* **Password validation standardized** — Minimum 8 characters + letter + number di semua titik (registration, profile)
+* **API v1 rate limiting** — 100 req/min/user via frappe.cache
+* **Tenant isolation** — Row-level permission hooks + Company-based isolation
+* **Role-based authorization** — public/customer/admin roles
+* **Audit logging** — Semua aksi sensitif tercatat
+* **Two-Factor Authentication (2FA)** — TOTP-based (RFC 6238), setup/enable/disable, backup codes, QR code ([`two_factor.py`](qalcuity/qalcuity/api/two_factor.py))
+* **Session management** — Active sessions list, force logout, user-agent parsing ([`session_api.py`](qalcuity/qalcuity/api/session_api.py))
+* **CSRF protection** — Hidden tokens di semua web forms
+* **Email verification** — HMAC-SHA256 token, TTL 24 jam ([`registration.py`](qalcuity/qalcuity/api/registration.py))
+* **Password reset** — Token-based, TTL 1 jam, rate limited ([`password_reset.py`](qalcuity/qalcuity/api/password_reset.py))
+* **System health monitoring** — System, application, activity stats + health checks ([`health_api.py`](qalcuity/qalcuity/api/health_api.py))
 
 ---
 
@@ -206,7 +228,7 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 
 ## Implementation Status
 
-> Last Updated: 2026-08-25
+> Last Updated: 2026-08-26
 
 | Feature | Status | Notes |
 |---------|--------|-------|
@@ -259,6 +281,19 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | In-app Notification (Bell Icon) | ✅ Done | Qalcuity Notification DocType + bell icon component |
 | WhatsApp Confirmation | ✅ Done | Link wa.me setelah payment submit |
 | Tenant Provisioning | ✅ Done | ERP environment provisioning ([`provisioning.py`](qalcuity/qalcuity/provisioning.py)) — Company, Workspace, Roles, Isolation |
+| Grace Period Status | ✅ Done | Status `Grace Period` terpisah dengan state color di DocType |
+| Registration Rate Limiting | ✅ Done | Max 5 registrasi per jam per IP |
+| Password Validation | ✅ Done | Standardized: min 8 chars + letter + number (server & client) |
+| Reusable Navigation | ✅ Done | [`navigation.html`](qalcuity/qalcuity/templates/includes/navigation.html) — shared header bar |
+| Responsive Mobile UI | ✅ Done | Hamburger menu, responsive grid/forms/tables, touch-friendly |
+| Hooks.py Sync | ✅ Done | Inner hooks synced: website_context, fixtures, retry_failed_provisioning |
+| Branding Fixes | ✅ Done | "ERPNext" → "ERP" di user-facing text, desk branding hide rules |
+| Website Branding Patch | ✅ Done | Auto-set Website Settings (favicon, splash, app_logo) via patch |
+| Two-Factor Authentication (2FA) | ✅ Done | TOTP-based 2FA (RFC 6238), setup/enable/disable, backup codes, QR code |
+| Session Management | ✅ Done | Active sessions list, force logout, user-agent parsing |
+| System Health Monitoring | ✅ Done | System, application, activity stats + health checks (admin) |
+| ERP Module Config per Plan | ✅ Done | Module access controls per plan tier (plan_modules field) |
+| API Documentation | ✅ Done | Comprehensive API_DOCUMENTATION.md with all endpoints |
 
 ### Implemented DocTypes
 
@@ -319,6 +354,20 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | `api/backup_api.py::delete_backup` | POST | Delete specific backup (admin) | ✅ Done |
 | `api/backup_api.py::get_backup_stats` | GET | Get backup statistics (admin) | ✅ Done |
 | `api/backup_api.py::trigger_cleanup` | POST | Manual cleanup old backups (admin) | ✅ Done |
+| `api/two_factor.py::get_2fa_status` | GET | Get 2FA status for current user | ✅ Done |
+| `api/two_factor.py::setup_2fa` | POST | Generate 2FA secret and QR code URL | ✅ Done |
+| `api/two_factor.py::enable_2fa` | POST | Enable 2FA after code verification | ✅ Done |
+| `api/two_factor.py::disable_2fa` | POST | Disable 2FA with password confirmation | ✅ Done |
+| `api/two_factor.py::regenerate_backup_codes` | POST | Regenerate 2FA backup codes | ✅ Done |
+| `api/two_factor.py::pre_login_check` | POST | Pre-login 2FA validation | ✅ Done |
+| `api/two_factor.py::verify_2fa_login` | POST | Verify 2FA code during login | ✅ Done |
+| `api/session_api.py::get_active_sessions` | GET | Get active sessions with device info | ✅ Done |
+| `api/session_api.py::force_logout_session` | POST | Force logout specific session | ✅ Done |
+| `api/session_api.py::force_logout_all_sessions` | POST | Force logout all other sessions | ✅ Done |
+| `api/health_api.py::get_system_health` | GET | Get comprehensive system health (admin) | ✅ Done |
+| `api/admin_dashboard.py::get_admin_dashboard_data` | GET | Get admin dashboard with revenue/customer/subscription stats | ✅ Done |
+| `api/plans.py::submit_payment_with_subscription` | POST | Submit payment and create subscription | ✅ Done |
+| `api/plans.py::get_plan_by_name` | GET | Get specific plan by name (public) | ✅ Done |
 
 #### Notification API
 
@@ -354,6 +403,7 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | `api/v1/endpoints.py::bulk_reject_payments` | POST | Admin | Bulk reject | ✅ Done |
 | `api/v1/endpoints.py::get_audit_logs` | GET | Admin | Get all audit logs | ✅ Done |
 | `api/v1/endpoints.py::get_all_subscription_history` | GET | Admin | Get all subscription history | ✅ Done |
+| `api/v1/endpoints.py::get_user_info` | GET | Authenticated | Get current user info | ✅ Done |
 
 ### Implemented Web Pages
 
@@ -368,6 +418,14 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | Profile | `/profile` | Edit profil dan ganti password | ✅ Done |
 | Account Status | `/account-status` | Detail status langganan dan pembayaran | ✅ Done |
 | Subscription History | `/subscription-history` | Timeline riwayat perubahan langganan | ✅ Done |
+| Admin Dashboard | `/admin-dashboard` | Superadmin dashboard dengan revenue, customer, subscription stats | ✅ Done |
+| Verify Email | `/verify-email` | Email verification page (HMAC-SHA256 token) | ✅ Done |
+| Forgot Password | `/forgot-password` | Request password reset via email | ✅ Done |
+| Reset Password | `/reset-password` | Reset password via token | ✅ Done |
+| 2FA Setup | `/2fa-setup` | Two-factor authentication setup page | ✅ Done |
+| 2FA Verify | `/2fa-verify` | 2FA verification during login | ✅ Done |
+| Sessions | `/sessions` | Active sessions management page | ✅ Done |
+| Admin Health | `/admin-health` | System health monitoring dashboard | ✅ Done |
 
 ### Implemented Patches
 
@@ -376,6 +434,7 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | `add_tenant_to_subscription` | Menambahkan field `tenant` (Link) ke Qalcuity Subscription | ✅ Done |
 | `seed_bank_accounts` | Seed 4 bank accounts default (BRI, JAGO, BTN, BSI) ke Qalcuity Settings | ✅ Done |
 | `seed_erp_user_role` | Seed "Qalcuity ERP User" role for tenant users | ✅ Done |
+| `set_website_branding` | Set Website Settings branding (favicon, splash_image, app_logo) ke Qalcuity | ✅ Done |
 
 ### Implemented Email Notifications
 
@@ -399,6 +458,8 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 * Customer registration page (`/register`) — Form with name, email, password, confirm password
 * API `register_customer()` — Validates unique email, creates Frappe User + Customer + Portal User + Tenant otomatis
 * After registration, customer langsung bisa login dan melihat pricing page
+* **Registration rate limiting** — Max 5 registrasi per jam per IP ([`registration.py`](qalcuity/qalcuity/api/registration.py))
+* **Password validation** — Minimum 8 characters + letter + number, diterapkan di server dan client
 
 ### MVP
 
@@ -1021,6 +1082,13 @@ Potential modules:
 
 Only expose modules that are appropriate for the selected plan.
 
+### Implemented — ERP Module Config per Plan
+
+* **Plan modules field** — `plan_modules` field di Qalcuity Plan DocType
+* **Module access controls** — Setiap plan bisa configure modul ERP mana yang diakses
+* **Provisioning integration** — Module config diterapkan saat ERP provisioning
+* **Default modules** — Accounting, CRM, Selling, Buying, Stock, HR, Projects, Manufacturing
+
 ---
 
 # 11. Qalcuity Custom Features
@@ -1065,6 +1133,14 @@ Do not add features merely to make the product appear larger.
 * **Account Status page** (`/account-status`) — Detail status langganan, tenant, pembayaran, usage bars
 * **Subscription History page** (`/subscription-history`) — Timeline riwayat perubahan langganan
 * **Custom Login** — Qalcuity-branded login dengan "Lupa password?" dan "Daftar" links
+* **Reusable navigation template** ([`navigation.html`](qalcuity/qalcuity/templates/includes/navigation.html)) — Shared header bar untuk semua halaman dengan hamburger menu mobile
+* **Desk branding** — ERPNext footer, sidebar, navbar di-hide untuk user experience yang bersih ([`qalcuity.js`](qalcuity/qalcuity/public/js/qalcuity.js))
+* **"ERPNext" → "ERP" branding** — Semua user-facing text menggunakan "ERP" bukan "ERPNext"
+* **Admin Dashboard page** (`/admin-dashboard`) — Revenue, customer, subscription, payment, tenant stats
+* **2FA Setup page** (`/2fa-setup`) — Two-factor authentication setup
+* **2FA Verify page** (`/2fa-verify`) — 2FA verification during login
+* **Sessions page** (`/sessions`) — Active sessions management
+* **Admin Health page** (`/admin-health`) — System health monitoring dashboard
 
 ### Specification
 
@@ -1126,7 +1202,7 @@ ERPNext default UI may remain underneath where practical, but the customer-facin
 /api/v1/ → qalcuity.qalcuity.api.v1.endpoints.*
 ```
 
-20 endpoints dengan auth check, rate limiting (100 req/min/user), dan standard response format.
+24 endpoints dengan auth check, rate limiting (100 req/min/user), dan standard response format.
 Lihat [`api/v1/`](qalcuity/qalcuity/api/v1/) untuk detail lengkap.
 
 Potential resources:

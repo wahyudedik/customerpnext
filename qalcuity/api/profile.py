@@ -8,6 +8,9 @@ Provides whitelisted methods for customer profile management.
 
 import frappe
 from frappe import _
+from qalcuity.qalcuity.input_validation import (
+    sanitize_text, validate_email, validate_password, validate_phone, sanitize_html
+)
 
 
 @frappe.whitelist()
@@ -110,7 +113,28 @@ def update_profile(data):
 
     for field in allowed_fields:
         if field in data:
-            update_data[field] = data[field]
+            value = data[field]
+
+            # Sanitize inputs
+            if field == "full_name":
+                value = sanitize_text(value, max_length=100)
+                if value:
+                    value = sanitize_html(value)
+            elif field == "phone":
+                value = (value or "").strip()
+            elif field == "company_name":
+                value = sanitize_text(value, max_length=200)
+                if value:
+                    value = sanitize_html(value)
+
+            update_data[field] = value
+
+    # Validate phone if provided
+    if "phone" in update_data and update_data["phone"]:
+        if not validate_phone(update_data["phone"]):
+            frappe.throw(
+                _("Format nomor telepon tidak valid. Gunakan format: +62xxxxxxxxxx atau 08xxxxxxxxxx")
+            )
 
     if not update_data:
         frappe.throw(_("Tidak ada field yang valid untuk diperbarui."))
@@ -135,6 +159,7 @@ def change_password(old_password, new_password):
     """
     Change password for the currently logged-in user.
     Validates old password before allowing change.
+    Password requirement: min 8 characters with at least one letter and one number.
 
     Args:
         old_password: Current password
@@ -143,6 +168,8 @@ def change_password(old_password, new_password):
     Returns:
         dict: Success status
     """
+    import re
+
     user = frappe.session.user
 
     if user == "Guest":
@@ -154,8 +181,10 @@ def change_password(old_password, new_password):
     if not new_password:
         frappe.throw(_("Password baru tidak boleh kosong."))
 
-    if len(new_password) < 6:
-        frappe.throw(_("Password baru minimal 6 karakter."))
+    # ── Validasi password strength (menggunakan centralized validation) ────
+    is_valid_pwd, pwd_error = validate_password(new_password)
+    if not is_valid_pwd:
+        frappe.throw(_(pwd_error))
 
     if old_password == new_password:
         frappe.throw(_("Password baru harus berbeda dari password lama."))

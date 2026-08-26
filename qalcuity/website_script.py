@@ -265,12 +265,13 @@ def get_website_script():
 
             textNodes.forEach(function(node) {
                 var text = node.textContent || '';
-                if (text.indexOf('Frappe') !== -1 && text.indexOf('Qalcuity') === -1) {
+                if ((text.indexOf('Frappe') !== -1 || text.indexOf('ERPNext') !== -1) && text.indexOf('Qalcuity') === -1) {
                     // Only replace in certain contexts to avoid breaking things
                     var parent = node.parentElement;
                     if (parent && !parent.matches('script, style, code, pre, textarea')) {
                         node.textContent = text
                             .replace(/Frappe Framework/g, 'Qalcuity ERP')
+                            .replace(/ERPNext/g, 'Qalcuity ERP')
                             .replace(/Frappe/g, 'Qalcuity');
                     }
                 }
@@ -306,6 +307,88 @@ def get_website_script():
         }
 
         /**
+         * Override login form to support Two-Factor Authentication.
+         * Intercepts form submission, validates password via API,
+         * and redirects to /2fa-verify if 2FA is enabled.
+         */
+        function setupLogin2FAOverride() {
+            if (!isLoginPage()) return;
+
+            // Wait for the login form to be available
+            function attachHandler() {
+                var forms = document.querySelectorAll('.page-card form, .for-login form, form[data-purpose="login"]');
+                if (forms.length === 0) return false;
+
+                forms.forEach(function(form) {
+                    if (form.dataset.twofaHooked) return;
+                    form.dataset.twofaHooked = '1';
+
+                    form.addEventListener('submit', function(e) {
+                        // Only intercept if we haven't already redirected
+                        if (form.dataset.twofaSubmitting) return;
+
+                        var emailInput = form.querySelector('#login_email, input[name="usr"], input[type="email"], input[name="email"]');
+                        var pwdInput = form.querySelector('#login_password, input[name="pwd"], input[type="password"]');
+
+                        if (!emailInput || !pwdInput) return;
+
+                        var user = emailInput.value.trim();
+                        var pwd = pwdInput.value;
+
+                        if (!user || !pwd) return;
+
+                        // Prevent default form submission
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        form.dataset.twofaSubmitting = '1';
+
+                        // Check if frappe.call is available (desk context)
+                        if (typeof frappe !== 'undefined' && frappe.call) {
+                            frappe.call({
+                                method: 'qalcuity.api.two_factor.pre_login_check',
+                                args: { user: user, password: pwd },
+                                callback: function(r) {
+                                    if (r.message && r.message.status === '2fa_required') {
+                                        // Redirect to 2FA verification page
+                                        window.location.href = '/2fa-verify?token=' + r.message.token;
+                                    } else if (r.message && r.message.status === 'ok') {
+                                        // No 2FA — submit the form normally
+                                        delete form.dataset.twofaSubmitting;
+                                        form.submit();
+                                    }
+                                },
+                                error: function(err) {
+                                    delete form.dataset.twofaSubmitting;
+                                    // Show error on login page
+                                    var errDiv = document.querySelector('.page-card .alerts, .page-card .text-danger, .for-login .alert-danger');
+                                    if (errDiv) {
+                                        errDiv.textContent = err._message || 'Login gagal.';
+                                        errDiv.style.display = 'block';
+                                    } else {
+                                        alert(err._message || 'Login gagal. Silakan coba lagi.');
+                                    }
+                                }
+                            });
+                        } else {
+                            // Fallback: submit normally if frappe.call not available
+                            delete form.dataset.twofaSubmitting;
+                            form.submit();
+                        }
+                    });
+                });
+                return true;
+            }
+
+            if (!attachHandler()) {
+                var obs = new MutationObserver(function() {
+                    if (attachHandler()) obs.disconnect();
+                });
+                obs.observe(document.body, { childList: true, subtree: true });
+            }
+        }
+
+        /**
          * Main initialization — run all fixes.
          */
         function init() {
@@ -314,6 +397,7 @@ def get_website_script():
             fixBrandHtml();
             fixBrandingText();
             fixNavbar();
+            setupLogin2FAOverride();
         }
 
         // Run immediately if DOM is ready, otherwise wait

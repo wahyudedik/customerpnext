@@ -21,6 +21,8 @@
         "max_storage_gb",
         "column_break_limits2",
         "sort_order",
+        "section_break_modules",
+        "enabled_modules",
         "amended_from"
     ],
     "fields": [
@@ -118,6 +120,18 @@
             "label": "Sort Order"
         },
         {
+            "fieldname": "section_break_modules",
+            "fieldtype": "Section Break",
+            "label": "Enabled ERP Modules"
+        },
+        {
+            "fieldname": "enabled_modules",
+            "fieldtype": "Table",
+            "label": "Enabled ERP Modules",
+            "options": "Qalcuity Plan Module",
+            "description": "Pilih modul ERPNext yang diaktifkan untuk paket ini. Jika kosong, semua modul aktif."
+        },
+        {
             "fieldname": "amended_from",
             "fieldtype": "Link",
             "label": "Amended From",
@@ -134,7 +148,7 @@
             "link_fieldname": "plan"
         }
     ],
-    "modified": "2026-08-22 15:57:00.000000",
+    "modified": "2026-08-26 09:45:00.000000",
     "modified_by": "Administrator",
     "module": "Qalcuity",
     "name": "Qalcuity Plan",

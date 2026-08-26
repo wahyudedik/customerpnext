@@ -428,5 +428,305 @@ $(document).ready(() => {
 	qalcuity.notifications.init();
 });
 
+/**
+ * Qalcuity ERP — Navigation Controller
+ * Handles hamburger menu, dropdowns, active state, and role-based nav.
+ */
+qalcuity.navigation = {
+	/**
+	 * Initialize navigation on page load
+	 */
+	init() {
+		const nav = document.getElementById("qalcuity-nav");
+		if (!nav) return; // No nav on this page (e.g., register/login)
+
+		this._detectRole();
+		this._setActivePage();
+		this._setUserName();
+		this._bindHamburger();
+		this._bindDropdowns();
+		this._bindMobileMenuClose();
+	},
+
+	/**
+	 * Detect if current user is admin/superadmin
+	 * and add body class to show admin-only nav items
+	 */
+	_detectRole() {
+		try {
+			const roles = frappe.boot && frappe.boot.user
+				? (frappe.boot.user.roles || [])
+				: [];
+
+			const isAdmin = roles.some(
+				(r) =>
+					r.role === "Qalcuity Superadmin" ||
+					r.role === "Qalcuity Admin" ||
+					r.role === "System Manager" ||
+					r.role === "Administrator"
+			);
+
+			if (isAdmin) {
+				document.body.classList.add("qalcuity-is-admin");
+			}
+		} catch (e) {
+			// Silently fail — admin items stay hidden by default
+		}
+	},
+
+	/**
+	 * Set active nav link based on current URL path
+	 */
+	_setActivePage() {
+		const path = window.location.pathname.replace(/^\/|\/$/g, "");
+
+		// Map of path segments to nav data-page values
+		const pageMap = {
+			"dashboard": "dashboard",
+			"my-payments": "my-payments",
+			"subscription-history": "subscription-history",
+			"admin-reviews": "admin-reviews",
+			"profile": "profile",
+			"account-status": "account-status",
+			"pricing": "pricing",
+			"checkout": "checkout",
+		};
+
+		const currentPage = pageMap[path] || path;
+
+		// Set active on direct links
+		document.querySelectorAll(".qalcuity-nav-link[data-page], .qalcuity-nav-dropdown-item[data-page]").forEach((el) => {
+			if (el.getAttribute("data-page") === currentPage) {
+				el.classList.add("active");
+			}
+		});
+
+		// If a dropdown item is active, also highlight the parent dropdown toggle
+		const activeDropdownItem = document.querySelector(
+			".qalcuity-nav-dropdown-menu .qalcuity-nav-dropdown-item.active"
+		);
+		if (activeDropdownItem) {
+			const dropdown = activeDropdownItem.closest(".qalcuity-nav-dropdown");
+			if (dropdown) {
+				const toggle = dropdown.querySelector(".qalcuity-nav-dropdown-toggle");
+				if (toggle) toggle.classList.add("active");
+			}
+		}
+	},
+
+	/**
+	 * Set user name in the nav user button
+	 */
+	_setUserName() {
+		const nameEl = document.getElementById("qalcuity-nav-user-name");
+		if (!nameEl) return;
+
+		try {
+			// Try frappe.boot first
+			if (frappe && frappe.session && frappe.session.user) {
+				const user = frappe.session.user;
+				if (user && user !== "Guest") {
+					// Use full_name from boot if available
+					const bootUser = frappe.boot.user || {};
+					nameEl.textContent = bootUser.full_name || bootUser.email || user.split("@")[0];
+				} else {
+					nameEl.textContent = "Guest";
+				}
+			}
+		} catch (e) {
+			nameEl.textContent = "User";
+		}
+	},
+
+	/**
+	 * Bind hamburger toggle button
+	 */
+	_bindHamburger() {
+		const toggle = document.getElementById("qalcuity-nav-toggle");
+		const menu = document.getElementById("qalcuity-nav-menu");
+		if (!toggle || !menu) return;
+
+		toggle.addEventListener("click", (e) => {
+			e.stopPropagation();
+			const isOpen = menu.classList.toggle("open");
+			toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+			document.body.classList.toggle("nav-open", isOpen);
+
+			// Change icon
+			const icon = toggle.querySelector(".octicon");
+			if (icon) {
+				icon.classList.toggle("octicon-three-bars");
+				icon.classList.toggle("octicon-x", isOpen);
+				icon.classList.toggle("octicon-three-bars", !isOpen);
+			}
+		});
+	},
+
+	/**
+	 * Bind dropdown toggles (both nav dropdown and user dropdown)
+	 */
+	_bindDropdowns() {
+		// Nav dropdowns (e.g., Pembayaran)
+		document.querySelectorAll(".qalcuity-nav-dropdown-toggle").forEach((toggle) => {
+			toggle.addEventListener("click", (e) => {
+				e.stopPropagation();
+				const dropdown = toggle.closest(".qalcuity-nav-dropdown");
+
+				// Close other open dropdowns
+				document.querySelectorAll(".qalcuity-nav-dropdown.open").forEach((d) => {
+					if (d !== dropdown) d.classList.remove("open");
+				});
+
+				dropdown.classList.toggle("open");
+			});
+		});
+
+		// User dropdown
+		const userBtn = document.getElementById("qalcuity-nav-user-btn");
+		if (userBtn) {
+			userBtn.addEventListener("click", (e) => {
+				e.stopPropagation();
+				const dropdown = userBtn.closest(".qalcuity-nav-dropdown");
+
+				// Close other open dropdowns
+				document.querySelectorAll(".qalcuity-nav-dropdown.open").forEach((d) => {
+					if (d !== dropdown) d.classList.remove("open");
+				});
+
+				dropdown.classList.toggle("open");
+			});
+		}
+
+		// Close dropdowns when clicking outside
+		document.addEventListener("click", () => {
+			document.querySelectorAll(".qalcuity-nav-dropdown.open").forEach((d) => {
+				d.classList.remove("open");
+			});
+		});
+
+		// Prevent dropdown menu clicks from closing
+		document.querySelectorAll(".qalcuity-nav-dropdown-menu").forEach((menu) => {
+			menu.addEventListener("click", (e) => {
+				e.stopPropagation();
+			});
+		});
+	},
+
+	/**
+	 * Close mobile menu when clicking a nav link
+	 */
+	_bindMobileMenuClose() {
+		const menu = document.getElementById("qalcuity-nav-menu");
+		const toggle = document.getElementById("qalcuity-nav-toggle");
+		if (!menu || !toggle) return;
+
+		menu.querySelectorAll(".qalcuity-nav-link, .qalcuity-nav-dropdown-item").forEach((link) => {
+			// Only close for links that navigate (have href)
+			if (link.getAttribute("href")) {
+				link.addEventListener("click", () => {
+					if (window.innerWidth <= 768) {
+						menu.classList.remove("open");
+						toggle.setAttribute("aria-expanded", "false");
+						document.body.classList.remove("nav-open");
+						const icon = toggle.querySelector(".octicon");
+						if (icon) {
+							icon.classList.remove("octicon-x");
+							icon.classList.add("octicon-three-bars");
+						}
+					}
+				});
+			}
+		});
+	},
+};
+
+// Initialize navigation on page load
+$(document).ready(() => {
+	qalcuity.navigation.init();
+});
+
+/**
+ * Qalcuity ERP — Desk Branding Overrides
+ * Hides Frappe/ERPNext branding elements on desk pages.
+ * Injected via CSS so it applies immediately without FOUC.
+ */
+(function () {
+	var style = document.createElement('style');
+	style.textContent = `
+		/* ============================================
+		   Qalcuity ERP — Desk Branding Hide Rules
+		   Hides Frappe/ERPNext default branding on desk
+		   ============================================ */
+
+		/* Hide "Powered by Frappe" footer */
+		.footer-frape,
+		.footer-frape a,
+		#website-footer .footer-frape,
+		.frappe-footer .footer-frape {
+			display: none !important;
+		}
+
+		/* Hide Frappe sidebar branding / logo */
+		.desk-sidebar .sidebar-label img[alt*="Frappe"],
+		.desk-sidebar .sidebar-label img[alt*="ERPNext"],
+		.sidebar-menu .sidebar-label img[alt*="Frappe"],
+		.sidebar-menu .sidebar-label img[alt*="ERPNext"] {
+			display: none !important;
+		}
+
+		/* Hide Frappe/ERPNext images in sidebar */
+		.desk-sidebar img[src*="frappe"],
+		.desk-sidebar img[src*="erpnext"],
+		.sidebar-menu img[src*="frappe"],
+		.sidebar-menu img[src*="erpnext"] {
+			display: none !important;
+		}
+
+		/* Hide Frappe/ERPNext images in navbar */
+		.navbar img[src*="frappe"][alt*="Frappe"],
+		.navbar img[src*="erpnext"][alt*="ERPNext"],
+		.app-header img[src*="frappe"][alt*="Frappe"],
+		.app-header img[src*="erpnext"][alt*="ERPNext"] {
+			display: none !important;
+		}
+
+		/* Hide Frappe/ERPNext images globally on desk */
+		img[src*="frappe"][alt*="Frappe"],
+		img[src*="frappe"][alt*="framework"],
+		img[src*="erpnext"][alt*="ERPNext"],
+		img[src*="erpnext"][alt*="ERP"] {
+			display: none !important;
+		}
+
+		/* Override Frappe default app icon color */
+		.app-icon {
+			background-color: #2490EF !important;
+		}
+
+		/* Override Frappe sidebar active indicator color */
+		.desk-sidebar .sidebar-menu .active a,
+		.sidebar-menu .active a {
+			border-right-color: #2490EF !important;
+		}
+
+		/* Hide "Made with Frappe" / "Frappe Framework" in footer text */
+		.footer-frape,
+		.website-footer .footer-frape,
+		.frappe-footer {
+			font-size: 0 !important;
+			height: 0 !important;
+			padding: 0 !important;
+			margin: 0 !important;
+			overflow: hidden !important;
+		}
+
+		/* Override Frappe desk title to show Qalcuity */
+		.page-head .page-title {
+			font-weight: 600;
+		}
+	`;
+	document.head.appendChild(style);
+})();
+
 // Log initialization
 console.log("Qalcuity ERP v" + qalcuity.version + " loaded");

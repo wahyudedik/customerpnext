@@ -66,5 +66,5 @@ def get_context(context):
             context.erp_company = tenant[0].erp_company
             context.can_access_erp = (
                 tenant[0].erp_provisioning_status == "Completed"
-                and context.subscription_status == "Active"
+                and context.subscription_status in ("Active", "Grace Period")
             )

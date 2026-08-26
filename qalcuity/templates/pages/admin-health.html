@@ -1,0 +1,635 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
+<div class="qalcuity-ah-container">
+	<!-- Header Section -->
+	<div class="qalcuity-ah-header">
+		<div>
+			<h1 class="qalcuity-ah-title">
+				<span class="octicon octicon-heart"></span> System Health
+			</h1>
+			<p class="qalcuity-ah-subtitle">Monitor status dan kesehatan sistem Qalcuity ERP</p>
+		</div>
+		<div class="qalcuity-ah-header-actions">
+			<span class="qalcuity-ah-last-updated" id="ah-last-updated"></span>
+			<button class="qalcuity-ah-btn qalcuity-ah-btn-primary" id="ah-refresh-btn">
+				<span class="octicon octicon-sync"></span> Refresh
+			</button>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="ah-loading" class="qalcuity-ah-loading">
+		<div class="qalcuity-ah-spinner"></div>
+		<p>Memuat data system health...</p>
+	</div>
+
+	<!-- Error State -->
+	<div id="ah-error" class="qalcuity-ah-error" style="display: none;">
+		<span class="octicon octicon-alert"></span>
+		<p id="ah-error-message">Gagal memuat data.</p>
+		<button class="qalcuity-ah-btn qalcuity-ah-btn-outline" id="ah-retry-btn">
+			<span class="octicon octicon-sync"></span> Coba Lagi
+		</button>
+	</div>
+
+	<!-- Content -->
+	<div id="ah-content" style="display: none;">
+
+		<!-- ========== HEALTH CHECKS ========== -->
+		<div class="qalcuity-ah-section">
+			<h2 class="qalcuity-ah-section-title">
+				<span class="octicon octicon-checklist"></span> Health Checks
+			</h2>
+			<div class="qalcuity-ah-health-grid" id="ah-health-checks"></div>
+		</div>
+
+		<!-- ========== SYSTEM STATUS ========== -->
+		<div class="qalcuity-ah-section">
+			<h2 class="qalcuity-ah-section-title">
+				<span class="octicon octicon-server"></span> System Status
+			</h2>
+			<div class="qalcuity-ah-stats-grid qalcuity-ah-stats-3" id="ah-system-stats"></div>
+			<!-- Database & Platform Info -->
+			<div class="qalcuity-ah-info-cards" id="ah-system-info"></div>
+		</div>
+
+		<!-- ========== APPLICATION STATUS ========== -->
+		<div class="qalcuity-ah-section">
+			<h2 class="qalcuity-ah-section-title">
+				<span class="octicon octicon-package"></span> Application Status
+			</h2>
+			<div class="qalcuity-ah-stats-grid qalcuity-ah-stats-3" id="ah-app-stats"></div>
+		</div>
+
+		<!-- ========== ACTIVITY STATS ========== -->
+		<div class="qalcuity-ah-section">
+			<h2 class="qalcuity-ah-section-title">
+				<span class="octicon octicon-graph"></span> Activity
+			</h2>
+			<div class="qalcuity-ah-stats-grid qalcuity-ah-stats-3" id="ah-activity-stats"></div>
+		</div>
+
+	</div>
+</div>
+
+<style>
+/* ===========================
+   System Health Page Styles
+   =========================== */
+.qalcuity-ah-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 24px 16px;
+}
+
+.qalcuity-ah-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 24px;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.qalcuity-ah-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-ah-title .octicon {
+	color: #e74c3c;
+}
+
+.qalcuity-ah-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 4px 0 0 0;
+}
+
+.qalcuity-ah-header-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.qalcuity-ah-last-updated {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-ah-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	border-radius: var(--qalcuity-radius);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	border: 1px solid transparent;
+	transition: all 0.2s ease;
+	text-decoration: none;
+}
+
+.qalcuity-ah-btn-primary {
+	background: var(--qalcuity-primary);
+	color: #fff;
+	border-color: var(--qalcuity-primary);
+}
+
+.qalcuity-ah-btn-primary:hover {
+	background: var(--qalcuity-primary-hover);
+}
+
+.qalcuity-ah-btn-outline {
+	background: transparent;
+	color: var(--qalcuity-text);
+	border-color: var(--qalcuity-border);
+}
+
+.qalcuity-ah-btn-outline:hover {
+	background: var(--qalcuity-bg-hover);
+}
+
+/* Loading */
+.qalcuity-ah-loading {
+	text-align: center;
+	padding: 48px 16px;
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-ah-spinner {
+	width: 32px;
+	height: 32px;
+	border: 3px solid var(--qalcuity-border);
+	border-top-color: var(--qalcuity-primary);
+	border-radius: 50%;
+	animation: qalcuity-spin 0.8s linear infinite;
+	margin: 0 auto 12px;
+}
+
+@keyframes qalcuity-spin {
+	to { transform: rotate(360deg); }
+}
+
+/* Error */
+.qalcuity-ah-error {
+	text-align: center;
+	padding: 48px 16px;
+	color: #e74c3c;
+}
+
+.qalcuity-ah-error .octicon {
+	font-size: 32px;
+	margin-bottom: 12px;
+}
+
+/* Sections */
+.qalcuity-ah-section {
+	margin-bottom: 24px;
+}
+
+.qalcuity-ah-section-title {
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 16px 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-ah-section-title .octicon {
+	color: var(--qalcuity-primary);
+}
+
+/* Health Checks Grid */
+.qalcuity-ah-health-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 16px;
+}
+
+.qalcuity-ah-health-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 16px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	transition: box-shadow 0.2s ease;
+}
+
+.qalcuity-ah-health-card:hover {
+	box-shadow: var(--qalcuity-shadow-lg);
+}
+
+.qalcuity-ah-health-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+.qalcuity-ah-health-dot-ok {
+	background: #27ae60;
+	box-shadow: 0 0 6px rgba(39, 174, 96, 0.4);
+}
+
+.qalcuity-ah-health-dot-warning {
+	background: #f39c12;
+	box-shadow: 0 0 6px rgba(243, 156, 18, 0.4);
+}
+
+.qalcuity-ah-health-dot-error {
+	background: #e74c3c;
+	box-shadow: 0 0 6px rgba(231, 76, 60, 0.4);
+}
+
+.qalcuity-ah-health-info {
+	flex: 1;
+}
+
+.qalcuity-ah-health-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-ah-health-message {
+	font-size: 11px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 2px;
+}
+
+/* Stats Grid */
+.qalcuity-ah-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.qalcuity-ah-stat-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 16px;
+	transition: box-shadow 0.2s ease;
+}
+
+.qalcuity-ah-stat-card:hover {
+	box-shadow: var(--qalcuity-shadow-lg);
+}
+
+.qalcuity-ah-stat-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 4px;
+}
+
+.qalcuity-ah-stat-value {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-ah-stat-sub {
+	font-size: 11px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 2px;
+}
+
+.qalcuity-ah-stat-bar {
+	height: 6px;
+	background: var(--qalcuity-border);
+	border-radius: 3px;
+	margin-top: 8px;
+	overflow: hidden;
+}
+
+.qalcuity-ah-stat-bar-fill {
+	height: 100%;
+	border-radius: 3px;
+	transition: width 0.5s ease;
+}
+
+.qalcuity-ah-stat-bar-ok { background: #27ae60; }
+.qalcuity-ah-stat-bar-warning { background: #f39c12; }
+.qalcuity-ah-stat-bar-danger { background: #e74c3c; }
+
+/* Info Cards */
+.qalcuity-ah-info-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 16px;
+}
+
+.qalcuity-ah-info-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius);
+	padding: 16px;
+}
+
+.qalcuity-ah-info-title {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.qalcuity-ah-info-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 4px 0;
+	font-size: 12px;
+	border-bottom: 1px solid var(--qalcuity-border-light, var(--qalcuity-border));
+}
+
+.qalcuity-ah-info-row:last-child {
+	border-bottom: none;
+}
+
+.qalcuity-ah-info-key {
+	color: var(--qalcuity-text-muted);
+}
+
+.qalcuity-ah-info-val {
+	color: var(--qalcuity-text);
+	font-weight: 600;
+}
+
+/* Version badge */
+.qalcuity-ah-version-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--qalcuity-primary-bg, rgba(36, 144, 239, 0.1));
+	color: var(--qalcuity-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.qalcuity-ah-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.qalcuity-ah-header-actions {
+		width: 100%;
+		justify-content: flex-end;
+	}
+
+	.qalcuity-ah-health-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.qalcuity-ah-stats-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.qalcuity-ah-info-cards {
+		grid-template-columns: 1fr;
+	}
+}
+</style>
+
+<script>
+frappe.ready(function () {
+	const $loading = document.getElementById('ah-loading');
+	const $error = document.getElementById('ah-error');
+	const $content = document.getElementById('ah-content');
+	const $refreshBtn = document.getElementById('ah-refresh-btn');
+	const $retryBtn = document.getElementById('ah-retry-btn');
+
+	function showLoading() {
+		$loading.style.display = '';
+		$error.style.display = 'none';
+		$content.style.display = 'none';
+	}
+
+	function showError(msg) {
+		$loading.style.display = 'none';
+		$error.style.display = '';
+		$content.style.display = 'none';
+		document.getElementById('ah-error-message').textContent = msg || 'Gagal memuat data.';
+	}
+
+	function showContent() {
+		$loading.style.display = 'none';
+		$error.style.display = 'none';
+		$content.style.display = '';
+	}
+
+	function formatBytes(gb) {
+		if (gb >= 1) return gb + ' GB';
+		return Math.round(gb * 1024) + ' MB';
+	}
+
+	function getBarClass(pct) {
+		if (pct >= 90) return 'qalcuity-ah-stat-bar-danger';
+		if (pct >= 70) return 'qalcuity-ah-stat-bar-warning';
+		return 'qalcuity-ah-stat-bar-ok';
+	}
+
+	function getDotClass(status) {
+		if (status === 'ok') return 'qalcuity-ah-health-dot-ok';
+		if (status === 'warning') return 'qalcuity-ah-health-dot-warning';
+		return 'qalcuity-ah-health-dot-error';
+	}
+
+	function renderHealthChecks(checks) {
+		const $el = document.getElementById('ah-health-checks');
+		let html = '';
+		const items = [
+			{ key: 'database', name: 'Database', icon: 'octicon-database' },
+			{ key: 'redis', name: 'Redis', icon: 'octicon-database' },
+			{ key: 'scheduler', name: 'Scheduler', icon: 'octicon-clock' },
+		];
+		for (const item of items) {
+			const check = checks[item.key] || { status: 'error', message: 'Unknown' };
+			html += '<div class="qalcuity-ah-health-card">' +
+				'<div class="qalcuity-ah-health-dot ' + getDotClass(check.status) + '"></div>' +
+				'<div class="qalcuity-ah-health-info">' +
+				'<div class="qalcuity-ah-health-name"><span class="octicon ' + item.icon + '"></span> ' + item.name + '</div>' +
+				'<div class="qalcuity-ah-health-message">' + (check.message || '') + '</div>' +
+				'</div></div>';
+		}
+		$el.innerHTML = html;
+	}
+
+	function renderSystemStats(sys) {
+		const $el = document.getElementById('ah-system-stats');
+		let html = '';
+
+		// Uptime
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Server Uptime</div>' +
+			'<div class="qalcuity-ah-stat-value">' + (sys.uptime.formatted || 'N/A') + '</div>' +
+			'</div>';
+
+		// Disk
+		const disk = sys.disk_usage || {};
+		const diskPct = disk.usage_percent || 0;
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Disk Usage</div>' +
+			'<div class="qalcuity-ah-stat-value">' + diskPct + '%</div>' +
+			'<div class="qalcuity-ah-stat-sub">' + formatBytes(disk.used_gb || 0) + ' / ' + formatBytes(disk.total_gb || 0) + '</div>' +
+			'<div class="qalcuity-ah-stat-bar"><div class="qalcuity-ah-stat-bar-fill ' + getBarClass(diskPct) + '" style="width:' + diskPct + '%"></div></div>' +
+			'</div>';
+
+		// Memory
+		const mem = sys.memory_usage || {};
+		const memPct = mem.usage_percent || 0;
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Memory Usage</div>' +
+			'<div class="qalcuity-ah-stat-value">' + memPct + '%</div>' +
+			'<div class="qalcuity-ah-stat-sub">' + formatBytes(mem.used_gb || 0) + ' / ' + formatBytes(mem.total_gb || 0) + '</div>' +
+			'<div class="qalcuity-ah-stat-bar"><div class="qalcuity-ah-stat-bar-fill ' + getBarClass(memPct) + '" style="width:' + memPct + '%"></div></div>' +
+			'</div>';
+
+		$el.innerHTML = html;
+
+		// System Info cards
+		const $info = document.getElementById('ah-system-info');
+		let infoHtml = '';
+
+		// CPU Info
+		const cpu = sys.cpu_load || {};
+		infoHtml += '<div class="qalcuity-ah-info-card">' +
+			'<div class="qalcuity-ah-info-title"><span class="octicon octicon-cpu"></span> CPU</div>' +
+			'<div class="qalcuity-ah-info-row"><span class="qalcuity-ah-info-key">Load (1m)</span><span class="qalcuity-ah-info-val">' + (cpu.load_1m || 0) + ' / ' + (cpu.cpu_count || 1) + ' cores</span></div>' +
+			'<div class="qalcuity-ah-info-row"><span class="qalcuity-ah-info-key">Load (5m)</span><span class="qalcuity-ah-info-val">' + (cpu.load_5m || 0) + '</span></div>' +
+			'<div class="qalcuity-ah-info-row"><span class="qalcuity-ah-info-key">Load (15m)</span><span class="qalcuity-ah-info-val">' + (cpu.load_15m || 0) + '</span></div>' +
+			'</div>';
+
+		// Database Info
+		const db = sys.database_size || {};
+		infoHtml += '<div class="qalcuity-ah-info-card">' +
+			'<div class="qalcuity-ah-info-title"><span class="octicon octicon-database"></span> Database</div>' +
+			'<div class="qalcuity-ah-info-row"><span class="qalcuity-ah-info-key">Size</span><span class="qalcuity-ah-info-val">' + (db.formatted || 'N/A') + '</span></div>' +
+			'</div>';
+
+		// Platform
+		infoHtml += '<div class="qalcuity-ah-info-card">' +
+			'<div class="qalcuity-ah-info-title"><span class="octicon octicon-device-desktop"></span> Platform</div>' +
+			'<div class="qalcuity-ah-info-row"><span class="qalcuity-ah-info-key">OS</span><span class="qalcuity-ah-info-val">' + (sys.platform || 'N/A') + '</span></div>' +
+			'<div class="qalcuity-ah-info-row"><span class="qalcuity-ah-info-key">Python</span><span class="qalcuity-ah-info-val">' + (sys.python_version || 'N/A') + '</span></div>' +
+			'</div>';
+
+		$info.innerHTML = infoHtml;
+	}
+
+	function renderAppStats(app) {
+		const $el = document.getElementById('ah-app-stats');
+		let html = '';
+
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Frappe Version</div>' +
+			'<div class="qalcuity-ah-stat-value"><span class="qalcuity-ah-version-badge">' + (app.frappe_version || 'N/A') + '</span></div>' +
+			'</div>';
+
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">ERPNext Version</div>' +
+			'<div class="qalcuity-ah-stat-value"><span class="qalcuity-ah-version-badge">' + (app.erpnext_version || 'N/A') + '</span></div>' +
+			'</div>';
+
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Qalcuity Version</div>' +
+			'<div class="qalcuity-ah-stat-value"><span class="qalcuity-ah-version-badge">' + (app.qalcuity_version || 'N/A') + '</span></div>' +
+			'</div>';
+
+		// Scheduler & Last Migrate
+		const sched = app.scheduler_status || {};
+		const schedColor = sched.status === 'Running' ? '#27ae60' : (sched.status === 'Stale' ? '#f39c12' : '#e74c3c');
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Scheduler</div>' +
+			'<div class="qalcuity-ah-stat-value" style="color:' + schedColor + '">' + (sched.status || 'Unknown') + '</div>' +
+			'<div class="qalcuity-ah-stat-sub">Last: ' + (sched.last_execution || 'N/A') + '</div>' +
+			'</div>';
+
+		$el.innerHTML = html;
+	}
+
+	function renderActivityStats(act) {
+		const $el = document.getElementById('ah-activity-stats');
+		let html = '';
+
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Active Users (24h)</div>' +
+			'<div class="qalcuity-ah-stat-value">' + (act.active_users_24h || 0) + '</div>' +
+			'<div class="qalcuity-ah-stat-sub">Total: ' + (act.total_users || 0) + ' users</div>' +
+			'</div>';
+
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Active Subscriptions</div>' +
+			'<div class="qalcuity-ah-stat-value">' + (act.total_subscriptions || 0) + '</div>' +
+			'<div class="qalcuity-ah-stat-sub">Customers: ' + (act.total_customers || 0) + '</div>' +
+			'</div>';
+
+		const errorsToday = act.errors_today || 0;
+		const errColor = errorsToday > 10 ? '#e74c3c' : (errorsToday > 0 ? '#f39c12' : '#27ae60');
+		html += '<div class="qalcuity-ah-stat-card">' +
+			'<div class="qalcuity-ah-stat-label">Errors Today</div>' +
+			'<div class="qalcuity-ah-stat-value" style="color:' + errColor + '">' + errorsToday + '</div>' +
+			'<div class="qalcuity-ah-stat-sub">Yesterday: ' + (act.errors_yesterday || 0) + '</div>' +
+			'</div>';
+
+		$el.innerHTML = html;
+	}
+
+	function loadHealth() {
+		showLoading();
+		frappe.call({
+			method: 'qalcuity.api.health_api.get_system_health',
+			callback: function (r) {
+				if (r && r.message) {
+					const data = r.message;
+					renderHealthChecks(data.health_checks || {});
+					renderSystemStats(data.system || {});
+					renderAppStats(data.application || {});
+					renderActivityStats(data.activity || {});
+					document.getElementById('ah-last-updated').textContent =
+						'Last updated: ' + (data.timestamp || '');
+					showContent();
+				} else {
+					showError('Tidak ada data yang diterima.');
+				}
+			},
+			error: function (err) {
+				showError(err.message || 'Gagal memuat data system health.');
+			}
+		});
+	}
+
+	// Event listeners
+	if ($refreshBtn) {
+		$refreshBtn.addEventListener('click', loadHealth);
+	}
+	if ($retryBtn) {
+		$retryBtn.addEventListener('click', loadHealth);
+	}
+
+	// Initial load
+	loadHealth();
+});
+</script>
+{% endblock %}

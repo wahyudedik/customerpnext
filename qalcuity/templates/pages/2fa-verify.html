@@ -1,0 +1,145 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-2fa-verify-container">
+	<!-- Logo -->
+	<div class="qalcuity-2fa-verify-logo">
+		<a href="/">
+			<img src="/assets/qalcuity/images/logo-dark.png" alt="Qalcuity ERP" class="qalcuity-2fa-verify-logo-img">
+		</a>
+	</div>
+
+	<!-- Card -->
+	<div class="qalcuity-2fa-verify-card">
+		<div class="qalcuity-2fa-verify-card-header">
+			<span class="octicon octicon-shield qalcuity-2fa-verify-icon"></span>
+			<h2 class="qalcuity-2fa-verify-title">Verifikasi Dua Faktor</h2>
+			<p class="qalcuity-2fa-verify-subtitle">Masukkan 6-digit kode dari authenticator app Anda.</p>
+		</div>
+
+		<!-- Error Alert -->
+		<div id="verify-error" class="qalcuity-alert qalcuity-alert-danger" style="display: none;">
+			<span class="octicon octicon-x"></span>
+			<span id="verify-error-msg">Kode tidak valid.</span>
+		</div>
+
+		<!-- Form -->
+		<form id="verify-form" class="qalcuity-2fa-verify-form">
+			<div class="qalcuity-2fa-code-input-wrapper qalcuity-2fa-code-input-large">
+				<input type="text" id="verify-code-input" class="qalcuity-2fa-code-input" maxlength="6"
+					pattern="[0-9]{6}" placeholder="000000" autocomplete="one-time-code" inputmode="numeric" autofocus>
+			</div>
+
+			<button type="submit" id="verify-btn" class="qalcuity-btn qalcuity-btn-primary qalcuity-btn-block">
+				<span class="octicon octicon-check"></span> Verifikasi
+			</button>
+		</form>
+
+		<!-- Backup Code Option -->
+		<div class="qalcuity-2fa-verify-divider">
+			<span>atau</span>
+		</div>
+
+		<form id="backup-form" class="qalcuity-2fa-verify-form">
+			<div class="qalcuity-form-group">
+				<input type="text" id="backup-code-input" class="qalcuity-form-input"
+					placeholder="Masukkan backup code (XXXX-XXXX)" style="text-align: center; letter-spacing: 2px;">
+			</div>
+			<button type="submit" id="backup-btn" class="qalcuity-btn qalcuity-btn-outline qalcuity-btn-block">
+				<span class="octicon octicon-key"></span> Gunakan Backup Code
+			</button>
+		</form>
+
+		<!-- Back to Login -->
+		<div class="qalcuity-2fa-verify-footer">
+			<a href="/login" class="qalcuity-2fa-verify-back-link">
+				<span class="octicon octicon-arrow-left"></span> Kembali ke Login
+			</a>
+		</div>
+	</div>
+</div>
+
+<script>
+	(function () {
+		// Get token from URL params
+		var urlParams = new URLSearchParams(window.location.search);
+		var token = urlParams.get('token');
+
+		if (!token) {
+			showError('Sesi verifikasi tidak ditemukan. Silakan login kembali.');
+			document.getElementById('verify-btn').disabled = true;
+			document.getElementById('backup-btn').disabled = true;
+			return;
+		}
+
+		// --- Verify TOTP Code ---
+		document.getElementById('verify-form').addEventListener('submit', function (e) {
+			e.preventDefault();
+			hideError();
+
+			var code = document.getElementById('verify-code-input').value.trim();
+			if (!code || code.length !== 6) {
+				showError('Masukkan kode 6 digit.');
+				return;
+			}
+
+			verifyCode(code);
+		});
+
+		// --- Verify Backup Code ---
+		document.getElementById('backup-form').addEventListener('submit', function (e) {
+			e.preventDefault();
+			hideError();
+
+			var code = document.getElementById('backup-code-input').value.trim();
+			if (!code) {
+				showError('Masukkan backup code.');
+				return;
+			}
+
+			verifyCode(code);
+		});
+
+		function verifyCode(code) {
+			var btn = document.getElementById('verify-btn');
+			btn.disabled = true;
+			btn.innerHTML = '<span class="octicon octicon-sync"></span> Memverifikasi...';
+
+			frappe.call({
+				method: 'qalcuity.api.two_factor.verify_2fa_login',
+				args: { token: token, code: code },
+				callback: function (r) {
+					if (r.message && r.message.status === 'ok') {
+						// Redirect to app
+						window.location.href = r.message.redirect || '/app';
+					}
+				},
+				error: function (err) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-check"></span> Verifikasi';
+					showError(err._message || 'Kode verifikasi tidak valid.');
+					document.getElementById('verify-code-input').value = '';
+					document.getElementById('verify-code-input').focus();
+				}
+			});
+		}
+
+		// --- Auto-advance on 6 digits ---
+		document.getElementById('verify-code-input').addEventListener('input', function () {
+			this.value = this.value.replace(/[^0-9]/g, '');
+			if (this.value.length === 6) {
+				document.getElementById('verify-form').dispatchEvent(new Event('submit'));
+			}
+		});
+
+		function showError(msg) {
+			document.getElementById('verify-error-msg').textContent = msg;
+			document.getElementById('verify-error').style.display = 'flex';
+		}
+
+		function hideError() {
+			document.getElementById('verify-error').style.display = 'none';
+		}
+	})();
+</script>
+{% endblock %}

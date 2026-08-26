@@ -44,7 +44,7 @@
             "in_list_view": 1,
             "in_standard_filter": 1,
             "label": "Status",
-            "options": "Draft\nPending Payment\nActive\nSuspended\nExpired\nCancelled",
+            "options": "Draft\nPending Payment\nActive\nGrace Period\nSuspended\nExpired\nCancelled",
             "reqd": 1
         },
         {
@@ -169,6 +169,10 @@
         {
             "color": "green",
             "title": "Active"
+        },
+        {
+            "color": "orange",
+            "title": "Grace Period"
         },
         {
             "color": "red",

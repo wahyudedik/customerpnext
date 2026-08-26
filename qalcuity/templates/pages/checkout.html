@@ -819,11 +819,11 @@
 							</label>
 							<div class="qalcuity-file-upload-wrapper">
 								<input type="file" id="proof_of_payment" name="proof_of_payment"
-									class="qalcuity-file-input" accept="image/jpeg,image/png,image/jpg,application/pdf"
-									required>
+									class="qalcuity-file-input"
+									accept="image/jpeg,image/png,image/jpg,image/webp,application/pdf" required>
 								<label for="proof_of_payment" class="qalcuity-file-label">
 									<span class="octicon octicon-cloud-upload"></span>
-									<span id="file-label-text">Pilih file (JPG, PNG, atau PDF, maks 5MB)</span>
+									<span id="file-label-text">Pilih file (JPG, PNG, WebP, atau PDF, maks 5MB)</span>
 								</label>
 								<div id="file-preview" class="qalcuity-file-preview" style="display: none;"></div>
 							</div>
@@ -882,7 +882,7 @@
 						preview.innerHTML = '<div class="qalcuity-file-preview-doc"><span class="octicon octicon-file-text"></span> ' + frappe.utils.escape_html(file.name) + '</div>';
 					}
 				} else {
-					label.textContent = 'Pilih file (JPG, PNG, atau PDF, maks 5MB)';
+					label.textContent = 'Pilih file (JPG, PNG, WebP, atau PDF, maks 5MB)';
 					preview.style.display = 'none';
 				}
 			});
@@ -997,15 +997,47 @@
 
 		if (proofFile) {
 			var maxSize = 5 * 1024 * 1024; // 5MB
-			var allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+			var allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'];
+			var allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
+			var dangerousExtensions = ['.php', '.php3', '.php5', '.phtml', '.cgi', '.pl', '.py', '.exe', '.bat', '.cmd', '.sh', '.js', '.svg'];
 
+			// Check file size
 			if (proofFile.size > maxSize) {
-				showFieldError('proof_of_payment', 'Ukuran file maksimal 5MB.');
+				showFieldError('proof_of_payment', 'Ukuran file maksimal 5MB. File Anda: ' + (proofFile.size / 1024 / 1024).toFixed(1) + 'MB.');
 				valid = false;
 			}
 
+			// Check file size > 0
+			if (proofFile.size === 0) {
+				showFieldError('proof_of_payment', 'File kosong. Silakan pilih file yang valid.');
+				valid = false;
+			}
+
+			// Check MIME type
 			if (allowedTypes.indexOf(proofFile.type) === -1) {
-				showFieldError('proof_of_payment', 'Format file tidak didukung. Gunakan JPG, PNG, atau PDF.');
+				showFieldError('proof_of_payment', 'Format file tidak didukung. Gunakan JPG, PNG, WebP, atau PDF.');
+				valid = false;
+			}
+
+			// Check file extension
+			var fileName = proofFile.name;
+			var fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+
+			if (allowedExtensions.indexOf(fileExt) === -1) {
+				showFieldError('proof_of_payment', 'Ekstensi file tidak didukung. Gunakan: ' + allowedExtensions.join(', '));
+				valid = false;
+			}
+
+			// Check for dangerous extensions
+			if (dangerousExtensions.indexOf(fileExt) !== -1) {
+				showFieldError('proof_of_payment', 'Tipe file ini tidak diizinkan karena alasan keamanan.');
+				valid = false;
+			}
+
+			// Check for double extensions (e.g., image.php.jpg)
+			var nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+			if (nameWithoutExt.indexOf('.') !== -1) {
+				showFieldError('proof_of_payment', 'File dengan multiple ekstensi tidak diizinkan.');
 				valid = false;
 			}
 		}

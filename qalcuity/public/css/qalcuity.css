@@ -3843,7 +3843,9 @@
 }
 
 @keyframes qalcuity-spin {
-	to { transform: rotate(360deg); }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* Dark mode adjustments for ERP banner */
@@ -3867,5 +3869,1836 @@
 	.qalcuity-dash-erp-banner-btn {
 		width: 100%;
 		justify-content: center;
+	}
+}
+
+/* --- Auth Buttons (Public Nav) --- */
+.qalcuity-nav-auth-btn {
+	padding: 8px 16px;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+	min-height: 36px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.qalcuity-nav-auth-btn.qalcuity-btn-outline {
+	background: transparent;
+	border: 1px solid var(--qalcuity-nav-border);
+	color: var(--qalcuity-nav-text);
+	border-radius: var(--qalcuity-radius-sm);
+	transition: all 0.2s ease;
+}
+
+.qalcuity-nav-auth-btn.qalcuity-btn-outline:hover {
+	border-color: var(--qalcuity-primary);
+	color: var(--qalcuity-primary);
+	background: rgba(36, 144, 239, 0.06);
+}
+
+.qalcuity-nav-auth-btn.qalcuity-btn-primary {
+	background: var(--qalcuity-primary);
+	color: #fff;
+	border: 1px solid var(--qalcuity-primary);
+	border-radius: var(--qalcuity-radius-sm);
+	transition: all 0.2s ease;
+}
+
+.qalcuity-nav-auth-btn.qalcuity-btn-primary:hover {
+	background: var(--qalcuity-primary-dark);
+	border-color: var(--qalcuity-primary-dark);
+}
+
+/* ============================================================
+	  Qalcuity Navigation Header Bar
+	  Consistent navigation across all website pages
+	  ============================================================ */
+
+:root {
+	--qalcuity-nav-height: 56px;
+	--qalcuity-nav-bg: #ffffff;
+	--qalcuity-nav-border: #e2e8f0;
+	--qalcuity-nav-text: #4a5568;
+	--qalcuity-nav-text-hover: #2490ef;
+	--qalcuity-nav-active: #2490ef;
+	--qalcuity-nav-dropdown-bg: #ffffff;
+	--qalcuity-nav-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"],
+[data-theme-mode="dark"] {
+	--qalcuity-nav-bg: #1a202c;
+	--qalcuity-nav-border: #4a5568;
+	--qalcuity-nav-text: #a0aec0;
+	--qalcuity-nav-text-hover: #63b3ed;
+	--qalcuity-nav-active: #63b3ed;
+	--qalcuity-nav-dropdown-bg: #2d3748;
+	--qalcuity-nav-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* --- Navigation Bar Container --- */
+.qalcuity-nav {
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	background: var(--qalcuity-nav-bg);
+	border-bottom: 1px solid var(--qalcuity-nav-border);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	height: var(--qalcuity-nav-height);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+
+.qalcuity-nav-inner {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 20px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+/* --- Brand / Logo --- */
+.qalcuity-nav-brand {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	text-decoration: none;
+	flex-shrink: 0;
+}
+
+.qalcuity-nav-logo {
+	height: 28px;
+	width: auto;
+}
+
+/* Logo theme switching */
+.qalcuity-nav-logo-dark {
+	display: block;
+}
+
+.qalcuity-nav-logo-light {
+	display: none;
+}
+
+[data-theme="dark"] .qalcuity-nav-logo-dark,
+[data-theme-mode="dark"] .qalcuity-nav-logo-dark {
+	display: none;
+}
+
+[data-theme="dark"] .qalcuity-nav-logo-light,
+[data-theme-mode="dark"] .qalcuity-nav-logo-light {
+	display: block;
+}
+
+.qalcuity-nav-brand-text {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--qalcuity-primary);
+	letter-spacing: -0.3px;
+}
+
+/* --- Hamburger Toggle (Mobile) --- */
+.qalcuity-nav-toggle {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border: none;
+	background: transparent;
+	color: var(--qalcuity-nav-text);
+	font-size: 20px;
+	cursor: pointer;
+	border-radius: var(--qalcuity-radius-sm);
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.qalcuity-nav-toggle:hover {
+	background: var(--qalcuity-bg);
+	color: var(--qalcuity-nav-text-hover);
+}
+
+/* --- Navigation Menu --- */
+.qalcuity-nav-menu {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex: 1;
+	margin-left: 24px;
+}
+
+.qalcuity-nav-links {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* --- Navigation Link --- */
+.qalcuity-nav-link {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--qalcuity-nav-text);
+	text-decoration: none;
+	border-radius: var(--qalcuity-radius-sm);
+	transition: all 0.2s ease;
+	cursor: pointer;
+	border: none;
+	background: transparent;
+	white-space: nowrap;
+	position: relative;
+}
+
+.qalcuity-nav-link:hover {
+	color: var(--qalcuity-nav-text-hover);
+	background: rgba(36, 144, 239, 0.06);
+}
+
+.qalcuity-nav-link.active {
+	color: var(--qalcuity-nav-active);
+	background: rgba(36, 144, 239, 0.08);
+	font-weight: 600;
+}
+
+.qalcuity-nav-link.active::after {
+	content: '';
+	position: absolute;
+	bottom: -2px;
+	left: 14px;
+	right: 14px;
+	height: 2px;
+	background: var(--qalcuity-nav-active);
+	border-radius: 1px;
+}
+
+/* --- Chevron Icon --- */
+.qalcuity-nav-chevron {
+	font-size: 12px;
+	transition: transform 0.2s ease;
+	margin-left: 2px;
+}
+
+/* --- Dropdown --- */
+.qalcuity-nav-dropdown {
+	position: relative;
+}
+
+.qalcuity-nav-dropdown-menu {
+	display: none;
+	position: absolute;
+	top: calc(100% + 4px);
+	left: 0;
+	min-width: 200px;
+	background: var(--qalcuity-nav-dropdown-bg);
+	border: 1px solid var(--qalcuity-nav-border);
+	border-radius: var(--qalcuity-radius);
+	box-shadow: var(--qalcuity-nav-dropdown-shadow);
+	z-index: 1001;
+	overflow: hidden;
+	animation: qalcuity-nav-fadeIn 0.15s ease;
+}
+
+@keyframes qalcuity-nav-fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.qalcuity-nav-dropdown.open .qalcuity-nav-dropdown-menu {
+	display: block;
+}
+
+.qalcuity-nav-dropdown.open .qalcuity-nav-chevron {
+	transform: rotate(180deg);
+}
+
+.qalcuity-nav-dropdown-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 16px;
+	font-size: 14px;
+	color: var(--qalcuity-nav-text);
+	text-decoration: none;
+	transition: all 0.15s ease;
+}
+
+.qalcuity-nav-dropdown-item:hover {
+	background: rgba(36, 144, 239, 0.06);
+	color: var(--qalcuity-nav-text-hover);
+}
+
+.qalcuity-nav-dropdown-item.active {
+	color: var(--qalcuity-nav-active);
+	font-weight: 600;
+	background: rgba(36, 144, 239, 0.06);
+}
+
+.qalcuity-nav-dropdown-divider {
+	height: 1px;
+	background: var(--qalcuity-nav-border);
+	margin: 4px 0;
+}
+
+.qalcuity-nav-logout {
+	color: var(--qalcuity-danger) !important;
+}
+
+.qalcuity-nav-logout:hover {
+	background: rgba(220, 53, 69, 0.06) !important;
+	color: var(--qalcuity-danger) !important;
+}
+
+/* --- Right Side --- */
+.qalcuity-nav-right {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-left: auto;
+}
+
+/* --- Bell Notification --- */
+.qalcuity-nav-bell {
+	position: relative;
+}
+
+/* --- User Button --- */
+.qalcuity-nav-user-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px;
+	border: 1px solid var(--qalcuity-nav-border);
+	background: transparent;
+	border-radius: var(--qalcuity-radius);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 14px;
+	color: var(--qalcuity-nav-text);
+}
+
+.qalcuity-nav-user-btn:hover {
+	background: var(--qalcuity-bg);
+	border-color: var(--qalcuity-primary);
+}
+
+.qalcuity-nav-user-avatar {
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(36, 144, 239, 0.1);
+	color: var(--qalcuity-primary);
+	border-radius: 50%;
+	font-size: 14px;
+}
+
+.qalcuity-nav-user-name {
+	font-weight: 500;
+	max-width: 120px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* User dropdown menu — align right */
+.qalcuity-nav-user-menu {
+	left: auto;
+	right: 0;
+	min-width: 180px;
+}
+
+/* --- Admin-only items --- */
+.qalcuity-nav-admin-only {
+	display: none !important;
+}
+
+body.qalcuity-is-admin .qalcuity-nav-admin-only {
+	display: flex !important;
+}
+
+/* ============================================================
+	  Navigation Responsive — Tablet & Mobile
+	  ============================================================ */
+
+@media (max-width: 768px) {
+	.qalcuity-nav-toggle {
+		display: flex;
+	}
+
+	.qalcuity-nav-menu {
+		display: none;
+		position: fixed;
+		top: var(--qalcuity-nav-height);
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: var(--qalcuity-nav-bg);
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-start;
+		margin-left: 0;
+		padding: 12px 16px;
+		overflow-y: auto;
+		z-index: 999;
+		animation: qalcuity-nav-slideDown 0.2s ease;
+		border-top: 1px solid var(--qalcuity-nav-border);
+	}
+
+	.qalcuity-nav-menu.open {
+		display: flex;
+	}
+
+	@keyframes qalcuity-nav-slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-8px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.qalcuity-nav-links {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 2px;
+	}
+
+	.qalcuity-nav-link {
+		padding: 12px 16px;
+		font-size: 15px;
+		border-radius: var(--qalcuity-radius);
+		min-height: 44px;
+	}
+
+	.qalcuity-nav-link.active::after {
+		display: none;
+	}
+
+	/* Mobile dropdown — always open */
+	.qalcuity-nav-dropdown-menu {
+		position: static;
+		box-shadow: none;
+		border: none;
+		border-radius: 0;
+		background: rgba(36, 144, 239, 0.03);
+		display: block;
+		animation: none;
+		margin-top: 2px;
+		margin-bottom: 8px;
+	}
+
+	.qalcuity-nav-dropdown-item {
+		padding: 10px 16px 10px 32px;
+		min-height: 44px;
+	}
+
+	.qalcuity-nav-dropdown-toggle {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	/* Right side — full width on mobile */
+	.qalcuity-nav-right {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+		margin-top: 12px;
+		padding-top: 12px;
+		border-top: 1px solid var(--qalcuity-nav-border);
+	}
+
+	.qalcuity-nav-user-btn {
+		width: 100%;
+		justify-content: space-between;
+		min-height: 44px;
+	}
+
+	.qalcuity-nav-user-menu {
+		position: static;
+		box-shadow: none;
+		border: none;
+		border-radius: 0;
+		background: rgba(36, 144, 239, 0.03);
+		display: block;
+		animation: none;
+		margin-top: 4px;
+	}
+
+	.qalcuity-nav-user-name {
+		max-width: none;
+	}
+
+	/* Auth buttons — full width on mobile */
+	.qalcuity-nav-auth-btn {
+		width: 100%;
+		justify-content: center;
+		min-height: 44px;
+		font-size: 14px;
+	}
+
+	.qalcuity-nav-right .qalcuity-nav-auth-btn+.qalcuity-nav-auth-btn {
+		margin-top: 4px;
+	}
+
+	/* Remove body scroll when mobile menu is open */
+	body.nav-open {
+		overflow: hidden;
+		position: fixed;
+		width: 100%;
+	}
+}
+
+@media (max-width: 480px) {
+	.qalcuity-nav-brand-text {
+		font-size: 16px;
+	}
+
+	.qalcuity-nav-inner {
+		padding: 0 12px;
+	}
+}
+
+/* ============================================================
+	  Mobile-First Responsive Utilities
+	  Applied globally to all Qalcuity pages
+	  ============================================================ */
+
+/* --- Responsive Tables --- */
+@media (max-width: 768px) {
+
+	.qalcuity-table-responsive,
+	.qarcuity-table-responsive {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		margin: 0 -16px;
+		padding: 0 16px;
+	}
+
+	.qalcuity-table-responsive table,
+	.qarcuity-table-responsive table {
+		min-width: 500px;
+	}
+}
+
+/* --- Responsive Cards Grid --- */
+@media (max-width: 768px) {
+	.qalcuity-dash-stats {
+		grid-template-columns: 1fr !important;
+	}
+
+	.qalcuity-my-payments-stats {
+		grid-template-columns: 1fr 1fr !important;
+	}
+
+	.qalcuity-acc-payment-grid {
+		grid-template-columns: 1fr 1fr !important;
+	}
+
+	.qalcuity-acc-usage-grid {
+		grid-template-columns: 1fr !important;
+	}
+
+	.qalcuity-acc-actions-grid {
+		grid-template-columns: 1fr !important;
+	}
+
+	.qalcuity-acc-detail-grid {
+		grid-template-columns: 1fr !important;
+	}
+
+	.qalcuity-profile-form-grid {
+		grid-template-columns: 1fr !important;
+	}
+
+	.qalcuity-profile-info-grid {
+		grid-template-columns: 1fr !important;
+	}
+
+	.qalcuity-checkout-layout {
+		grid-template-columns: 1fr !important;
+	}
+
+	/* Cards full width on mobile */
+	.qalcuity-dash-card,
+	.qalcuity-profile-card,
+	.qalcuity-acc-card {
+		padding: 16px !important;
+	}
+}
+
+@media (max-width: 480px) {
+	.qalcuity-my-payments-stats {
+		grid-template-columns: 1fr !important;
+	}
+
+	.qalcuity-acc-payment-grid {
+		grid-template-columns: 1fr !important;
+	}
+}
+
+/* --- Responsive Forms --- */
+@media (max-width: 768px) {
+	.qalcuity-form-group {
+		margin-bottom: 16px;
+	}
+
+	.qalcuity-form-input,
+	.qalcuity-form-select,
+	textarea.qalcuity-form-input {
+		font-size: 16px !important;
+		/* Prevent iOS zoom */
+		padding: 12px 14px !important;
+		min-height: 44px;
+	}
+
+	.qalcuity-btn {
+		min-height: 44px;
+		font-size: 15px;
+		width: 100%;
+		justify-content: center;
+	}
+
+	/* Page headers responsive */
+	.qalcuity-dash-header,
+	.qalcuity-my-payments-header,
+	.qalcuity-profile-header,
+	.qalcuity-acc-header,
+	.qalcuity-sub-history-header {
+		flex-direction: column !important;
+		align-items: flex-start !important;
+		gap: 12px;
+	}
+
+	.qalcuity-dash-header-actions,
+	.qalcuity-my-payments-header-right,
+	.qalcuity-profile-header-right,
+	.qalcuity-acc-header-right,
+	.qalcuity-sub-history-header-right {
+		width: 100%;
+	}
+
+	.qalcuity-dash-header-actions .qalcuity-dash-btn,
+	.qalcuity-my-payments-header-right .qalcuity-btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	/* Title responsive */
+	.qalcuity-dash-title,
+	.qalcuity-my-payments-title,
+	.qalcuity-profile-title,
+	.qalcuity-acc-title,
+	.qalcuity-sub-history-title {
+		font-size: 22px !important;
+	}
+
+	/* Container padding responsive */
+	.qalcuity-dash-container,
+	.qalcuity-my-payments-container,
+	.qalcuity-profile-container,
+	.qalcuity-acc-container,
+	.qalcuity-sub-history-container,
+	.qalcuity-checkout-container,
+	.qalcuity-pricing-container,
+	.qalcuity-ar-container {
+		padding: 12px !important;
+	}
+
+	/* Notification panel responsive */
+	.qalcuity-notif-panel {
+		right: -8px !important;
+		left: -8px !important;
+		width: auto !important;
+		max-width: none !important;
+	}
+}
+
+/* --- Touch Target Minimum 44px --- */
+@media (max-width: 768px) {
+
+	.qalcuity-nav-link,
+	.qalcuity-nav-dropdown-item,
+	.qalcuity-nav-toggle,
+	.qalcuity-nav-user-btn,
+	.qalcuity-btn,
+	.qalcuity-link,
+	.qalcuity-payment-card,
+	.qalcuity-plan-card,
+	.qalcuity-dash-btn,
+	.qalcuity-dash-link,
+	.qalcuity-acc-action-card {
+		min-height: 44px;
+	}
+}
+
+/* --- Admin Reviews responsive --- */
+@media (max-width: 768px) {
+	.qalcuity-ar-filters {
+		flex-direction: column !important;
+		gap: 8px !important;
+	}
+
+	.qalcuity-ar-filter-group {
+		width: 100%;
+	}
+
+	.qalcuity-ar-filter-select {
+		width: 100%;
+		min-height: 44px;
+	}
+
+	.qalcuity-ar-bulk-bar {
+		flex-direction: column;
+		gap: 8px;
+		align-items: flex-start;
+	}
+
+	.qalcuity-ar-bulk-actions {
+		width: 100%;
+	}
+
+	.qalcuity-ar-bulk-actions .qalcuity-btn {
+		flex: 1;
+		justify-content: center;
+		min-height: 44px;
+	}
+
+	/* Payment cards in admin reviews */
+	.qalcuity-ar-payment-card {
+		padding: 12px !important;
+	}
+}
+
+/* --- Subscription History responsive --- */
+@media (max-width: 768px) {
+	.qalcuity-sub-history-filter-group {
+		width: 100%;
+	}
+
+	.qalcuity-sub-history-filter-group select {
+		width: 100%;
+		min-height: 44px;
+	}
+
+	.qalcuity-sub-history-entry {
+		padding-left: 24px !important;
+	}
+}
+
+/* --- Checkout responsive --- */
+@media (max-width: 768px) {
+	.qalcuity-checkout-sidebar {
+		padding: 0 !important;
+	}
+
+	.qalcuity-checkout-form {
+		padding: 0 !important;
+	}
+
+	.bank-account-card {
+		padding: 12px !important;
+	}
+
+	.qalcuity-checkout-submit {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
+/* --- Empty/Loading/Error states responsive --- */
+@media (max-width: 768px) {
+
+	.qalcuity-dash-empty,
+	.qalcuity-my-payments-empty,
+	.qalcuity-acc-empty,
+	.qalcuity-sub-history-empty,
+	.qalcuity-pricing-empty,
+	.qalcuity-ar-empty {
+		padding: 24px 16px;
+	}
+
+	.qalcuity-dash-empty-icon,
+	.qalcuity-my-payments-empty-icon {
+		margin-bottom: 12px;
+	}
+}
+
+/* --- Pricing responsive --- */
+@media (max-width: 768px) {
+	.qalcuity-pricing-grid {
+		grid-template-columns: 1fr !important;
+		max-width: 400px;
+		margin: 0 auto;
+	}
+}
+
+/* --- Page body spacing for nav --- */
+.qalcuity-page-with-nav {
+	padding-top: 0;
+}
+
+.qalcuity-dash-container,
+.qalcuity-my-payments-container,
+.qalcuity-profile-container,
+.qalcuity-acc-container,
+.qalcuity-sub-history-container,
+.qalcuity-checkout-container,
+.qalcuity-pricing-container,
+.qalcuity-ar-container {
+	margin-top: 0;
+}
+
+/* ===========================
+   Shared Auth Page Styles
+   (verify-email, forgot-password, reset-password)
+   =========================== */
+.qalcuity-auth-page {
+	background: var(--qalcuity-bg);
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px 16px;
+}
+
+.qalcuity-auth-container {
+	width: 100%;
+	max-width: 480px;
+	margin: 0 auto;
+}
+
+.qalcuity-auth-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-lg);
+	box-shadow: var(--qalcuity-shadow-lg);
+	padding: 40px 36px;
+}
+
+.qalcuity-auth-header {
+	text-align: center;
+	margin-bottom: 24px;
+}
+
+.qalcuity-auth-header img {
+	margin-bottom: 16px;
+}
+
+.qalcuity-auth-title {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-auth-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0 0 8px 0;
+	line-height: 1.5;
+}
+
+.qalcuity-auth-form {
+	display: flex;
+	flex-direction: column;
+}
+
+.qalcuity-auth-status {
+	text-align: center;
+	padding: 8px 0;
+}
+
+.qalcuity-auth-icon {
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto 16px auto;
+	font-size: 28px;
+}
+
+.qalcuity-auth-icon-success {
+	background: #d4edda;
+	color: var(--qalcuity-success);
+}
+
+.qalcuity-auth-icon-error {
+	background: #f8d7da;
+	color: var(--qalcuity-danger);
+}
+
+.qalcuity-auth-icon-info {
+	background: #d1ecf1;
+	color: var(--qalcuity-info);
+}
+
+.qalcuity-auth-actions {
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+	margin-top: 24px;
+	flex-wrap: wrap;
+}
+
+.qalcuity-auth-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 24px;
+	font-size: 14px;
+	font-weight: 600;
+	border-radius: var(--qalcuity-radius-sm);
+	border: 1px solid transparent;
+	cursor: pointer;
+	text-decoration: none;
+	transition: all 0.2s ease;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.qalcuity-auth-btn-primary {
+	background: var(--qalcuity-primary);
+	color: #ffffff;
+	border-color: var(--qalcuity-primary);
+}
+
+.qalcuity-auth-btn-primary:hover {
+	background: var(--qalcuity-primary-dark);
+	border-color: var(--qalcuity-primary-dark);
+	color: #ffffff;
+	text-decoration: none;
+}
+
+.qalcuity-auth-btn-outline {
+	background: transparent;
+	color: var(--qalcuity-primary);
+	border-color: var(--qalcuity-border);
+}
+
+.qalcuity-auth-btn-outline:hover {
+	background: var(--qalcuity-bg);
+	border-color: var(--qalcuity-primary);
+	color: var(--qalcuity-primary);
+	text-decoration: none;
+}
+
+.qalcuity-auth-btn-full {
+	width: 100%;
+}
+
+.qalcuity-auth-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.qalcuity-auth-btn-text,
+.qalcuity-auth-btn-loading {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-auth-alert {
+	padding: 12px 16px;
+	border-radius: var(--qalcuity-radius-sm);
+	font-size: 14px;
+	margin-bottom: 16px;
+	text-align: left;
+}
+
+.qalcuity-auth-alert-success {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.qalcuity-auth-alert-error {
+	background: #f8d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
+}
+
+.qalcuity-auth-spinner {
+	display: inline-block;
+	width: 40px;
+	height: 40px;
+	border: 3px solid var(--qalcuity-border);
+	border-top-color: var(--qalcuity-primary);
+	border-radius: 50%;
+	margin-bottom: 16px;
+	animation: qalcuity-spin 1s linear infinite;
+}
+
+.qalcuity-auth-resend-form {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-auth-resend-form .qalcuity-auth-input {
+	width: 100%;
+	padding: 10px 14px;
+	font-size: 14px;
+	color: var(--qalcuity-text);
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: var(--qalcuity-radius-sm);
+	outline: none;
+	transition: border-color 0.2s ease;
+	box-sizing: border-box;
+	margin-bottom: 12px;
+}
+
+.qalcuity-auth-resend-form .qalcuity-auth-input:focus {
+	border-color: var(--qalcuity-primary);
+	box-shadow: 0 0 0 3px rgba(36, 144, 239, 0.15);
+}
+
+.qalcuity-auth-footer {
+	text-align: center;
+	margin-top: 20px;
+	padding-top: 16px;
+	border-top: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-auth-footer p {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0 0 8px 0;
+}
+
+/* Dark mode auth icons */
+[data-theme="dark"] .qalcuity-auth-icon-success,
+[data-theme-mode="dark"] .qalcuity-auth-icon-success {
+	background: #1e4620;
+	color: #28a745;
+}
+
+[data-theme="dark"] .qalcuity-auth-icon-error,
+[data-theme-mode="dark"] .qalcuity-auth-icon-error {
+	background: #4a1a1a;
+	color: #dc3545;
+}
+
+[data-theme="dark"] .qalcuity-auth-icon-info,
+[data-theme-mode="dark"] .qalcuity-auth-icon-info {
+	background: #1a3a4a;
+	color: #17a2b8;
+}
+
+/* Dark mode auth alerts */
+[data-theme="dark"] .qalcuity-auth-alert-success,
+[data-theme-mode="dark"] .qalcuity-auth-alert-success {
+	background: #1e4620;
+	color: #a3d9b1;
+	border-color: #2d6a3f;
+}
+
+[data-theme="dark"] .qalcuity-auth-alert-error,
+[data-theme-mode="dark"] .qalcuity-auth-alert-error {
+	background: #4a1a1a;
+	color: #f5a3aa;
+	border-color: #6b2a2a;
+}
+
+/* Dark mode auth logo toggle */
+[data-theme="dark"] .qalcuity-auth-logo-light,
+[data-theme-mode="dark"] .qalcuity-auth-logo-light {
+	display: none !important;
+}
+
+[data-theme="dark"] .qalcuity-auth-logo-dark,
+[data-theme-mode="dark"] .qalcuity-auth-logo-dark {
+	display: block !important;
+}
+
+/* ===========================
+   Register Check Email Card
+   =========================== */
+.qalcuity-register-check-email {
+	text-align: center;
+	padding: 8px 0;
+}
+
+.qalcuity-register-check-email .qalcuity-auth-icon {
+	margin-bottom: 20px;
+}
+
+.qalcuity-register-check-email .qalcuity-auth-title {
+	margin-bottom: 12px;
+}
+
+.qalcuity-register-check-email .qalcuity-auth-subtitle {
+	margin-bottom: 8px;
+}
+
+/* ===========================
+   Responsive — Auth Pages
+   =========================== */
+@media (max-width: 768px) {
+	.qalcuity-auth-card {
+		padding: 32px 28px;
+	}
+
+	.qalcuity-auth-title {
+		font-size: 20px;
+	}
+}
+
+/* =============================================================================
+	  2FA SETUP PAGE
+	  ============================================================================= */
+
+.qalcuity-2fa-setup-container {
+	max-width: 560px;
+	margin: 0 auto;
+	padding: 24px 20px;
+}
+
+.qalcuity-2fa-setup-header {
+	text-align: center;
+	margin-bottom: 32px;
+}
+
+.qalcuity-2fa-setup-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--qalcuity-text, #1a1a2e);
+	margin: 0 0 8px 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.qalcuity-2fa-setup-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted, #6b7280);
+	margin: 0;
+}
+
+.qalcuity-2fa-step {
+	background: var(--qalcuity-card-bg, #ffffff);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 12px;
+	padding: 28px;
+	margin-bottom: 20px;
+}
+
+.qalcuity-2fa-step-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+}
+
+.qalcuity-2fa-step-number {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: var(--qalcuity-primary, #6366f1);
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.qalcuity-2fa-step-number.qalcuity-2fa-step-done {
+	background: #10b981;
+}
+
+.qalcuity-2fa-step-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--qalcuity-text, #1a1a2e);
+}
+
+.qalcuity-2fa-step-desc {
+	font-size: 13px;
+	color: var(--qalcuity-text-muted, #6b7280);
+	margin-bottom: 16px;
+	line-height: 1.5;
+}
+
+.qalcuity-2fa-qr-area {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	padding: 20px;
+	background: var(--qalcuity-bg, #f8f9fa);
+	border-radius: 8px;
+	margin-bottom: 16px;
+}
+
+.qalcuity-2fa-qr-img {
+	width: 200px;
+	height: 200px;
+	border: 2px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 8px;
+	background: #fff;
+}
+
+.qalcuity-2fa-secret-area {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+}
+
+.qalcuity-2fa-secret-label {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted, #6b7280);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.qalcuity-2fa-secret-key {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: var(--qalcuity-card-bg, #ffffff);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 8px;
+	padding: 10px 14px;
+	width: 100%;
+	max-width: 360px;
+}
+
+.qalcuity-2fa-secret-code {
+	font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--qalcuity-text, #1a1a2e);
+	letter-spacing: 2px;
+	flex: 1;
+	text-align: center;
+	word-break: break-all;
+}
+
+.qalcuity-2fa-copy-btn {
+	padding: 6px 12px;
+	background: var(--qalcuity-primary, #6366f1);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s;
+	white-space: nowrap;
+}
+
+.qalcuity-2fa-copy-btn:hover {
+	background: var(--qalcuity-primary-hover, #4f46e5);
+}
+
+.qalcuity-2fa-verify-form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+}
+
+.qalcuity-2fa-code-input-group {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+}
+
+.qalcuity-2fa-code-input {
+	width: 48px;
+	height: 56px;
+	text-align: center;
+	font-size: 24px;
+	font-weight: 700;
+	font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+	border: 2px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 10px;
+	background: var(--qalcuity-card-bg, #ffffff);
+	color: var(--qalcuity-text, #1a1a2e);
+	transition: border-color 0.2s, box-shadow 0.2s;
+	outline: none;
+}
+
+.qalcuity-2fa-code-input:focus {
+	border-color: var(--qalcuity-primary, #6366f1);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.qalcuity-2fa-code-input.filled {
+	border-color: #10b981;
+	background: #f0fdf4;
+}
+
+.qalcuity-2fa-verify-btn {
+	padding: 12px 32px;
+	background: var(--qalcuity-primary, #6366f1);
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s, opacity 0.2s;
+	width: 100%;
+	max-width: 320px;
+}
+
+.qalcuity-2fa-verify-btn:hover:not(:disabled) {
+	background: var(--qalcuity-primary-hover, #4f46e5);
+}
+
+.qalcuity-2fa-verify-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.qalcuity-2fa-backup-codes {
+	background: var(--qalcuity-bg, #f8f9fa);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 8px;
+	padding: 20px;
+	width: 100%;
+}
+
+.qalcuity-2fa-backup-codes-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.qalcuity-2fa-backup-codes-header .octicon {
+	color: #f59e0b;
+	font-size: 16px;
+}
+
+.qalcuity-2fa-backup-codes-header span {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text, #1a1a2e);
+}
+
+.qalcuity-2fa-backup-warning {
+	font-size: 12px;
+	color: #ef4444;
+	margin-bottom: 12px;
+	line-height: 1.4;
+}
+
+.qalcuity-2fa-backup-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.qalcuity-2fa-backup-code {
+	font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--qalcuity-text, #1a1a2e);
+	padding: 8px 12px;
+	background: var(--qalcuity-card-bg, #ffffff);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 6px;
+	text-align: center;
+	letter-spacing: 1px;
+}
+
+.qalcuity-2fa-backup-copy-all {
+	padding: 10px 20px;
+	background: var(--qalcuity-primary, #6366f1);
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s;
+	width: 100%;
+}
+
+.qalcuity-2fa-backup-copy-all:hover {
+	background: var(--qalcuity-primary-hover, #4f46e5);
+}
+
+.qalcuity-2fa-done-btn {
+	padding: 12px 32px;
+	background: #10b981;
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s;
+	margin-top: 16px;
+}
+
+.qalcuity-2fa-done-btn:hover {
+	background: #059669;
+}
+
+/* =============================================================================
+	  2FA VERIFY PAGE
+	  ============================================================================= */
+
+.qalcuity-2fa-verify-container {
+	max-width: 420px;
+	margin: 0 auto;
+	padding: 24px 20px;
+}
+
+.qalcuity-2fa-verify-header {
+	text-align: center;
+	margin-bottom: 32px;
+}
+
+.qalcuity-2fa-verify-icon {
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	background: var(--qalcuity-primary, #6366f1);
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 28px;
+	margin: 0 auto 16px;
+}
+
+.qalcuity-2fa-verify-title {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--qalcuity-text, #1a1a2e);
+	margin: 0 0 8px 0;
+}
+
+.qalcuity-2fa-verify-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted, #6b7280);
+	margin: 0;
+}
+
+.qalcuity-2fa-verify-card {
+	background: var(--qalcuity-card-bg, #ffffff);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 12px;
+	padding: 28px;
+	margin-bottom: 16px;
+}
+
+.qalcuity-2fa-verify-error {
+	background: #fef2f2;
+	border: 1px solid #fecaca;
+	border-radius: 8px;
+	padding: 10px 14px;
+	margin-bottom: 16px;
+	display: none;
+}
+
+.qalcuity-2fa-verify-error.show {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-2fa-verify-error .octicon {
+	color: #ef4444;
+	font-size: 14px;
+}
+
+.qalcuity-2fa-verify-error span {
+	font-size: 13px;
+	color: #dc2626;
+}
+
+.qalcuity-2fa-verify-alt {
+	text-align: center;
+	margin-top: 16px;
+}
+
+.qalcuity-2fa-verify-alt-btn {
+	background: none;
+	border: none;
+	color: var(--qalcuity-primary, #6366f1);
+	font-size: 13px;
+	cursor: pointer;
+	text-decoration: underline;
+	padding: 4px;
+}
+
+.qalcuity-2fa-verify-alt-btn:hover {
+	color: var(--qalcuity-primary-hover, #4f46e5);
+}
+
+.qalcuity-2fa-backup-input-group {
+	display: none;
+	flex-direction: column;
+	gap: 12px;
+	align-items: center;
+}
+
+.qalcuity-2fa-backup-input-group.show {
+	display: flex;
+}
+
+.qalcuity-2fa-backup-input {
+	width: 100%;
+	padding: 12px 14px;
+	font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+	font-size: 16px;
+	letter-spacing: 1px;
+	text-align: center;
+	border: 2px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 8px;
+	background: var(--qalcuity-card-bg, #ffffff);
+	color: var(--qalcuity-text, #1a1a2e);
+	outline: none;
+	transition: border-color 0.2s;
+}
+
+.qalcuity-2fa-backup-input:focus {
+	border-color: var(--qalcuity-primary, #6366f1);
+}
+
+/* =============================================================================
+	  SESSIONS PAGE
+	  ============================================================================= */
+
+.qalcuity-sessions-container {
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 24px 20px;
+}
+
+.qalcuity-sessions-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.qalcuity-sessions-header-left {
+	flex: 1;
+}
+
+.qalcuity-sessions-title {
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--qalcuity-text, #1a1a2e);
+	margin: 0 0 6px 0;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.qalcuity-sessions-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted, #6b7280);
+	margin: 0;
+}
+
+.qalcuity-sessions-header-right {
+	flex-shrink: 0;
+}
+
+.qalcuity-sessions-loading {
+	text-align: center;
+	padding: 48px 20px;
+	color: var(--qalcuity-text-muted, #6b7280);
+}
+
+.qalcuity-sessions-loading p {
+	margin-top: 12px;
+	font-size: 14px;
+}
+
+.qalcuity-sessions-stats {
+	display: flex;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.qalcuity-sessions-stat {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 16px;
+	background: var(--qalcuity-card-bg, #ffffff);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 8px;
+	font-size: 14px;
+	color: var(--qalcuity-text, #1a1a2e);
+}
+
+.qalcuity-sessions-stat .octicon {
+	color: var(--qalcuity-primary, #6366f1);
+	font-size: 16px;
+}
+
+.qalcuity-sessions-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.qalcuity-sessions-card {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 16px 20px;
+	background: var(--qalcuity-card-bg, #ffffff);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 10px;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.qalcuity-sessions-card:hover {
+	border-color: var(--qalcuity-primary, #6366f1);
+	box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+}
+
+.qalcuity-sessions-card.current {
+	border-color: #10b981;
+	background: #f0fdf4;
+}
+
+.qalcuity-sessions-device-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	background: var(--qalcuity-bg, #f0f0f5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.qalcuity-sessions-device-icon .octicon {
+	font-size: 22px;
+	color: var(--qalcuity-primary, #6366f1);
+}
+
+.qalcuity-sessions-card.current .qalcuity-sessions-device-icon {
+	background: #d1fae5;
+}
+
+.qalcuity-sessions-card.current .qalcuity-sessions-device-icon .octicon {
+	color: #10b981;
+}
+
+.qalcuity-sessions-card-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.qalcuity-sessions-card-browser {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--qalcuity-text, #1a1a2e);
+	margin-bottom: 2px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-sessions-card-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	background: #10b981;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	border-radius: 10px;
+}
+
+.qalcuity-sessions-card-os {
+	font-size: 13px;
+	color: var(--qalcuity-text-muted, #6b7280);
+	margin-bottom: 2px;
+}
+
+.qalcuity-sessions-card-meta {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted, #9ca3af);
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.qalcuity-sessions-card-meta span {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.qalcuity-sessions-card-actions {
+	flex-shrink: 0;
+}
+
+.qalcuity-sessions-logout-btn {
+	padding: 8px 14px;
+	background: transparent;
+	color: #ef4444;
+	border: 1px solid #fecaca;
+	border-radius: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.2s, color 0.2s;
+	white-space: nowrap;
+}
+
+.qalcuity-sessions-logout-btn:hover {
+	background: #fef2f2;
+	color: #dc2626;
+	border-color: #fca5a5;
+}
+
+.qalcuity-sessions-empty {
+	text-align: center;
+	padding: 48px 20px;
+	background: var(--qalcuity-card-bg, #ffffff);
+	border: 1px solid var(--qalcuity-border, #e5e7eb);
+	border-radius: 10px;
+}
+
+.qalcuity-sessions-empty .octicon {
+	font-size: 40px;
+	color: var(--qalcuity-text-muted, #d1d5db);
+	margin-bottom: 12px;
+}
+
+.qalcuity-sessions-empty p {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted, #6b7280);
+	margin: 0;
+}
+
+/* =============================================================================
+	  2FA & SESSIONS — RESPONSIVE
+	  ============================================================================= */
+
+@media (max-width: 640px) {
+	.qalcuity-2fa-setup-container,
+	.qalcuity-2fa-verify-container {
+		padding: 16px 14px;
+	}
+
+	.qalcuity-2fa-step {
+		padding: 20px 16px;
+	}
+
+	.qalcuity-2fa-code-input {
+		width: 40px;
+		height: 48px;
+		font-size: 20px;
+	}
+
+	.qalcuity-2fa-qr-img {
+		width: 160px;
+		height: 160px;
+	}
+
+	.qalcuity-2fa-backup-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.qalcuity-sessions-container {
+		padding: 16px 14px;
+	}
+
+	.qalcuity-sessions-header {
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.qalcuity-sessions-header-right {
+		width: 100%;
+	}
+
+	.qalcuity-sessions-header-right .qalcuity-btn {
+		width: 100%;
+	}
+
+	.qalcuity-sessions-card {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.qalcuity-sessions-card-actions {
+		width: 100%;
+	}
+
+	.qalcuity-sessions-card-actions .qalcuity-sessions-logout-btn {
+		width: 100%;
+	}
+
+	.qalcuity-sessions-card-meta {
+		flex-direction: column;
+		gap: 4px;
+	}
+}
+
+@media (max-width: 576px) {
+	.qalcuity-auth-page {
+		padding: 16px 12px;
+	}
+
+	.qalcuity-auth-card {
+		padding: 24px 20px;
+	}
+
+	.qalcuity-auth-title {
+		font-size: 18px;
+	}
+
+	.qalcuity-auth-subtitle {
+		font-size: 13px;
+	}
+
+	.qalcuity-auth-btn {
+		padding: 11px 20px;
+		font-size: 13px;
+	}
+
+	.qalcuity-auth-actions {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.qalcuity-auth-actions .qalcuity-auth-btn {
+		width: 100%;
 	}
 }

@@ -37,7 +37,7 @@ def check_user_limit(tenant_name):
     # Dapatkan plan dari subscription
     subscription_name = frappe.db.get_value(
         "Qalcuity Subscription",
-        {"customer": customer, "status": ["in", ["Active", "Pending Payment"]]},
+        {"customer": customer, "status": ["in", ["Active", "Grace Period", "Pending Payment"]]},
         "name",
     )
 
@@ -120,7 +120,7 @@ def check_storage_limit(tenant_name):
 
     subscription_name = frappe.db.get_value(
         "Qalcuity Subscription",
-        {"customer": customer, "status": "Active"},
+        {"customer": customer, "status": ["in", ["Active", "Grace Period"]]},
         "name",
     )
 

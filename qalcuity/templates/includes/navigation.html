@@ -1,0 +1,134 @@
+{# ============================================================
+Qalcuity ERP — Navigation Header Bar
+Reusable navigation component for all website pages.
+
+Usage: {% include "qalcuity/templates/includes/navigation.html" %}
+
+Handles two states:
+- Logged in: Full nav (Dashboard, Payments, Profile, etc.)
+- Not logged in (Guest): Simplified nav (Logo, Pricing, Login, Register)
+============================================================ #}
+
+{% set is_logged_in = (frappe.session.user != "Guest") %}
+
+<div class="qalcuity-nav" id="qalcuity-nav">
+	<div class="qalcuity-nav-inner">
+		{# Logo — Left #}
+		<a href="{{ '/dashboard' if is_logged_in else '/' }}" class="qalcuity-nav-brand">
+			<img src="/assets/qalcuity/images/logo-dark.png" alt="Qalcuity ERP"
+				class="qalcuity-nav-logo qalcuity-nav-logo-dark">
+			<img src="/assets/qalcuity/images/logo-light.png" alt="Qalcuity ERP"
+				class="qalcuity-nav-logo qalcuity-nav-logo-light">
+			<span class="qalcuity-nav-brand-text">Qalcuity</span>
+		</a>
+
+		{# Hamburger Toggle — Mobile #}
+		<button class="qalcuity-nav-toggle" id="qalcuity-nav-toggle" aria-label="Toggle navigation"
+			aria-expanded="false">
+			<span class="octicon octicon-three-bars"></span>
+		</button>
+
+		{# Main Navigation — Center #}
+		<div class="qalcuity-nav-menu" id="qalcuity-nav-menu">
+			{% if is_logged_in %}
+			{# === LOGGED IN NAVIGATION === #}
+			<nav class="qalcuity-nav-links">
+				<a href="/dashboard" class="qalcuity-nav-link" data-page="dashboard">
+					<span class="octicon octicon-home"></span>
+					<span class="qalcuity-nav-link-text">Dashboard</span>
+				</a>
+
+				{# Payments — Dropdown #}
+				<div class="qalcuity-nav-dropdown">
+					<button class="qalcuity-nav-link qalcuity-nav-dropdown-toggle" data-page="payments">
+						<span class="octicon octicon-credit-card"></span>
+						<span class="qalcuity-nav-link-text">Pembayaran</span>
+						<span class="octicon octicon-chevron-down qalcuity-nav-chevron"></span>
+					</button>
+					<div class="qalcuity-nav-dropdown-menu">
+						<a href="/my-payments" class="qalcuity-nav-dropdown-item" data-page="my-payments">
+							<span class="octicon octicon-file-text"></span> Pembayaran Saya
+						</a>
+						<a href="/subscription-history" class="qalcuity-nav-dropdown-item"
+							data-page="subscription-history">
+							<span class="octicon octicon-history"></span> Riwayat Langganan
+						</a>
+					</div>
+				</div>
+
+				{# Admin Dashboard — Only for admin/superadmin #}
+				<a href="/admin-dashboard" class="qalcuity-nav-link qalcuity-nav-admin-only"
+					data-page="admin-dashboard">
+					<span class="octicon octicon-graph"></span>
+					<span class="qalcuity-nav-link-text">Dashboard Admin</span>
+				</a>
+
+				{# Admin Reviews — Only for admin/superadmin #}
+				<a href="/admin-reviews" class="qalcuity-nav-link qalcuity-nav-admin-only" data-page="admin-reviews">
+					<span class="octicon octicon-check-circle"></span>
+					<span class="qalcuity-nav-link-text">Review Pembayaran</span>
+				</a>
+
+				{# System Health — Only for admin/superadmin #}
+				<a href="/admin-health" class="qalcuity-nav-link qalcuity-nav-admin-only" data-page="admin-health">
+					<span class="octicon octicon-heart"></span>
+					<span class="qalcuity-nav-link-text">System Health</span>
+				</a>
+			</nav>
+
+			{# Right Side — User Menu #}
+			<div class="qalcuity-nav-right">
+				{# Bell Notification #}
+				<div class="qalcuity-nav-bell" id="qalcuity-nav-bell"></div>
+
+				{# User Dropdown #}
+				<div class="qalcuity-nav-dropdown qalcuity-nav-user-dropdown">
+					<button class="qalcuity-nav-user-btn" id="qalcuity-nav-user-btn">
+						<span class="octicon octicon-person qalcuity-nav-user-avatar"></span>
+						<span class="qalcuity-nav-user-name" id="qalcuity-nav-user-name">User</span>
+						<span class="octicon octicon-chevron-down qalcuity-nav-chevron"></span>
+					</button>
+					<div class="qalcuity-nav-dropdown-menu qalcuity-nav-user-menu">
+						<a href="/profile" class="qalcuity-nav-dropdown-item" data-page="profile">
+							<span class="octicon octicon-person"></span> Profil
+						</a>
+						<a href="/account-status" class="qalcuity-nav-dropdown-item" data-page="account-status">
+							<span class="octicon octicon-shield"></span> Status Akun
+						</a>
+						<a href="/sessions" class="qalcuity-nav-dropdown-item" data-page="sessions">
+							<span class="octicon octicon-device-desktop"></span> Sesi Aktif
+						</a>
+						<div class="qalcuity-nav-dropdown-divider"></div>
+						<a href="/pricing" class="qalcuity-nav-dropdown-item">
+							<span class="octicon octicon-tag"></span> Lihat Paket
+						</a>
+						<div class="qalcuity-nav-dropdown-divider"></div>
+						<a href="/login?logout=1" class="qalcuity-nav-dropdown-item qalcuity-nav-logout">
+							<span class="octicon octicon-sign-out"></span> Keluar
+						</a>
+					</div>
+				</div>
+			</div>
+
+			{% else %}
+			{# === PUBLIC (NOT LOGGED IN) NAVIGATION === #}
+			<nav class="qalcuity-nav-links">
+				<a href="/pricing" class="qalcuity-nav-link" data-page="pricing">
+					<span class="octicon octicon-tag"></span>
+					<span class="qalcuity-nav-link-text">Harga</span>
+				</a>
+			</nav>
+
+			{# Right Side — Auth Buttons #}
+			<div class="qalcuity-nav-right">
+				<a href="/login" class="qalcuity-btn qalcuity-btn-outline qalcuity-nav-auth-btn">
+					<span class="octicon octicon-sign-in"></span> Masuk
+				</a>
+				<a href="/register" class="qalcuity-btn qalcuity-btn-primary qalcuity-nav-auth-btn">
+					<span class="octicon octicon-rocket"></span> Daftar
+				</a>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+</div>

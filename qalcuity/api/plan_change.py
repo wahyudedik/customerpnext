@@ -9,6 +9,7 @@ Provides whitelisted methods for plan upgrade/downgrade operations.
 import frappe
 from frappe import _
 from frappe.utils import getdate, date_diff, today
+from qalcuity.qalcuity.input_validation import sanitize_text, validate_reason
 
 
 @frappe.whitelist()
@@ -129,6 +130,13 @@ def submit_plan_change(subscription_id, new_plan_id, effective_date=None, reason
                 pending
             )
         )
+
+    # Sanitize reason if provided
+    if reason:
+        reason = sanitize_text(reason, max_length=500)
+        is_valid_reason, reason_error = validate_reason(reason)
+        if not is_valid_reason:
+            frappe.throw(_(reason_error))
 
     # Create plan change
     plan_change = frappe.get_doc({
@@ -324,6 +332,11 @@ def reject_plan_change(plan_change_id, reason):
     if not frappe.has_permission("Qalcuity Plan Change", "write"):
         frappe.throw(_("Insufficient permissions to reject plan changes."))
 
+    if not reason:
+        frappe.throw(_("Rejection reason is required."))
+
+    # Sanitize reason
+    reason = sanitize_text(reason, max_length=500)
     if not reason:
         frappe.throw(_("Rejection reason is required."))
 

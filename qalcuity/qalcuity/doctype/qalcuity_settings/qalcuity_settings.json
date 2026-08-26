@@ -33,6 +33,8 @@
         "section_break_whatsapp",
         "whatsapp_phone_number",
         "whatsapp_enabled",
+        "section_break_2fa",
+        "enable_2fa",
         "section_break_notifications",
         "notify_superadmin_on_payment",
         "superadmin_notification_email",
@@ -199,6 +201,19 @@
             "fieldname": "whatsapp_enabled",
             "fieldtype": "Check",
             "label": "WhatsApp Enabled"
+        },
+        {
+            "fieldname": "section_break_2fa",
+            "fieldtype": "Section Break",
+            "label": "Security",
+            "collapsible": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "enable_2fa",
+            "fieldtype": "Check",
+            "label": "Enable Two-Factor Authentication",
+            "description": "Izinkan pengguna mengaktifkan 2FA (TOTP) dari profil mereka."
         },
         {
             "fieldname": "section_break_notifications",

@@ -1,0 +1,260 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
+<div class="qalcuity-2fa-container">
+	<!-- Header -->
+	<div class="qalcuity-2fa-header">
+		<div class="qalcuity-2fa-header-left">
+			<h1 class="qalcuity-2fa-title">
+				<span class="octicon octicon-shield"></span> Atur Two-Factor Authentication
+			</h1>
+			<p class="qalcuity-2fa-subtitle">Tambahkan lapisan keamanan ekstra pada akun Anda dengan authenticator app.
+			</p>
+		</div>
+		<div class="qalcuity-2fa-header-right">
+			<a href="/profile" class="qalcuity-btn qalcuity-btn-outline">
+				<span class="octicon octicon-arrow-left"></span> Kembali ke Profil
+			</a>
+		</div>
+	</div>
+
+	<!-- Success/Error Alerts -->
+	<div id="twofa-success" class="qalcuity-alert qalcuity-alert-success" style="display: none;">
+		<span class="octicon octicon-check"></span>
+		<span id="twofa-success-msg">2FA berhasil diaktifkan.</span>
+	</div>
+	<div id="twofa-error" class="qalcuity-alert qalcuity-alert-danger" style="display: none;">
+		<span class="octicon octicon-x"></span>
+		<span id="twofa-error-msg">Terjadi kesalahan.</span>
+	</div>
+
+	<!-- Loading State -->
+	<div id="twofa-loading" class="qalcuity-2fa-loading">
+		<div class="qalcuity-pricing-spinner"></div>
+		<p>Menyiapkan 2FA...</p>
+	</div>
+
+	<!-- Step 1: QR Code -->
+	<div id="twofa-step1" style="display: none;">
+		<div class="qalcuity-2fa-card">
+			<div class="qalcuity-2fa-card-header">
+				<h3 class="qalcuity-2fa-card-title">
+					<span class="octicon octicon-device-camera"></span> Langkah 1: Pindai QR Code
+				</h3>
+			</div>
+			<div class="qalcuity-2fa-card-body">
+				<p class="qalcuity-2fa-instruction">
+					Buka authenticator app Anda (Google Authenticator, Authy, Microsoft Authenticator, atau lainnya)
+					dan pindai QR code di bawah ini.
+				</p>
+
+				<div class="qalcuity-2fa-qr-wrapper">
+					<img id="twofa-qr-image" src="" alt="QR Code 2FA" class="qalcuity-2fa-qr-image">
+				</div>
+
+				<div class="qalcuity-2fa-manual-key">
+					<p class="qalcuity-2fa-manual-label">
+						<span class="octicon octicon-key"></span> Atau masukkan manual:
+					</p>
+					<div class="qalcuity-2fa-secret-display">
+						<code id="twofa-secret-display" class="qalcuity-2fa-secret-code"></code>
+						<button type="button" id="twofa-copy-secret"
+							class="qalcuity-btn qalcuity-btn-outline qalcuity-btn-sm">
+							<span class="octicon octicon-clippy"></span> Salin
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Step 2: Verify Code -->
+		<div class="qalcuity-2fa-card">
+			<div class="qalcuity-2fa-card-header">
+				<h3 class="qalcuity-2fa-card-title">
+					<span class="octicon octicon-key"></span> Langkah 2: Verifikasi Kode
+				</h3>
+			</div>
+			<div class="qalcuity-2fa-card-body">
+				<p class="qalcuity-2fa-instruction">
+					Masukkan 6-digit kode dari authenticator app Anda untuk mengaktifkan 2FA.
+				</p>
+
+				<form id="twofa-verify-form" class="qalcuity-2fa-form">
+					<input type="hidden" name="csrf_token" value="{{ frappe.session.csrf_token }}">
+					<div class="qalcuity-2fa-code-input-wrapper">
+						<input type="text" id="twofa-code-input" class="qalcuity-2fa-code-input" maxlength="6"
+							pattern="[0-9]{6}" placeholder="000000" autocomplete="one-time-code" inputmode="numeric">
+					</div>
+					<button type="submit" id="twofa-verify-btn" class="qalcuity-btn qalcuity-btn-primary">
+						<span class="octicon octicon-check"></span> Aktifkan 2FA
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- Step 3: Backup Codes -->
+	<div id="twofa-step2" style="display: none;">
+		<div class="qalcuity-2fa-card qalcuity-2fa-card-success">
+			<div class="qalcuity-2fa-card-header">
+				<h3 class="qalcuity-2fa-card-title">
+					<span class="octicon octicon-check-circle"></span> 2FA Berhasil Diaktifkan!
+				</h3>
+			</div>
+			<div class="qalcuity-2fa-card-body">
+				<div class="qalcuity-alert qalcuity-alert-warning" style="display: flex;">
+					<span class="octicon octicon-alert"></span>
+					<div>
+						<strong>Penting!</strong> Simpan backup codes di tempat yang aman.
+						Backup codes hanya ditampilkan sekali dan bisa digunakan jika Anda kehilangan akses ke
+						authenticator app.
+					</div>
+				</div>
+
+				<div class="qalcuity-2fa-backup-codes">
+					<div class="qalcuity-2fa-backup-codes-header">
+						<h4>Backup Codes</h4>
+						<button type="button" id="twofa-copy-backups"
+							class="qalcuity-btn qalcuity-btn-outline qalcuity-btn-sm">
+							<span class="octicon octicon-clippy"></span> Salin Semua
+						</button>
+					</div>
+					<div id="twofa-backup-codes-list" class="qalcuity-2fa-backup-codes-grid">
+						<!-- Backup codes will be inserted here -->
+					</div>
+				</div>
+
+				<div class="qalcuity-2fa-form-actions">
+					<a href="/profile" class="qalcuity-btn qalcuity-btn-primary">
+						<span class="octicon octicon-check"></span> Selesai
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	(function () {
+		var currentSecret = '';
+
+		// --- Load 2FA Setup ---
+		function initSetup() {
+			document.getElementById('twofa-loading').style.display = 'block';
+
+			frappe.call({
+				method: 'qalcuity.api.two_factor.setup_2fa',
+				callback: function (r) {
+					document.getElementById('twofa-loading').style.display = 'none';
+
+					if (r.message) {
+						currentSecret = r.message.secret;
+						document.getElementById('twofa-qr-image').src = r.message.qr_url;
+						document.getElementById('twofa-secret-display').textContent = r.message.secret_formatted;
+						document.getElementById('twofa-step1').style.display = 'block';
+					}
+				},
+				error: function (err) {
+					document.getElementById('twofa-loading').style.display = 'none';
+					showError(err._message || 'Gagal menyiapkan 2FA.');
+				}
+			});
+		}
+
+		// --- Verify Code ---
+		document.getElementById('twofa-verify-form').addEventListener('submit', function (e) {
+			e.preventDefault();
+			hideAlerts();
+
+			var code = document.getElementById('twofa-code-input').value.trim();
+			if (!code || code.length !== 6) {
+				showError('Masukkan kode 6 digit dari authenticator app.');
+				return;
+			}
+
+			var btn = document.getElementById('twofa-verify-btn');
+			btn.disabled = true;
+			btn.innerHTML = '<span class="octicon octicon-sync"></span> Memverifikasi...';
+
+			frappe.call({
+				method: 'qalcuity.api.two_factor.enable_2fa',
+				args: { code: code },
+				callback: function (r) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-check"></span> Aktifkan 2FA';
+
+					if (r.message && r.message.success) {
+						// Show backup codes
+						document.getElementById('twofa-step1').style.display = 'none';
+						document.getElementById('twofa-step2').style.display = 'block';
+
+						var codesList = document.getElementById('twofa-backup-codes-list');
+						codesList.innerHTML = '';
+						(r.message.backup_codes || []).forEach(function (code) {
+							var el = document.createElement('div');
+							el.className = 'qalcuity-2fa-backup-code-item';
+							el.textContent = code;
+							codesList.appendChild(el);
+						});
+					}
+				},
+				error: function (err) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-check"></span> Aktifkan 2FA';
+					showError(err._message || 'Kode verifikasi tidak valid.');
+				}
+			});
+		});
+
+		// --- Copy Secret ---
+		document.getElementById('twofa-copy-secret').addEventListener('click', function () {
+			if (currentSecret) {
+				navigator.clipboard.writeText(currentSecret).then(function () {
+					showSuccess('Kode rahasia berhasil disalin.');
+				});
+			}
+		});
+
+		// --- Copy Backup Codes ---
+		document.getElementById('twofa-copy-backups').addEventListener('click', function () {
+			var codes = [];
+			document.querySelectorAll('.qalcuity-2fa-backup-code-item').forEach(function (el) {
+				codes.push(el.textContent);
+			});
+			if (codes.length) {
+				navigator.clipboard.writeText(codes.join('\n')).then(function () {
+					showSuccess('Backup codes berhasil disalin.');
+				});
+			}
+		});
+
+		// --- Auto-focus code input ---
+		document.getElementById('twofa-code-input').addEventListener('input', function () {
+			this.value = this.value.replace(/[^0-9]/g, '');
+		});
+
+		// --- Helpers ---
+		function showSuccess(msg) {
+			document.getElementById('twofa-success-msg').textContent = msg;
+			document.getElementById('twofa-success').style.display = 'flex';
+			document.getElementById('twofa-error').style.display = 'none';
+			setTimeout(function () { document.getElementById('twofa-success').style.display = 'none'; }, 5000);
+		}
+
+		function showError(msg) {
+			document.getElementById('twofa-error-msg').textContent = msg;
+			document.getElementById('twofa-error').style.display = 'flex';
+			document.getElementById('twofa-success').style.display = 'none';
+		}
+
+		function hideAlerts() {
+			document.getElementById('twofa-success').style.display = 'none';
+			document.getElementById('twofa-error').style.display = 'none';
+		}
+
+		// Init
+		initSetup();
+	})();
+</script>
+{% endblock %}

@@ -5,3 +5,4 @@ qalcuity.qalcuity.patches.add_tenant_to_subscription
 qalcuity.qalcuity.patches.seed_bank_accounts
 qalcuity.qalcuity.patches.seed_erp_user_role
 qalcuity.qalcuity.patches.set_website_branding
+qalcuity.qalcuity.patches.seed_plan_modules

@@ -1,6 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
 <div class="qalcuity-acc-container">
 	<!-- Header -->
 	<div class="qalcuity-acc-header">
@@ -22,7 +23,7 @@
 			<strong>⚠️ Masa Tenggat (Grace Period)</strong>
 			<p>Subscription Anda telah kedaluwarsa. Anda memiliki <strong>7 hari</strong> masa tenggat untuk
 				memperpanjang.
-				Akses ERPNext akan diblokir setelah masa tenggat berakhir.</p>
+				Akses ERP akan diblokir setelah masa tenggat berakhir.</p>
 			<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary" style="margin-top: 8px;">
 				<span class="octicon octicon-tag"></span> Perpanjang Sekarang
 			</a>
@@ -32,7 +33,7 @@
 		<span class="octicon octicon-alert"></span>
 		<div>
 			<strong>🚫 Subscription Kedaluwarsa</strong>
-			<p>Subscription Anda telah kedaluwarsa dan masa tenggat telah berakhir. Akses ERPNext diblokir.
+			<p>Subscription Anda telah kedaluwarsa dan masa tenggat telah berakhir. Akses ERP diblokir.
 				Silakan membeli paket baru untuk mengaktifkan kembali akun Anda.</p>
 			<a href="/pricing" class="qalcuity-btn qalcuity-btn-primary" style="margin-top: 8px;">
 				<span class="octicon octicon-tag"></span> Beli Paket Baru

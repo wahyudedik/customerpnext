@@ -151,7 +151,7 @@ class QalcuityTenant(Document):
             sub_status = frappe.db.get_value(
                 "Qalcuity Subscription", self.subscription, "status"
             )
-            if sub_status not in ["Active"]:
+            if sub_status not in ["Active", "Grace Period"]:
                 frappe.throw(
                     _(
                         "Cannot reactivate tenant: subscription is {0}."

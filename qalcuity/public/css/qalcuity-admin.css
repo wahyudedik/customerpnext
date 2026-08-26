@@ -619,3 +619,468 @@
 	border-color: #6b2a2a;
 	color: #feb2b2;
 }
+
+/* ===========================
+   Admin Dashboard
+   =========================== */
+.qalcuity-ad-container {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: 24px;
+}
+
+.qalcuity-ad-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 24px;
+	gap: 16px;
+}
+
+.qalcuity-ad-title {
+	font-size: 24px;
+	font-weight: 700;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.qalcuity-ad-title .octicon {
+	color: var(--qalcuity-primary);
+}
+
+.qalcuity-ad-subtitle {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 4px 0 0;
+}
+
+.qalcuity-ad-header-actions {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	flex-shrink: 0;
+}
+
+.qalcuity-ad-date-filter {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.qalcuity-ad-filter-label {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.qalcuity-ad-filter-input {
+	padding: 6px 10px;
+	border: 1px solid var(--qalcuity-border);
+	border-radius: 6px;
+	background: var(--qalcuity-bg-card);
+	color: var(--qalcuity-text);
+	font-size: 13px;
+	outline: none;
+	transition: border-color 0.2s;
+}
+
+.qalcuity-ad-filter-input:focus {
+	border-color: var(--qalcuity-primary);
+}
+
+/* Buttons */
+.qalcuity-ad-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s;
+	white-space: nowrap;
+}
+
+.qalcuity-ad-btn-primary {
+	background: var(--qalcuity-primary);
+	color: #fff;
+}
+
+.qalcuity-ad-btn-primary:hover {
+	background: var(--qalcuity-primary-dark);
+}
+
+/* Section */
+.qalcuity-ad-section {
+	margin-bottom: 28px;
+}
+
+.qalcuity-ad-section-title {
+	font-size: 16px;
+	font-weight: 700;
+	margin: 0 0 14px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-ad-section-title .octicon {
+	color: var(--qalcuity-primary);
+	font-size: 18px;
+}
+
+/* Stats Grid */
+.qalcuity-ad-stats-grid {
+	display: grid;
+	gap: 14px;
+}
+
+.qalcuity-ad-stats-4 {
+	grid-template-columns: repeat(4, 1fr);
+}
+
+.qalcuity-ad-stats-row {
+	display: flex;
+	gap: 28px;
+}
+
+.qalcuity-ad-stats-half {
+	flex: 1;
+	min-width: 0;
+}
+
+.qalcuity-ad-stats-half .qalcuity-ad-section-title {
+	margin-bottom: 10px;
+}
+
+/* Stat Card */
+.qalcuity-ad-stat-card {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: 10px;
+	padding: 16px;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	transition: box-shadow 0.2s;
+}
+
+.qalcuity-ad-stat-card:hover {
+	box-shadow: var(--qalcuity-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.08));
+}
+
+.qalcuity-ad-stat-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	font-size: 20px;
+}
+
+.qalcuity-ad-stat-info {
+	min-width: 0;
+}
+
+.qalcuity-ad-stat-value {
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--qalcuity-text);
+	line-height: 1.2;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.qalcuity-ad-stat-label {
+	font-size: 12px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 2px;
+}
+
+/* Chart */
+.qalcuity-ad-chart-wrapper {
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: 10px;
+	padding: 20px;
+	overflow-x: auto;
+}
+
+.qalcuity-ad-chart {
+	position: relative;
+	min-height: 240px;
+	padding-top: 30px;
+}
+
+.qalcuity-ad-chart-bars {
+	position: relative;
+	height: 200px;
+	display: flex;
+	align-items: flex-end;
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-ad-chart-bar-group {
+	position: absolute;
+	bottom: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 100%;
+	justify-content: flex-end;
+	padding: 0 4px;
+}
+
+.qalcuity-ad-chart-bar {
+	width: 70%;
+	max-width: 80px;
+	border-radius: 4px 4px 0 0;
+	transition: height 0.4s ease;
+	min-height: 2px;
+}
+
+.qalcuity-ad-chart-bar-value {
+	font-size: 10px;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	margin-bottom: 4px;
+	white-space: nowrap;
+	text-align: center;
+}
+
+.qalcuity-ad-chart-bar-label {
+	font-size: 11px;
+	color: var(--qalcuity-text-muted);
+	margin-top: 8px;
+	text-align: center;
+	white-space: nowrap;
+}
+
+/* Table */
+.qalcuity-ad-table-wrapper {
+	overflow-x: auto;
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: 10px;
+}
+
+.qalcuity-ad-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.qalcuity-ad-table thead {
+	background: var(--qalcuity-bg);
+	border-bottom: 1px solid var(--qalcuity-border);
+}
+
+.qalcuity-ad-table th {
+	padding: 12px 16px;
+	text-align: left;
+	font-weight: 600;
+	color: var(--qalcuity-text-muted);
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
+}
+
+.qalcuity-ad-table td {
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--qalcuity-border);
+	color: var(--qalcuity-text);
+	vertical-align: middle;
+}
+
+.qalcuity-ad-table tbody tr:hover {
+	background: var(--qalcuity-bg);
+}
+
+.qalcuity-ad-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.qalcuity-ad-table td .octicon {
+	margin-right: 6px;
+	color: var(--qalcuity-text-muted);
+}
+
+/* Empty State */
+.qalcuity-ad-empty {
+	text-align: center;
+	padding: 40px 20px;
+	background: var(--qalcuity-bg-card);
+	border: 1px solid var(--qalcuity-border);
+	border-radius: 10px;
+}
+
+.qalcuity-ad-empty h3 {
+	font-size: 18px;
+	font-weight: 600;
+	margin: 12px 0 6px;
+	color: var(--qalcuity-text);
+}
+
+.qalcuity-ad-empty p {
+	font-size: 14px;
+	color: var(--qalcuity-text-muted);
+	margin: 0;
+}
+
+/* Loading */
+.qalcuity-ad-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	gap: 16px;
+	color: var(--qalcuity-text-muted);
+	font-size: 14px;
+}
+
+.qalcuity-ad-spinner {
+	width: 32px;
+	height: 32px;
+	border: 3px solid var(--qalcuity-border);
+	border-top-color: var(--qalcuity-primary);
+	border-radius: 50%;
+	animation: qalcuity-ad-spin 0.8s linear infinite;
+}
+
+@keyframes qalcuity-ad-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* ===========================
+   Dark Mode — Admin Dashboard
+   =========================== */
+[data-theme="dark"] .qalcuity-ad-chart-wrapper,
+[data-theme-mode="dark"] .qalcuity-ad-chart-wrapper {
+	background: #1a2332;
+	border-color: #2d3748;
+}
+
+[data-theme="dark"] .qalcuity-ad-chart-bar-value,
+[data-theme-mode="dark"] .qalcuity-ad-chart-bar-value,
+[data-theme="dark"] .qalcuity-ad-chart-bar-label,
+[data-theme-mode="dark"] .qalcuity-ad-chart-bar-label {
+	color: #a0aec0;
+}
+
+/* ===========================
+   Responsive — Admin Dashboard
+   =========================== */
+@media (max-width: 1024px) {
+	.qalcuity-ad-stats-row {
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.qalcuity-ad-stats-4 {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 768px) {
+	.qalcuity-ad-container {
+		padding: 16px;
+	}
+
+	.qalcuity-ad-header {
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.qalcuity-ad-header-actions {
+		width: 100%;
+		flex-wrap: wrap;
+	}
+
+	.qalcuity-ad-date-filter {
+		flex: 1;
+		min-width: 120px;
+	}
+
+	.qalcuity-ad-filter-input {
+		width: 100%;
+	}
+
+	.qalcuity-ad-title {
+		font-size: 20px;
+	}
+
+	.qalcuity-ad-stats-4 {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.qalcuity-ad-stat-value {
+		font-size: 16px;
+	}
+
+	.qalcuity-ad-stat-icon {
+		width: 36px;
+		height: 36px;
+		font-size: 16px;
+	}
+
+	.qalcuity-ad-chart-bars {
+		height: 150px;
+	}
+
+	.qalcuity-ad-table {
+		font-size: 12px;
+	}
+
+	.qalcuity-ad-table th,
+	.qalcuity-ad-table td {
+		padding: 8px 10px;
+	}
+}
+
+@media (max-width: 576px) {
+	.qalcuity-ad-container {
+		padding: 12px;
+	}
+
+	.qalcuity-ad-stats-4 {
+		grid-template-columns: 1fr;
+	}
+
+	.qalcuity-ad-header-actions {
+		flex-direction: column;
+	}
+
+	.qalcuity-ad-date-filter {
+		width: 100%;
+	}
+
+	.qalcuity-ad-title {
+		font-size: 18px;
+	}
+
+	.qalcuity-ad-chart-bar-value {
+		font-size: 8px;
+	}
+
+	.qalcuity-ad-chart-bar-label {
+		font-size: 9px;
+	}
+
+	.qalcuity-ad-section-title {
+		font-size: 14px;
+	}
+}

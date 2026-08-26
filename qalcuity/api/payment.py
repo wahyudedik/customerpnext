@@ -8,6 +8,8 @@ Provides whitelisted methods for payment operations.
 
 import frappe
 from frappe import _
+from qalcuity.qalcuity.upload_security import validate_upload, sanitize_filename, get_max_file_size_mb
+from qalcuity.qalcuity.input_validation import validate_amount, validate_reference_number, sanitize_text
 
 
 @frappe.whitelist()
@@ -37,10 +39,45 @@ def submit_payment(subscription, amount, payment_method, payment_date, proof_of_
             _("Cannot submit payment for a {0} subscription.").format(sub_status)
         )
 
-    # Validate amount
+    # Validate amount (enhanced with input_validation)
     amount = frappe.utils.flt(amount)
+    is_valid_amount, amount_error = validate_amount(amount)
+    if not is_valid_amount:
+        frappe.throw(_(amount_error))
     if amount <= 0:
         frappe.throw(_("Payment amount must be greater than 0."))
+
+    # Validate reference number
+    if reference_number:
+        is_valid_ref, ref_error = validate_reference_number(reference_number)
+        if not is_valid_ref:
+            frappe.throw(_(ref_error))
+        reference_number = sanitize_text(reference_number, max_length=50)
+
+    # Validate proof of payment file
+    if proof_of_payment:
+        # Validate file URL format
+        if not proof_of_payment.startswith("/files/"):
+            frappe.throw(_("Invalid file upload. Please re-upload your proof of payment."))
+
+        # Extract filename from URL and validate extension
+        import os
+        proof_filename = os.path.basename(proof_of_payment)
+        _, ext = os.path.splitext(proof_filename)
+        ext = ext.lower()
+
+        allowed_extensions = [".jpg", ".jpeg", ".png", ".webp", ".pdf"]
+        if ext not in allowed_extensions:
+            frappe.throw(
+                _("File type '{0}' is not allowed. Allowed: {1}.").format(
+                    ext, ", ".join(allowed_extensions)
+                )
+            )
+
+        # Check for dangerous double extensions
+        name_without_ext = os.path.splitext(proof_filename)[0]
+        if "." in name_without_ext:
+            frappe.throw(_("File name with multiple extensions is not allowed."))
 
     # Get plan price for validation
     plan_price = frappe.db.get_value(
@@ -122,6 +159,11 @@ def reject_payment(payment_name, reason):
     if not frappe.has_permission("Qalcuity Payment", "write"):
         frappe.throw(_("Insufficient permissions to reject payments."))
 
+    if not reason:
+        frappe.throw(_("Rejection reason is required."))
+
+    # Sanitize reason
+    reason = sanitize_text(reason, max_length=500)
     if not reason:
         frappe.throw(_("Rejection reason is required."))
 
@@ -312,6 +354,11 @@ def bulk_reject_payments(payment_names, reason):
     if not frappe.has_permission("Qalcuity Payment", "write"):
         frappe.throw(_("Insufficient permissions to reject payments."))
 
+    if not reason:
+        frappe.throw(_("Rejection reason is required."))
+
+    # Sanitize reason
+    reason = sanitize_text(reason, max_length=500)
     if not reason:
         frappe.throw(_("Rejection reason is required."))
 

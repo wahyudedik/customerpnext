@@ -1,0 +1,244 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="qalcuity-auth-container">
+	<div class="qalcuity-auth-card">
+		<!-- Logo & Header -->
+		<div class="qalcuity-auth-header">
+			<img src="/assets/qalcuity/images/logo-dark.png" class="qalcuity-auth-logo-light" alt="Qalcuity ERP"
+				style="height: 40px;">
+			<img src="/assets/qalcuity/images/logo-light.png" class="qalcuity-auth-logo-dark" alt="Qalcuity ERP"
+				style="height: 40px; display: none;">
+		</div>
+
+		<!-- Loading State -->
+		<div id="verify-loading" class="qalcuity-auth-status">
+			<div class="qalcuity-auth-spinner"></div>
+			<h2 class="qalcuity-auth-title">Memverifikasi Email...</h2>
+			<p class="qalcuity-auth-subtitle">Mohon tunggu sebentar</p>
+		</div>
+
+		<!-- Success State -->
+		<div id="verify-success" class="qalcuity-auth-status" style="display: none;">
+			<div class="qalcuity-auth-icon qalcuity-auth-icon-success">
+				<span class="octicon octicon-check"></span>
+			</div>
+			<h2 class="qalcuity-auth-title">Email Terverifikasi!</h2>
+			<p class="qalcuity-auth-subtitle" id="verify-success-msg">
+				Akun Anda sekarang aktif. Silakan login untuk mulai menggunakan Qalcuity ERP.
+			</p>
+			<a href="/login" class="qalcuity-auth-btn qalcuity-auth-btn-primary">
+				<span class="octicon octicon-sign-in"></span> Masuk Sekarang
+			</a>
+		</div>
+
+		<!-- Already Verified State -->
+		<div id="verify-already" class="qalcuity-auth-status" style="display: none;">
+			<div class="qalcuity-auth-icon qalcuity-auth-icon-info">
+				<span class="octicon octicon-info"></span>
+			</div>
+			<h2 class="qalcuity-auth-title">Sudah Terverifikasi</h2>
+			<p class="qalcuity-auth-subtitle">Email Anda sudah terverifikasi sebelumnya.</p>
+			<a href="/login" class="qalcuity-auth-btn qalcuity-auth-btn-primary">
+				<span class="octicon octicon-sign-in"></span> Masuk
+			</a>
+		</div>
+
+		<!-- Error State -->
+		<div id="verify-error" class="qalcuity-auth-status" style="display: none;">
+			<div class="qalcuity-auth-icon qalcuity-auth-icon-error">
+				<span class="octicon octicon-x"></span>
+			</div>
+			<h2 class="qalcuity-auth-title">Verifikasi Gagal</h2>
+			<p class="qalcuity-auth-subtitle" id="verify-error-msg">
+				Link verifikasi tidak valid atau sudah kedaluwarsa.
+			</p>
+			<div class="qalcuity-auth-actions">
+				<a href="/login" class="qalcuity-auth-btn qalcuity-auth-btn-outline">
+					<span class="octicon octicon-sign-in"></span> Masuk
+				</a>
+				<button id="resend-btn" class="qalcuity-auth-btn qalcuity-auth-btn-primary"
+					onclick="qalcuity.verifyEmail.resend()">
+					<span class="octicon octicon-mail"></span> Kirim Ulang Verifikasi
+				</button>
+			</div>
+			<!-- Resend Form (hidden by default) -->
+			<div id="resend-form" class="qalcuity-auth-resend-form" style="display: none;">
+				<p class="qalcuity-auth-subtitle">Masukkan email Anda untuk mengirim ulang link verifikasi:</p>
+				<input type="email" id="resend-email" class="qalcuity-auth-input" placeholder="Masukkan email Anda">
+				<button class="qalcuity-auth-btn qalcuity-auth-btn-primary qalcuity-auth-btn-full"
+					onclick="qalcuity.verifyEmail.submitResend()">
+					<span class="octicon octicon-mail"></span> Kirim Ulang
+				</button>
+				<div id="resend-alert" class="qalcuity-auth-alert" style="display: none;"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	frappe.provide('qalcuity.verifyEmail');
+
+	qalcuity.verifyEmail = {
+		init: function () {
+			// Logo dark mode toggle
+			(function () {
+				var theme = document.documentElement.getAttribute('data-theme')
+					|| localStorage.getItem('frappe_theme')
+					|| 'light';
+				if (theme === 'dark') {
+					var lightLogo = document.querySelector('.qalcuity-auth-logo-light');
+					var darkLogo = document.querySelector('.qalcuity-auth-logo-dark');
+					if (lightLogo) lightLogo.style.display = 'none';
+					if (darkLogo) darkLogo.style.display = 'block';
+				}
+			})();
+
+			// Get token and email from URL params
+			var params = new URLSearchParams(window.location.search);
+			var token = params.get('token');
+			var email = params.get('email');
+
+			if (!token || !email) {
+				qalcuity.verifyEmail.showError('Link verifikasi tidak valid. Parameter token atau email tidak ditemukan.');
+				return;
+			}
+
+			// Auto-verify on page load
+			qalcuity.verifyEmail.verify(token, email);
+		},
+
+		verify: function (token, email) {
+			frappe.call({
+				method: 'qalcuity.api.registration.verify_email',
+				args: { token: token, email: email },
+				callback: function (r) {
+					if (r.message && r.message.success) {
+						if (r.message.already_verified) {
+							qalcuity.verifyEmail.showAlready();
+						} else {
+							qalcuity.verifyEmail.showSuccess(r.message.message);
+						}
+					}
+				},
+				error: function (err) {
+					var msg = (err && err._server_messages)
+						? JSON.parse(err._server_messages)[0].replace(/<[^>]*>/g, '')
+						: 'Link verifikasi tidak valid atau sudah kedaluwarsa.';
+					qalcuity.verifyEmail.showError(msg);
+				}
+			});
+		},
+
+		showSuccess: function (msg) {
+			document.getElementById('verify-loading').style.display = 'none';
+			document.getElementById('verify-success').style.display = 'block';
+			if (msg) document.getElementById('verify-success-msg').textContent = msg;
+		},
+
+		showAlready: function () {
+			document.getElementById('verify-loading').style.display = 'none';
+			document.getElementById('verify-already').style.display = 'block';
+		},
+
+		showError: function (msg) {
+			document.getElementById('verify-loading').style.display = 'none';
+			document.getElementById('verify-error').style.display = 'block';
+			if (msg) document.getElementById('verify-error-msg').textContent = msg;
+			// Pre-fill email from URL
+			var params = new URLSearchParams(window.location.search);
+			var email = params.get('email');
+			if (email) {
+				document.getElementById('resend-email').value = email;
+			}
+		},
+
+		resend: function () {
+			var resendForm = document.getElementById('resend-form');
+			var resendBtn = document.getElementById('resend-btn');
+			if (resendForm.style.display === 'none') {
+				resendForm.style.display = 'block';
+				resendBtn.style.display = 'none';
+			} else {
+				resendForm.style.display = 'none';
+				resendBtn.style.display = 'inline-flex';
+			}
+		},
+
+		submitResend: function () {
+			var email = document.getElementById('resend-email').value.trim();
+			if (!email) {
+				qalcuity.verifyEmail.showResendAlert('Email wajib diisi.', 'error');
+				return;
+			}
+
+			var btn = document.querySelector('#resend-form .qalcuity-auth-btn');
+			btn.disabled = true;
+			btn.innerHTML = '<span class="octicon octicon-sync spin"></span> Mengirim...';
+
+			frappe.call({
+				method: 'qalcuity.api.registration.resend_verification_email',
+				args: { email: email },
+				callback: function (r) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-mail"></span> Kirim Ulang';
+					if (r.message && r.message.success) {
+						if (r.message.already_verified) {
+							qalcuity.verifyEmail.showAlready();
+						} else {
+							qalcuity.verifyEmail.showResendAlert(r.message.message, 'success');
+						}
+					}
+				},
+				error: function (err) {
+					btn.disabled = false;
+					btn.innerHTML = '<span class="octicon octicon-mail"></span> Kirim Ulang';
+					var msg = (err && err._server_messages)
+						? JSON.parse(err._server_messages)[0].replace(/<[^>]*>/g, '')
+						: 'Gagal mengirim ulang. Silakan coba lagi.';
+					qalcuity.verifyEmail.showResendAlert(msg, 'error');
+				}
+			});
+		},
+
+		showResendAlert: function (msg, type) {
+			var alertEl = document.getElementById('resend-alert');
+			alertEl.textContent = msg;
+			alertEl.className = 'qalcuity-auth-alert qalcuity-auth-alert-' + type;
+			alertEl.style.display = 'block';
+		}
+	};
+
+	document.addEventListener('DOMContentLoaded', function () {
+		qalcuity.verifyEmail.init();
+	});
+</script>
+
+<style>
+	@keyframes qalcuity-spin {
+		from {
+			transform: rotate(0deg);
+		}
+
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.qalcuity-auth-spinner .spin,
+	.qalcuity-auth-spinner {
+		animation: qalcuity-spin 1s linear infinite;
+		display: inline-block;
+		width: 40px;
+		height: 40px;
+		border: 3px solid var(--qalcuity-border);
+		border-top-color: var(--qalcuity-primary);
+		border-radius: 50%;
+		margin-bottom: 16px;
+	}
+
+	#resend-form .spin {
+		animation: qalcuity-spin 1s linear infinite;
+	}
+</style>
+{% endblock %}

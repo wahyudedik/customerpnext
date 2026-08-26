@@ -9,6 +9,8 @@ Permission hooks untuk ERPNext DocTypes (Customer, Sales Invoice, dll).
 1. Tenant Isolation: Customer portal user hanya bisa mengakses data miliknya sendiri.
 2. Subscription Enforcement: Customer dengan subscription Expired/Suspended diblokir
    akses ke ERPNext features. Superadmin/Admin tetap bisa akses.
+3. Module Enforcement: Customer hanya bisa mengakses ERPNext modules yang diaktifkan
+   di subscription plan mereka.
 
 Digunakan oleh hooks.py sebagai get_permission_query_conditions dan has_permission
 untuk ERPNext DocTypes.
@@ -112,6 +114,10 @@ def _has_active_subscription(user):
     if latest_sub.status == "Active":
         return True
 
+    # Grace Period — subscription past end_date but within 7-day grace window
+    if latest_sub.status == "Grace Period":
+        return True
+
     # Pending Payment is allowed (customer is in the process of paying)
     if latest_sub.status == "Pending Payment":
         return True
@@ -157,6 +163,14 @@ def _get_subscription_block_message(user):
 
     latest_sub = sub[0]
 
+    if latest_sub.status == "Grace Period":
+        return _(
+            "Your subscription has passed its end date on {0}. "
+            "You are currently in a 7-day grace period. "
+            "Please renew your subscription to avoid service interruption. "
+            "Visit {1}/pricing to choose a plan."
+        ).format(latest_sub.end_date, frappe.utils.get_url())
+
     if latest_sub.status == "Expired":
         return _(
             "Your subscription has expired on {0}. "
@@ -171,6 +185,64 @@ def _get_subscription_block_message(user):
         )
 
     return _("Access restricted. Please check your subscription status.")
+
+
+# =============================================================================
+# Module Enforcement Helper
+# =============================================================================
+
+def _is_module_enabled_for_user(user, module_name):
+    """
+    Cek apakah module ERPNext tertentu diaktifkan untuk plan user.
+
+    Args:
+        user: User email/name
+        module_name: Nama module (e.g., "Accounting", "Sales", "CRM")
+
+    Returns:
+        bool: True jika module diizinkan atau tidak ada pembatasan
+    """
+    try:
+        from qalcuity.qalcuity.module_enforcement import is_module_enabled_for_user
+        return is_module_enabled_for_user(module_name, user)
+    except ImportError:
+        # Module enforcement belum tersedia — izinkan semua
+        return True
+
+
+def _is_doctype_module_enabled(user, doctype_name):
+    """
+    Cek apakah DocType tertentu diizinkan berdasarkan module plan user.
+
+    Args:
+        user: User email/name
+        doctype_name: ERPNext DocType name
+
+    Returns:
+        bool: True jika DocType diizinkan atau tidak ada pembatasan
+    """
+    try:
+        from qalcuity.qalcuity.module_enforcement import is_doctype_enabled_for_user
+        return is_doctype_enabled_for_user(doctype_name, user)
+    except ImportError:
+        return True
+
+
+def _get_module_block_message(doctype_name):
+    """
+    Get block message untuk module yang tidak tersedia di plan.
+
+    Args:
+        doctype_name: ERPNext DocType name
+
+    Returns:
+        str: Block message
+    """
+    try:
+        from qalcuity.qalcuity.module_enforcement import get_module_block_message
+        return get_module_block_message(doctype_name)
+    except ImportError:
+        return _("This module is not available in your current subscription plan.")
 
 
 # =============================================================================
@@ -216,8 +288,7 @@ def get_sales_order_permission_query_conditions(user, doctype):
     Permission query conditions untuk Sales Order DocType.
 
     Customer portal user hanya bisa melihat Sales Order miliknya sendiri.
-    Blocked jika subscription expired/suspended.
-    Company-based filtering untuk ERPNext isolation layer.
+    Blocked jika subscription expired/suspended atau module tidak aktif di plan.
 
     Args:
         user: User yang sedang mengakses
@@ -239,6 +310,10 @@ def get_sales_order_permission_query_conditions(user, doctype):
     if not _has_active_subscription(user):
         return "1=0"
 
+    # Module enforcement — Sales module
+    if not _is_doctype_module_enabled(user, "Sales Order"):
+        return "1=0"
+
     customer = get_customer_for_user(user)
     if not customer:
         return "1=0"
@@ -258,8 +333,7 @@ def get_sales_invoice_permission_query_conditions(user, doctype):
     Permission query conditions untuk Sales Invoice DocType.
 
     Customer portal user hanya bisa melihat Sales Invoice miliknya sendiri.
-    Blocked jika subscription expired/suspended.
-    Company-based filtering untuk ERPNext isolation layer.
+    Blocked jika subscription expired/suspended atau module tidak aktif di plan.
 
     Args:
         user: User yang sedang mengakses
@@ -281,6 +355,10 @@ def get_sales_invoice_permission_query_conditions(user, doctype):
     if not _has_active_subscription(user):
         return "1=0"
 
+    # Module enforcement — Sales module
+    if not _is_doctype_module_enabled(user, "Sales Invoice"):
+        return "1=0"
+
     customer = get_customer_for_user(user)
     if not customer:
         return "1=0"
@@ -300,8 +378,7 @@ def get_quotation_permission_query_conditions(user, doctype):
     Permission query conditions untuk Quotation DocType.
 
     Customer portal user hanya bisa melihat Quotation miliknya sendiri.
-    Blocked jika subscription expired/suspended.
-    Company-based filtering untuk ERPNext isolation layer.
+    Blocked jika subscription expired/suspended atau module tidak aktif di plan.
 
     Args:
         user: User yang sedang mengakses
@@ -323,6 +400,10 @@ def get_quotation_permission_query_conditions(user, doctype):
     if not _has_active_subscription(user):
         return "1=0"
 
+    # Module enforcement — Sales module
+    if not _is_doctype_module_enabled(user, "Quotation"):
+        return "1=0"
+
     customer = get_customer_for_user(user)
     if not customer:
         return "1=0"
@@ -342,8 +423,7 @@ def get_purchase_order_permission_query_conditions(user, doctype):
     Permission query conditions untuk Purchase Order DocType.
 
     Customer portal user hanya bisa melihat Purchase Order miliknya sendiri.
-    Blocked jika subscription expired/suspended.
-    Company-based filtering untuk ERPNext isolation layer.
+    Blocked jika subscription expired/suspended atau module tidak aktif di plan.
 
     Args:
         user: User yang sedang mengakses
@@ -365,6 +445,10 @@ def get_purchase_order_permission_query_conditions(user, doctype):
     if not _has_active_subscription(user):
         return "1=0"
 
+    # Module enforcement — Purchasing module
+    if not _is_doctype_module_enabled(user, "Purchase Order"):
+        return "1=0"
+
     customer = get_customer_for_user(user)
     if not customer:
         return "1=0"
@@ -384,8 +468,7 @@ def get_purchase_invoice_permission_query_conditions(user, doctype):
     Permission query conditions untuk Purchase Invoice DocType.
 
     Customer portal user hanya bisa melihat Purchase Invoice miliknya sendiri.
-    Blocked jika subscription expired/suspended.
-    Company-based filtering untuk ERPNext isolation layer.
+    Blocked jika subscription expired/suspended atau module tidak aktif di plan.
 
     Args:
         user: User yang sedang mengakses
@@ -405,6 +488,10 @@ def get_purchase_invoice_permission_query_conditions(user, doctype):
 
     # Subscription enforcement
     if not _has_active_subscription(user):
+        return "1=0"
+
+    # Module enforcement — Purchasing module
+    if not _is_doctype_module_enabled(user, "Purchase Invoice"):
         return "1=0"
 
     customer = get_customer_for_user(user)
@@ -456,6 +543,10 @@ def has_customer_permission(doc, ptype, user=None):
     if not _has_active_subscription(user):
         return False
 
+    # Module enforcement — Sales module (Customer is part of Sales)
+    if not _is_doctype_module_enabled(user, "Customer"):
+        return False
+
     customer = get_customer_for_user(user)
     if not customer:
         return False
@@ -496,6 +587,10 @@ def has_sales_order_permission(doc, ptype, user=None):
 
     # Subscription enforcement
     if not _has_active_subscription(user):
+        return False
+
+    # Module enforcement
+    if not _is_doctype_module_enabled(user, "Sales Order"):
         return False
 
     customer = get_customer_for_user(user)
@@ -547,6 +642,10 @@ def has_sales_invoice_permission(doc, ptype, user=None):
 
     # Subscription enforcement
     if not _has_active_subscription(user):
+        return False
+
+    # Module enforcement
+    if not _is_doctype_module_enabled(user, "Sales Invoice"):
         return False
 
     customer = get_customer_for_user(user)

@@ -169,7 +169,8 @@ class QalcuitySubscription(Document):
                 valid_transitions = {
                     "Draft": ["Pending Payment", "Cancelled"],
                     "Pending Payment": ["Active", "Cancelled"],
-                    "Active": ["Suspended", "Expired", "Cancelled"],
+                    "Active": ["Grace Period", "Suspended", "Expired", "Cancelled"],
+                    "Grace Period": ["Active", "Expired", "Cancelled"],
                     "Suspended": ["Active", "Cancelled", "Expired"],
                     "Expired": ["Pending Payment", "Cancelled"],
                     "Cancelled": [],
@@ -381,9 +382,22 @@ class QalcuitySubscription(Document):
             frappe.db.set_value("Qalcuity Tenant", tenant, "status", "Suspended")
 
     def check_expiry(self):
-        """Cek apakah subscription sudah expired."""
+        """Cek apakah subscription sudah expired.
+
+        Handles both "Active" and "Grace Period" statuses.
+        - Active + past end_date → transition to Grace Period (handled by scheduler)
+        - Grace Period + past grace_end_date → transition to Expired
+        """
         if self.status == "Active" and self.end_date:
             if getdate(nowdate()) > getdate(self.end_date):
+                # Don't immediately expire — let the scheduler handle grace period
+                # Only expire if explicitly called with force
+                pass
+
+        if self.status == "Grace Period" and self.end_date:
+            from qalcuity.qalcuity.tasks import GRACE_PERIOD_DAYS
+            grace_end_date = add_days(getdate(self.end_date), GRACE_PERIOD_DAYS)
+            if getdate(nowdate()) > grace_end_date:
                 old_status = self.status
                 self.status = "Expired"
                 self.save(ignore_permissions=True)

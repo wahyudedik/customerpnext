@@ -3,7 +3,7 @@
 # Qalcuity ERP — AI Engineering Agent
 
 > **📦 GitHub Repository:** [`wahyudedik/customerpnext`](https://github.com/wahyudedik/customerpnext) · Branch: `main`
-> **Last Updated:** 2026-08-25
+> **Last Updated:** 2026-08-26
 
 ---
 
@@ -530,7 +530,7 @@ Frappe / ERPNext
 
 #### API v1 — Versioned
 
-24 endpoints dengan auth check, rate limiting, standard response format.
+20 endpoints dengan auth check, rate limiting, standard response format.
 Lihat [`api/v1/`](qalcuity/qalcuity/api/v1/) untuk detail lengkap.
 
 Qalcuity API should eventually provide stable endpoints for:
@@ -578,6 +578,10 @@ The UI should progressively become Qalcuity-specific.
 | Profile | `/profile` | Edit profil dan ganti password |
 | Account Status | `/account-status` | Detail status langganan dan pembayaran |
 | Subscription History | `/subscription-history` | Timeline riwayat perubahan langganan |
+| Admin Dashboard | `/admin-dashboard` | Superadmin dashboard dengan revenue, customer, subscription stats |
+| Verify Email | `/verify-email` | Email verification page (HMAC-SHA256 token) |
+| Forgot Password | `/forgot-password` | Request password reset via email |
+| Reset Password | `/reset-password` | Reset password via token |
 
 Requirements:
 
@@ -613,12 +617,14 @@ At minimum:
 * authorization (✅ role-based: public/customer/admin)
 * permission checks (✅ Portal User lookup)
 * secure password handling (✅ change_password API)
+* password validation (✅ standardized: min 8 chars + letter + number di registration & profile)
 * secure file upload handling
 * payment proof access control
 * API authentication (✅ API v1 auth middleware)
 * rate limiting (✅ 100 req/min/user via frappe.cache)
+* registration rate limiting (✅ max 5 registrasi per jam per IP)
 * input validation
-* CSRF protection where applicable
+* CSRF protection (✅ hidden token di semua web forms + frappe.call() otomatis handle)
 * secure secrets (✅ .env, .env.example, .env.production)
 * no secrets committed to Git
 * audit logs for sensitive actions (✅ Qalcuity Audit Log DocType)
@@ -1190,7 +1196,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 
 ## 20. Project Status — Live
 
-> Last Updated: 2026-08-25
+> Last Updated: 2026-08-26
 
 ### Phase 0 — Foundation: ✅ DONE
 
@@ -1338,17 +1344,55 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | seed_bank_accounts patch | ✅ |
 | patches.txt format fix | ✅ |
 
-### Next Sprint — ERP Provisioning & Polish
+### Sprint 7 — Hooks Sync, Security & UI/UX Improvements: ✅ DONE
 
-* [ ] Superadmin custom dashboard
+| Item | Status |
+|------|--------|
+| Hooks.py Sync (website_context, website_script, fixtures, retry scheduler) | ✅ |
+| Grace Period Status (8 files updated) | ✅ |
+| Registration Rate Limiting (max 5 per jam per IP) | ✅ |
+| Password Validation Standardized (min 8 chars + letter + number) | ✅ |
+| Branding Fixes ("ERPNext" → "ERP", desk branding hide) | ✅ |
+| Reusable Navigation Template (`navigation.html`) | ✅ |
+| UI/UX Responsive Mobile (hamburger, grid, forms, tables) | ✅ |
+| Website Branding Patch (`set_website_branding`) | ✅ |
+
+### Sprint 8 — Dashboard, Security & Auth: ✅ DONE
+
+| Item | Status |
+|------|--------|
+| Superadmin Dashboard (`/admin-dashboard`) — Revenue, customer, subscription, payment, tenant stats | ✅ |
+| CSRF Protection — Hidden token di semua web forms | ✅ |
+| Pagination — my-payments & subscription-history | ✅ |
+| Email Verification — HMAC-SHA256 token, `/verify-email`, resend (rate limit 3/jam) | ✅ |
+| Password Reset — `/forgot-password` + `/reset-password`, token TTL 1 jam | ✅ |
+
+### Sprint 9 — Security, 2FA & ERP Enhancement: ✅ DONE
+
+| Item | Status |
+|------|--------|
+| Two-Factor Authentication (2FA) — TOTP-based (RFC 6238), setup/enable/disable, backup codes, QR code | ✅ |
+| 2FA Login Flow — Pre-login check → 2FA verify → session creation, backup code support | ✅ |
+| 2FA Backup Codes — 8 codes, `XXXX-XXXX` format, SHA-256 hashed, regenerate capability | ✅ |
+| Session Management — Active sessions list, force logout single/all sessions, user-agent parsing | ✅ |
+| System Health Monitoring — System, application, activity stats + health checks (database, redis, scheduler) | ✅ |
+| ERP Module Config per Plan — `plan_modules` field di Qalcuity Plan, module access controls per plan tier | ✅ |
+| API Documentation — [`API_DOCUMENTATION.md`](API_DOCUMENTATION.md) — 53 core API + 20 API v1 endpoints | ✅ |
+| 2FA Setup Page (`/2fa-setup`) — QR code display + verification | ✅ |
+| 2FA Verify Page (`/2fa-verify`) — 2FA verification during login | ✅ |
+| Sessions Page (`/sessions`) — Active sessions management | ✅ |
+| Admin Health Page (`/admin-health`) — System health monitoring dashboard | ✅ |
+
+### Next Sprint — ERP Enhancement & Polish
+
 * [ ] Custom reports
-* [ ] ERP module configuration per plan
 * [ ] Customer-level data export
-* [ ] Email verification
-* [ ] Password reset automation
-* [ ] Two-factor authentication
-* [ ] API documentation (Swagger/OpenAPI)
 * [ ] Production deployment automation
+* [ ] API key management
+* [ ] Upload security audit
+* [ ] Input validation audit
+* [ ] Plan upgrade/downgrade flow
+* [ ] Prorated billing untuk upgrade
 
 ### Implemented DocTypes Summary
 
@@ -1367,7 +1411,7 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Qalcuity Notification | [`qalcuity_notification/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_notification/) | In-app notifications (`NOTIF-{YYYYMMDD}-{####}`) |
 | Qalcuity Provisioning Log | [`qalcuity_provisioning_log/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_provisioning_log/) | ERP provisioning event tracking (`PROV-{YYYYMMDD}-{####}`) |
 
-### Implemented Web Pages
+### Implemented Web Pages (17 + Navigation)
 
 | Page | Route | Purpose |
 |------|-------|---------|
@@ -1380,6 +1424,15 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Profile | `/profile` | Edit profil dan ganti password |
 | Account Status | `/account-status` | Detail status langganan dan pembayaran |
 | Subscription History | `/subscription-history` | Timeline riwayat perubahan langganan |
+| Admin Dashboard | `/admin-dashboard` | Superadmin dashboard dengan revenue, customer, subscription stats |
+| Verify Email | `/verify-email` | Email verification page (HMAC-SHA256 token) |
+| Forgot Password | `/forgot-password` | Request password reset via email |
+| Reset Password | `/reset-password` | Reset password via token |
+| 2FA Setup | `/2fa-setup` | Two-factor authentication setup page |
+| 2FA Verify | `/2fa-verify` | 2FA verification during login |
+| Sessions | `/sessions` | Active sessions management page |
+| Admin Health | `/admin-health` | System health monitoring dashboard |
+| Navigation | (included) | [`navigation.html`](qalcuity/qalcuity/templates/includes/navigation.html) — reusable header bar dengan hamburger menu mobile |
 
 ### Implemented Patches
 
@@ -1388,3 +1441,4 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | `add_tenant_to_subscription` | [`patches/add_tenant_to_subscription.py`](qalcuity/qalcuity/patches/add_tenant_to_subscription.py) | Menambahkan field `tenant` (Link) ke Qalcuity Subscription |
 | `seed_bank_accounts` | [`patches/seed_bank_accounts.py`](qalcuity/qalcuity/patches/seed_bank_accounts.py) | Seed 4 bank accounts default (BRI, JAGO, BTN, BSI) |
 | `seed_erp_user_role` | [`patches/seed_erp_user_role.py`](qalcuity/qalcuity/patches/seed_erp_user_role.py) | Seed "Qalcuity ERP User" role for tenant users |
+| `set_website_branding` | [`set_website_branding.py`](qalcuity/qalcuity/qalcuity/patches/set_website_branding.py) | Set Website Settings branding (favicon, splash, app_logo) ke Qalcuity |

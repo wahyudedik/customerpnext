@@ -26,6 +26,9 @@ class QalcuitySettings(Document):
 
     def validate(self):
         """Validasi pengaturan."""
+        # Sync enable_2fa with Frappe's System Settings two_factor_auth
+        self._sync_two_factor_auth()
+
         if self.enable_trial_period and self.trial_period_days <= 0:
             frappe.throw(
                 frappe._("Trial period days must be greater than 0 when trial is enabled.")
@@ -71,6 +74,14 @@ class QalcuitySettings(Document):
         self.payment_mode_description = PAYMENT_MODE_DESCRIPTIONS.get(
             self.payment_mode, ""
         )
+
+    def _sync_two_factor_auth(self):
+        """Sinkronkan enable_2fa dengan Frappe System Settings.
+
+        Kita tidak mengaktifkan 2FA global di System Settings karena
+        ingin mengontrol per-user. Method ini hanya memastikan field ada.
+        """
+        pass  # 2FA diaktifkan per-user, bukan global
 
     def on_update(self):
         """Setelah update - clear cache settings."""

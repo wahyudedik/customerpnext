@@ -83,7 +83,17 @@ def provision_tenant(tenant_name):
             "Roles assigned to {0} user(s)".format(users_modified)
         )
 
-        # Step 3: Update tenant record
+        # Step 3: Get enabled modules info from plan (for logging)
+        enabled_modules = _get_plan_enabled_modules(tenant.customer)
+        if enabled_modules is not None:
+            result["enabled_modules"] = enabled_modules
+            result["details"].append(
+                "Enabled modules: {0}".format(", ".join(enabled_modules))
+            )
+        else:
+            result["details"].append("All modules enabled (no plan restriction)")
+
+        # Step 4: Update tenant record
         frappe.db.set_value(
             "Qalcuity Tenant",
             tenant_name,
@@ -443,6 +453,43 @@ def deprovision_tenant(tenant_name):
             pass
 
         return {"status": "failed", "error": error_msg}
+
+
+# =============================================================================
+# Module-aware Helpers
+# =============================================================================
+
+def _get_plan_enabled_modules(customer_name):
+    """
+    Get enabled modules list from the customer's active subscription plan.
+
+    Args:
+        customer_name: ERPNext Customer name
+
+    Returns:
+        list or None: List of module names, or None if all modules enabled
+    """
+    try:
+        subscription_name = frappe.db.get_value(
+            "Qalcuity Subscription",
+            {"customer": customer_name, "status": ["in", ["Active", "Grace Period"]]},
+            "name",
+        )
+
+        if not subscription_name:
+            return None
+
+        plan_name = frappe.db.get_value("Qalcuity Subscription", subscription_name, "plan")
+        if not plan_name:
+            return None
+
+        plan_doc = frappe.get_doc("Qalcuity Plan", plan_name)
+        if not plan_doc.enabled_modules or len(plan_doc.enabled_modules) == 0:
+            return None  # All modules enabled
+
+        return [row.module_name for row in plan_doc.enabled_modules]
+    except Exception:
+        return None
 
 
 # =============================================================================

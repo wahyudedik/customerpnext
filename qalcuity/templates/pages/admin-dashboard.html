@@ -1,0 +1,555 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+{% include "qalcuity/templates/includes/navigation.html" %}
+<div class="qalcuity-ad-container">
+	<!-- Header Section -->
+	<div class="qalcuity-ad-header">
+		<div>
+			<h1 class="qalcuity-ad-title">
+				<span class="octicon octicon-graph"></span> Dashboard Admin
+			</h1>
+			<p class="qalcuity-ad-subtitle">Overview operasional SaaS Qalcuity ERP</p>
+		</div>
+		<div class="qalcuity-ad-header-actions">
+			<div class="qalcuity-ad-date-filter">
+				<label class="qalcuity-ad-filter-label">Dari</label>
+				<input type="date" id="ad-filter-date-from" class="qalcuity-ad-filter-input">
+			</div>
+			<div class="qalcuity-ad-date-filter">
+				<label class="qalcuity-ad-filter-label">Sampai</label>
+				<input type="date" id="ad-filter-date-to" class="qalcuity-ad-filter-input">
+			</div>
+			<button class="qalcuity-ad-btn qalcuity-ad-btn-primary" id="ad-refresh-btn">
+				<span class="octicon octicon-sync"></span> Refresh
+			</button>
+		</div>
+	</div>
+
+	<!-- Loading State -->
+	<div id="ad-loading" class="qalcuity-ad-loading">
+		<div class="qalcuity-ad-spinner"></div>
+		<p>Memuat data dashboard...</p>
+	</div>
+
+	<!-- Content -->
+	<div id="ad-content" style="display: none;">
+
+		<!-- ========== REVENUE OVERVIEW ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-dollar"></span> Revenue Overview
+			</h2>
+			<div class="qalcuity-ad-stats-grid qalcuity-ad-stats-4" id="ad-revenue-stats"></div>
+		</div>
+
+		<!-- ========== CUSTOMER & SUBSCRIPTION STATS ========== -->
+		<div class="qalcuity-ad-section">
+			<div class="qalcuity-ad-stats-row">
+				<!-- Customer Stats -->
+				<div class="qalcuity-ad-stats-half">
+					<h2 class="qalcuity-ad-section-title">
+						<span class="octicon octicon-people"></span> Customers
+					</h2>
+					<div class="qalcuity-ad-stats-grid qalcuity-ad-stats-4" id="ad-customer-stats"></div>
+				</div>
+				<!-- Subscription Stats -->
+				<div class="qalcuity-ad-stats-half">
+					<h2 class="qalcuity-ad-section-title">
+						<span class="octicon octicon-sync"></span> Subscriptions
+					</h2>
+					<div class="qalcuity-ad-stats-grid qalcuity-ad-stats-4" id="ad-subscription-stats"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ========== PAYMENT & TENANT STATS ========== -->
+		<div class="qalcuity-ad-section">
+			<div class="qalcuity-ad-stats-row">
+				<!-- Payment Stats -->
+				<div class="qalcuity-ad-stats-half">
+					<h2 class="qalcuity-ad-section-title">
+						<span class="octicon octicon-credit-card"></span> Payments
+					</h2>
+					<div class="qalcuity-ad-stats-grid qalcuity-ad-stats-4" id="ad-payment-stats"></div>
+				</div>
+				<!-- Tenant Stats -->
+				<div class="qalcuity-ad-stats-half">
+					<h2 class="qalcuity-ad-section-title">
+						<span class="octicon octicon-globe"></span> Tenants
+					</h2>
+					<div class="qalcuity-ad-stats-grid qalcuity-ad-stats-4" id="ad-tenant-stats"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ========== REVENUE TREND CHART ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-graph"></span> Revenue Trend (6 Bulan)
+			</h2>
+			<div class="qalcuity-ad-chart-wrapper" id="ad-revenue-chart"></div>
+		</div>
+
+		<!-- ========== RECENT ACTIVITY ========== -->
+		<div class="qalcuity-ad-section">
+			<h2 class="qalcuity-ad-section-title">
+				<span class="octicon octicon-clock"></span> Aktivitas Terakhir
+			</h2>
+			<div class="qalcuity-ad-table-wrapper">
+				<table class="qalcuity-ad-table" id="ad-activity-table">
+					<thead>
+						<tr>
+							<th>Jenis</th>
+							<th>Deskripsi</th>
+							<th>Detail</th>
+							<th>Status</th>
+							<th>Tanggal</th>
+						</tr>
+					</thead>
+					<tbody id="ad-activity-body">
+					</tbody>
+				</table>
+			</div>
+			<div id="ad-activity-empty" class="qalcuity-ad-empty" style="display: none;">
+				<span class="octicon octicon-clock" style="font-size: 40px; color: var(--qalcuity-text-muted);"></span>
+				<h3>Belum ada aktivitas</h3>
+				<p>Aktivitas terbaru akan muncul di sini.</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Error State -->
+	<div id="ad-error" class="qalcuity-ad-empty" style="display: none;">
+		<span class="octicon octicon-alert" style="font-size: 40px; color: var(--qalcuity-danger);"></span>
+		<h3>Gagal memuat data</h3>
+		<p id="ad-error-msg">Terjadi kesalahan saat memuat data dashboard.</p>
+		<button class="qalcuity-ad-btn qalcuity-ad-btn-primary" onclick="loadAdminDashboard()">
+			<span class="octicon octicon-sync"></span> Coba Lagi
+		</button>
+	</div>
+</div>
+
+<script>
+	(function () {
+		'use strict';
+
+		// ============================================================
+		// Admin Dashboard — Main Logic
+		// ============================================================
+
+		/**
+		 * Format currency as IDR
+		 */
+		function formatIDR(amount) {
+			if (amount === null || amount === undefined) return 'Rp 0';
+			return 'Rp ' + Number(amount).toLocaleString('id-ID');
+		}
+
+		/**
+		 * Format date string to locale
+		 */
+		function formatDate(dateStr) {
+			if (!dateStr) return '-';
+			const d = new Date(dateStr);
+			return d.toLocaleDateString('id-ID', {
+				day: 'numeric',
+				month: 'short',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+			});
+		}
+
+		/**
+		 * Get status badge HTML
+		 */
+		function getStatusBadge(status) {
+			const colorMap = {
+				Active: 'green',
+				Approved: 'green',
+				Provisioned: 'green',
+				'Grace Period': 'orange',
+				Pending: 'orange',
+				Suspended: 'red',
+				Rejected: 'red',
+				Expired: 'darkgray',
+				Cancelled: 'red',
+				Draft: 'gray',
+				'Pending Payment': 'yellow',
+			};
+			const color = colorMap[status] || 'gray';
+			return '<span class="indicator-pill whitespace-nowrap" data-indicator-color="' + color + '">' + status + '</span>';
+		}
+
+		/**
+		 * Get activity type icon
+		 */
+		function getActivityIcon(type) {
+			const icons = {
+				payment: 'octicon-credit-card',
+				subscription: 'octicon-sync',
+				tenant: 'octicon-globe',
+			};
+			return icons[type] || 'octicon-file-text';
+		}
+
+		// ============================================================
+		// Render Functions
+		// ============================================================
+
+		function renderRevenueStats(data) {
+			const container = document.getElementById('ad-revenue-stats');
+			container.innerHTML = `
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d1ecf1; color: #0c5460;">
+					<span class="octicon octicon-dollar"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${formatIDR(data.total)}</div>
+					<div class="qalcuity-ad-stat-label">Total Revenue</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">
+					<span class="octicon octicon-graph"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${formatIDR(data.this_month)}</div>
+					<div class="qalcuity-ad-stat-label">Bulan Ini</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #e2e3e5; color: #383d41;">
+					<span class="octicon octicon-calendar"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${formatIDR(data.last_month)}</div>
+					<div class="qalcuity-ad-stat-label">Bulan Lalu</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: ${data.growth_pct >= 0 ? '#d4edda' : '#f8d7da'}; color: ${data.growth_pct >= 0 ? '#155724' : '#721c24'};">
+					<span class="octicon octicon-${data.growth_pct >= 0 ? 'arrow-up' : 'arrow-down'}"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.growth_pct >= 0 ? '+' : ''}${data.growth_pct}%</div>
+					<div class="qalcuity-ad-stat-label">Growth</div>
+				</div>
+			</div>
+		`;
+		}
+
+		function renderCustomerStats(data) {
+			const container = document.getElementById('ad-customer-stats');
+			container.innerHTML = `
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d1ecf1; color: #0c5460;">
+					<span class="octicon octicon-people"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.total}</div>
+					<div class="qalcuity-ad-stat-label">Total</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">
+					<span class="octicon octicon-plus"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.new_this_month}</div>
+					<div class="qalcuity-ad-stat-label">Baru Bulan Ini</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">
+					<span class="octicon octicon-check"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.active}</div>
+					<div class="qalcuity-ad-stat-label">Aktif</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #f8d7da; color: #721c24;">
+					<span class="octicon octicon-x"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.inactive}</div>
+					<div class="qalcuity-ad-stat-label">Tidak Aktif</div>
+				</div>
+			</div>
+		`;
+		}
+
+		function renderSubscriptionStats(data) {
+			const container = document.getElementById('ad-subscription-stats');
+			container.innerHTML = `
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">
+					<span class="octicon octicon-check"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.Active}</div>
+					<div class="qalcuity-ad-stat-label">Active</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #fff3cd; color: #856404;">
+					<span class="octicon octicon-alert"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data['Grace Period'] || 0}</div>
+					<div class="qalcuity-ad-stat-label">Grace Period</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #e2e3e5; color: #383d41;">
+					<span class="octicon octicon-clock"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.Expired || 0}</div>
+					<div class="qalcuity-ad-stat-label">Expired</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #f8d7da; color: #721c24;">
+					<span class="octicon octicon-x"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.Suspended || 0}</div>
+					<div class="qalcuity-ad-stat-label">Suspended</div>
+				</div>
+			</div>
+		`;
+		}
+
+		function renderPaymentStats(data) {
+			const container = document.getElementById('ad-payment-stats');
+			container.innerHTML = `
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #fff3cd; color: #856404;">
+					<span class="octicon octicon-eye"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.pending}</div>
+					<div class="qalcuity-ad-stat-label">Pending Review</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">
+					<span class="octicon octicon-check-circle"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.approved_this_month}</div>
+					<div class="qalcuity-ad-stat-label">Approved (Bulan Ini)</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #f8d7da; color: #721c24;">
+					<span class="octicon octicon-x-circle"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.rejected_this_month}</div>
+					<div class="qalcuity-ad-stat-label">Rejected (Bulan Ini)</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d1ecf1; color: #0c5460;">
+					<span class="octicon octicon-file-text"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.total}</div>
+					<div class="qalcuity-ad-stat-label">Total</div>
+				</div>
+			</div>
+		`;
+		}
+
+		function renderTenantStats(data) {
+			const container = document.getElementById('ad-tenant-stats');
+			container.innerHTML = `
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d1ecf1; color: #0c5460;">
+					<span class="octicon octicon-globe"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.total}</div>
+					<div class="qalcuity-ad-stat-label">Total</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">
+					<span class="octicon octicon-check"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.Active || 0}</div>
+					<div class="qalcuity-ad-stat-label">Active</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #d4edda; color: #155724;">
+					<span class="octicon octicon-check-circle"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.Provisioned || 0}</div>
+					<div class="qalcuity-ad-stat-label">Provisioned</div>
+				</div>
+			</div>
+			<div class="qalcuity-ad-stat-card">
+				<div class="qalcuity-ad-stat-icon" style="background: #f8d7da; color: #721c24;">
+					<span class="octicon octicon-x"></span>
+				</div>
+				<div class="qalcuity-ad-stat-info">
+					<div class="qalcuity-ad-stat-value">${data.Suspended || 0}</div>
+					<div class="qalcuity-ad-stat-label">Suspended</div>
+				</div>
+			</div>
+		`;
+		}
+
+		function renderRevenueChart(trend) {
+			const container = document.getElementById('ad-revenue-chart');
+			if (!trend || trend.length === 0) {
+				container.innerHTML = '<div class="qalcuity-ad-empty"><p>Tidak ada data revenue trend.</p></div>';
+				return;
+			}
+
+			const labels = trend.map(function (m) { return m.month; });
+			const values = trend.map(function (m) { return m.revenue; });
+			const maxVal = Math.max.apply(null, values) || 1;
+			const chartHeight = 200;
+
+			// Build SVG bar chart
+			const barWidth = Math.floor(100 / labels.length) - 2;
+			let bars = '';
+			for (let i = 0; i < labels.length; i++) {
+				const barH = Math.round((values[i] / maxVal) * chartHeight);
+				const x = (i * (100 / labels.length)) + 1;
+				const color = i === labels.length - 1 ? 'var(--qalcuity-primary)' : 'var(--qalcuity-primary-light, #6cb2eb)';
+				bars += '<div class="qalcuity-ad-chart-bar-group" style="left:' + x + '%;width:' + (100 / labels.length) + '%;">';
+				bars += '<div class="qalcuity-ad-chart-bar-value">' + formatIDR(values[i]) + '</div>';
+				bars += '<div class="qalcuity-ad-chart-bar" style="height:' + barH + 'px;background:' + color + ';"></div>';
+				bars += '<div class="qalcuity-ad-chart-bar-label">' + labels[i] + '</div>';
+				bars += '</div>';
+			}
+
+			container.innerHTML =
+				'<div class="qalcuity-ad-chart">' +
+				'<div class="qalcuity-ad-chart-bars">' + bars + '</div>' +
+				'</div>';
+		}
+
+		function renderActivityTable(activities) {
+			var tbody = document.getElementById('ad-activity-body');
+			var emptyState = document.getElementById('ad-activity-empty');
+			var table = document.getElementById('ad-activity-table');
+
+			if (!activities || activities.length === 0) {
+				table.style.display = 'none';
+				emptyState.style.display = 'block';
+				return;
+			}
+
+			table.style.display = '';
+			emptyState.style.display = 'none';
+
+			var html = '';
+			for (var i = 0; i < activities.length; i++) {
+				var a = activities[i];
+				html += '<tr>';
+				html += '<td><span class="octicon ' + getActivityIcon(a.type) + '"></span> ' + a.type.charAt(0).toUpperCase() + a.type.slice(1) + '</td>';
+				html += '<td>' + (a.description || '-') + '</td>';
+				html += '<td>' + (a.detail || '-') + '</td>';
+				html += '<td>' + getStatusBadge(a.status) + '</td>';
+				html += '<td>' + formatDate(a.date) + '</td>';
+				html += '</tr>';
+			}
+			tbody.innerHTML = html;
+		}
+
+		// ============================================================
+		// Data Loading
+		// ============================================================
+
+		function loadAdminDashboard() {
+			var loading = document.getElementById('ad-loading');
+			var content = document.getElementById('ad-content');
+			var errorEl = document.getElementById('ad-error');
+
+			loading.style.display = 'flex';
+			content.style.display = 'none';
+			errorEl.style.display = 'none';
+
+			var dateFrom = document.getElementById('ad-filter-date-from').value || '';
+			var dateTo = document.getElementById('ad-filter-date-to').value || '';
+
+			var args = {};
+			if (dateFrom) args.date_from = dateFrom;
+			if (dateTo) args.date_to = dateTo;
+
+			frappe.call({
+				method: 'qalcuity.api.admin_dashboard.get_admin_dashboard_data',
+				args: args,
+				callback: function (r) {
+					loading.style.display = 'none';
+
+					if (r.message) {
+						var data = r.message;
+
+						renderRevenueStats(data.revenue);
+						renderCustomerStats(data.customers);
+						renderSubscriptionStats(data.subscriptions);
+						renderPaymentStats(data.payments);
+						renderTenantStats(data.tenants);
+						renderRevenueChart(data.revenue_trend);
+						renderActivityTable(data.recent_activity);
+
+						content.style.display = 'block';
+					} else {
+						errorEl.style.display = 'block';
+					}
+				},
+				error: function (err) {
+					loading.style.display = 'none';
+					var errorMsg = document.getElementById('ad-error-msg');
+					errorMsg.textContent = (err && err._server_messages) ? err._server_messages : 'Terjadi kesalahan saat memuat data dashboard.';
+					errorEl.style.display = 'block';
+				}
+			});
+		}
+
+		// ============================================================
+		// Initialization
+		// ============================================================
+
+		function init() {
+			// Set default date range (current month)
+			var now = new Date();
+			var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+			var today = new Date();
+
+			document.getElementById('ad-filter-date-from').value = firstDay.toISOString().split('T')[0];
+			document.getElementById('ad-filter-date-to').value = today.toISOString().split('T')[0];
+
+			// Refresh button
+			document.getElementById('ad-refresh-btn').addEventListener('click', function () {
+				loadAdminDashboard();
+			});
+
+			// Load data
+			loadAdminDashboard();
+		}
+
+		// Run on DOM ready
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
+
+		// Expose for global access
+		window.loadAdminDashboard = loadAdminDashboard;
+	})();
+</script>
+{% endblock %}

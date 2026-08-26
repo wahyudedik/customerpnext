@@ -114,6 +114,30 @@
 				<p>Sudah punya akun? <a href="/login" class="qalcuity-register-link">Masuk di sini</a></p>
 			</div>
 		</form>
+
+		<!-- Check Email Card (shown after successful registration) -->
+		<div id="register-check-email" class="qalcuity-register-check-email" style="display: none;">
+			<div class="qalcuity-auth-icon qalcuity-auth-icon-success">
+				<span class="octicon octicon-mail"></span>
+			</div>
+			<h2 class="qalcuity-auth-title">Cek Email Anda</h2>
+			<p class="qalcuity-auth-subtitle">
+				Kami telah mengirim link verifikasi ke
+				<strong id="check-email-address"></strong>.
+			</p>
+			<p class="qalcuity-auth-subtitle">
+				Silakan buka email Anda dan klik tombol verifikasi untuk mengaktifkan akun.
+				Link verifikasi berlaku selama 24 jam.
+			</p>
+			<div class="qalcuity-auth-actions">
+				<a href="/login" class="qalcuity-auth-btn qalcuity-auth-btn-primary">
+					<span class="octicon octicon-sign-in"></span> Masuk
+				</a>
+			</div>
+			<p class="qalcuity-auth-subtitle" style="font-size: 13px; margin-top: 16px;">
+				Tidak menerima email? <a href="/verify-email" class="qalcuity-register-link">Kirim ulang verifikasi</a>
+			</p>
+		</div>
 	</div>
 </div>
 
@@ -340,13 +364,17 @@
 				callback: function (r) {
 					qalcuity.register.setLoading(false);
 					if (r.message && r.message.success) {
+						// Show success message — do NOT redirect to login
+						// User must verify email first
 						qalcuity.register.showAlert(r.message.message, 'success');
-						form.reset();
-						document.getElementById('password-strength').style.display = 'none';
-						// Redirect to login after 3 seconds
-						setTimeout(function () {
-							window.location.href = '/login?registered=1';
-						}, 3000);
+						form.style.display = 'none';
+						// Show "check email" card
+						var checkEmailCard = document.getElementById('register-check-email');
+						if (checkEmailCard) {
+							checkEmailCard.style.display = 'block';
+							var emailSpan = document.getElementById('check-email-address');
+							if (emailSpan) emailSpan.textContent = r.message.email || '';
+						}
 					}
 				},
 				error: function (err) {

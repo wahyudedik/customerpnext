@@ -2,7 +2,7 @@
 
 # Qalcuity ERP — Development Roadmap
 
-> **Last Updated:** 2026-08-25
+> **Last Updated:** 2026-08-26
 
 ---
 
@@ -78,11 +78,11 @@ qalcuity.com — Single-site multi-tenant
 | 4 | Subscription System | ✅ Done |
 | 5 | Manual Payment System | ✅ Done |
 | 6 | Tenant Management + Provisioning | ✅ Done |
-| 7 | Superadmin Dashboard & Management | ⏳ Pending |
-| 8 | ERP Enhancement | ⏳ Pending |
-| 9 | Security & Authentication | ⏳ Pending |
+| 7 | Superadmin Dashboard & Management | 🔄 In Progress |
+| 8 | ERP Enhancement | ✅ Done |
+| 9 | Security & Authentication | ✅ Done |
 | 10 | Advanced SaaS Features | ⏳ Pending |
-| 11 | API & Integration | ⏳ Pending |
+| 11 | API & Integration | 🔄 In Progress |
 | 12 | Operations & Deployment | ⏳ Pending |
 | 13 | Advanced Features | ⏳ Backlog |
 
@@ -197,6 +197,57 @@ qalcuity.com — Single-site multi-tenant
 
 ---
 
+### Sprint 7 — Hooks Sync, Security & UI/UX Improvements ✅
+
+> Completed: 2026-08-26
+
+- [x] Hooks.py Sync — Inner hooks.py (`qalcuity/qalcuity/hooks.py`) disinkronkan: `website_context`, `website_script`, fixtures (ERP User role, Workspace, Website Settings), `retry_failed_provisioning` scheduler
+- [x] Grace Period Status — Status "Grace Period" ditambahkan ke Subscription status options (8 file diupdate: DocType JSON, subscription.py, tasks.py, erpnext_hooks.py, enforcement.py, dashboard.py, account_status.py, qalcuity_tenant.py)
+- [x] Rate Limiting Registration — Max 5 registrasi per jam per IP di [`registration.py`](qalcuity/qalcuity/api/registration.py)
+- [x] Password Validation Standardized — Minimum 8 characters + letter + number di registration (server + client) dan profile (server + client)
+- [x] Branding Fixes — "ERPNext" → "ERP" di user-facing text ([`account-status.html`](qalcuity/qalcuity/templates/pages/account-status.html)), TreeWalker replace di [`website_script.py`](qalcuity/qalcuity/website_script.py), desk branding hide rules di [`qalcuity.js`](qalcuity/qalcuity/public/js/qalcuity.js)
+- [x] Navigation Improvements — Reusable [`navigation.html`](qalcuity/qalcuity/templates/includes/navigation.html) template, hamburger menu mobile, dropdown menus, role detection; 9 template HTML diupdate dengan navigation include
+- [x] UI/UX Responsive Mobile — Hamburger menu (< 768px), responsive grid (1/2/3+ kolom), responsive forms, responsive tables (horizontal scroll), touch-friendly (min 44px)
+- [x] [`qalcuity.css`](qalcuity/qalcuity/public/css/qalcuity.css) — +785 baris: Navigation CSS, responsive mobile, dark mode
+- [x] [`qalcuity.js`](qalcuity/qalcuity/public/js/qalcuity.js) — +180 baris: Navigation controller (hamburger, dropdown, role detection)
+- [x] Website Branding Patch — [`set_website_branding`](qalcuity/qalcuity/qalcuity/patches/set_website_branding.py) auto-set Website Settings (favicon, splash_image, app_logo)
+
+---
+
+### Sprint 8 — Dashboard, Security & Auth ✅
+
+> Completed: 2026-08-26
+
+- [x] Superadmin Dashboard (`/admin-dashboard`) — Revenue, customer, subscription, payment, tenant stats + bar chart + recent activity
+- [x] CSRF Protection — Hidden token di semua web forms, frappe.call() otomatis handle, XHR upload CSRF header
+- [x] Pagination — my-payments: page numbers + ellipsis + prev/next; subscription-history: prev/next + page info; backend `page` + `page_size` params
+- [x] Email Verification — User created with `disabled=1`, HMAC-SHA256 token (TTL 24 jam), `/verify-email`, resend (rate limit 3/jam), email template Qalcuity-branded
+- [x] Password Reset — `/forgot-password` + `/reset-password`, token TTL 1 jam, rate limit 3/jam, anti email enumeration, email template Qalcuity-branded
+
+---
+
+### Sprint 9 — Security, 2FA & ERP Enhancement ✅
+
+> Completed: 2026-08-26
+
+- [x] Two-Factor Authentication (2FA) — TOTP-based (RFC 6238), setup/enable/disable, backup codes, QR code ([`two_factor.py`](qalcuity/qalcuity/api/two_factor.py))
+- [x] 2FA Login Flow — Pre-login check → 2FA verify → session creation, backup code support
+- [x] 2FA Backup Codes — 8 codes, `XXXX-XXXX` format, SHA-256 hashed, regenerate capability
+- [x] Session Management — Active sessions list, force logout single/all sessions, user-agent parsing ([`session_api.py`](qalcuity/qalcuity/api/session_api.py))
+- [x] System Health Monitoring — System (uptime, disk, memory, CPU), application (versions, scheduler), activity (users, sessions, errors), health checks (database, redis, scheduler) ([`health_api.py`](qalcuity/qalcuity/api/health_api.py))
+- [x] ERP Module Config per Plan — `plan_modules` field di Qalcuity Plan, module access controls per plan tier
+- [x] Admin Dashboard (`/admin-dashboard`) — Revenue, customer, subscription, payment, tenant stats
+- [x] API Documentation — [`API_DOCUMENTATION.md`](qalcuity/API_DOCUMENTATION.md) dengan 53 core API endpoints + 20 API v1 endpoints
+- [x] 2FA Setup Page (`/2fa-setup`) — QR code display + verification
+- [x] 2FA Verify Page (`/2fa-verify`) — 2FA verification during login
+- [x] Sessions Page (`/sessions`) — Active sessions management
+- [x] Admin Health Page (`/admin-health`) — System health monitoring dashboard
+- [x] CSRF Protection — Hidden token di semua web forms
+- [x] Email Verification — HMAC-SHA256 token, TTL 24 jam, resend rate limit
+- [x] Password Reset — Token-based, TTL 1 jam, rate limited
+
+---
+
 ## 3. Current Status
 
 ### What's Live in Production
@@ -222,7 +273,16 @@ qalcuity.com — Single-site multi-tenant
 | Email Notifications | ✅ Working | Approval, rejection, expiry, grace period |
 | Audit Log | ✅ Working | Track semua aksi sensitif |
 | Backup Automation | ✅ Working | Database + files, retention 30 hari |
-| API v1 | ✅ Working | 24 endpoints dengan auth + rate limiting |
+| API v1 | ✅ Working | 30 endpoints dengan auth + rate limiting |
+| Reusable Navigation | ✅ Working | Shared header bar dengan hamburger menu mobile |
+| Responsive Mobile | ✅ Working | Hamburger, responsive grid/forms/tables |
+| Registration Rate Limiting | ✅ Working | Max 5 per jam per IP |
+| Password Validation | ✅ Working | Min 8 chars + letter + number |
+| Two-Factor Authentication | ✅ Working | TOTP-based 2FA with backup codes |
+| Session Management | ✅ Working | Active sessions, force logout |
+| System Health | ✅ Working | System, application, activity stats |
+| ERP Module Config | ✅ Working | Module access controls per plan |
+| API Documentation | ✅ Working | Comprehensive API docs (53 + 20 endpoints) |
 
 ### Implemented DocTypes (12)
 
@@ -241,7 +301,7 @@ qalcuity.com — Single-site multi-tenant
 | 11 | Qalcuity Notification | Standard | In-app notifications (`NOTIF-{YYYYMMDD}-{####}`) |
 | 12 | Qalcuity Provisioning Log | Standard | ERP provisioning tracking (`PROV-{YYYYMMDD}-{####}`) |
 
-### Implemented Web Pages (9)
+### Implemented Web Pages (13 + Navigation)
 
 | # | Page | Route | Purpose |
 |---|------|-------|---------|
@@ -254,14 +314,25 @@ qalcuity.com — Single-site multi-tenant
 | 7 | Profile | `/profile` | Edit profil dan ganti password |
 | 8 | Account Status | `/account-status` | Detail status langganan dan pembayaran |
 | 9 | Subscription History | `/subscription-history` | Timeline riwayat perubahan langganan |
+| 10 | Admin Dashboard | `/admin-dashboard` | Superadmin dashboard dengan revenue, customer, subscription stats |
+| 11 | Verify Email | `/verify-email` | Email verification page (HMAC-SHA256 token) |
+| 12 | Forgot Password | `/forgot-password` | Request password reset via email |
+| 13 | Reset Password | `/reset-password` | Reset password via token |
+| 14 | 2FA Setup | `/2fa-setup` | Two-factor authentication setup |
+| 15 | 2FA Verify | `/2fa-verify` | 2FA verification during login |
+| 16 | Sessions | `/sessions` | Active sessions management |
+| 17 | Admin Health | `/admin-health` | System health monitoring dashboard |
 
 ### What Needs Attention
 
 - [ ] Production deployment reproducible from Git (VPS Docker + AAPanel)
 - [ ] Reverse proxy, HTTPS, domain configuration (Phase 1 remaining)
-- [ ] Superadmin custom dashboard (belum ada dedicated page)
-- [ ] Navigation redesign untuk superadmin area
+- [ ] Custom reports
+- [ ] Customer-level data export
 - [ ] Responsive behavior testing di berbagai device
+- [ ] Custom login page responsive testing
+- [ ] API documentation (Swagger/OpenAPI format)
+- [ ] Session management hardening
 
 ---
 
@@ -271,13 +342,13 @@ qalcuity.com — Single-site multi-tenant
 
 > **Priority:** P0 — Critical
 > **Complexity:** L
-> **Status:** ⏳ Pending
+> **Status:** 🔄 In Progress (Sprint 8 partial — dashboard done)
 
 **Goal:** Berikan superadmin dedicated dashboard untuk mengelola seluruh operasi SaaS.
 
 #### Key Deliverables
 
-- [ ] Superadmin custom dashboard — Stats, charts, recent activity, KPI
+- [x] Superadmin custom dashboard — Stats, charts, recent activity, KPI ✅ Sprint 8
 - [ ] Customer management page — List, view, edit customers
 - [ ] Subscription management page — List, extend, suspend subscriptions
 - [ ] Tenant management page — List, view, provision/re-provision tenants
@@ -310,13 +381,13 @@ graph TD
 
 > **Priority:** P1 — High
 > **Complexity:** L
-> **Status:** ⏳ Pending
+> **Status:** 🔄 In Progress (Sprint 9 partial — module config per plan done)
 
 **Goal:** Tingkatkan pengalaman ERP untuk customer berdasarkan plan tier mereka.
 
 #### Key Deliverables
 
-- [ ] ERP module configuration per plan — Setiap plan mendapatkan modul ERP yang berbeda
+- [x] ERP module configuration per plan — Setiap plan mendapatkan modul ERP yang berbeda ✅ Sprint 9
 - [ ] Company creation automation during provisioning — Lebih robust, handle edge cases
 - [ ] ERP workspace customization per plan tier — Starter beda dengan Enterprise
 - [ ] Customer-level data export — Export data dalam format CSV/Excel
@@ -342,23 +413,23 @@ graph TD
 
 ---
 
-### Phase 9 — Security & Authentication
+### Phase 9 — Security & Authentication ✅
 
 > **Priority:** P1 — High
 > **Complexity:** M
-> **Status:** ⏳ Pending
+> **Status:** ✅ Done (Sprint 8 + Sprint 9)
 
 **Goal:** Perkuat keamanan untuk production readiness.
 
 #### Key Deliverables
 
-- [ ] Email verification for registration — Aktivasi akun via email
-- [ ] Password reset automation — Lupa password flow via email
-- [ ] Two-factor authentication — TOTP-based 2FA
-- [ ] Session management — Active sessions list, force logout
+- [x] Email verification for registration — Aktivasi akun via email ✅ Sprint 8
+- [x] Password reset automation — Lupa password flow via email ✅ Sprint 8
+- [x] CSRF protection review — Pastikan semua form terlindungi ✅ Sprint 8
+- [x] Two-factor authentication — TOTP-based 2FA (RFC 6238) ✅ Sprint 9
+- [x] Session management — Active sessions list, force logout ✅ Sprint 9
 - [ ] API key management — Untuk integrasi external
 - [ ] Upload security audit — Validasi file type, size, malware check
-- [ ] CSRF protection review — Pastikan semua form terlindungi
 - [ ] Input validation audit — Sanitasi semua user input
 
 ---

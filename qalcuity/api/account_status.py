@@ -201,10 +201,13 @@ def _get_usage_data(customer_name, tenant):
     )
     usage["users_count"] = user_count
 
-    # Get plan limits
+    # Get plan limits (Active or Grace Period — both have access to plan features)
     sub = frappe.get_all(
         "Qalcuity Subscription",
-        filters={"customer": customer_name, "status": "Active"},
+        filters={
+            "customer": customer_name,
+            "status": ["in", ["Active", "Grace Period"]],
+        },
         fields=["plan"],
         limit_page_length=1,
     )
