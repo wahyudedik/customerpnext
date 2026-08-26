@@ -99,7 +99,7 @@ class QalcuityTenant(Document):
         Provision ERP environment for this tenant.
         Creates Company, assigns roles, configures workspace.
         """
-        from qalcuity.qalcuity.provisioning import provision_tenant
+        from qalcuity.provisioning import provision_tenant
 
         return provision_tenant(self.name)
 
@@ -109,7 +109,7 @@ class QalcuityTenant(Document):
         Deprovision ERP environment for this tenant.
         Removes ERP roles but preserves Company and data.
         """
-        from qalcuity.qalcuity.provisioning import deprovision_tenant
+        from qalcuity.provisioning import deprovision_tenant
 
         return deprovision_tenant(self.name)
 
@@ -119,7 +119,7 @@ class QalcuityTenant(Document):
         Retry provisioning for this tenant.
         Used when previous provisioning failed.
         """
-        from qalcuity.qalcuity.provisioning import provision_tenant
+        from qalcuity.provisioning import provision_tenant
 
         return provision_tenant(self.name)
 

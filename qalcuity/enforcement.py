@@ -209,7 +209,7 @@ def before_user_insert(doc, method):
         return
 
     # Cari customer yang terkait dengan user yang sedang login
-    from qalcuity.qalcuity.isolation import get_current_customer
+    from qalcuity.isolation import get_current_customer
 
     customer = get_current_customer()
     if not customer:

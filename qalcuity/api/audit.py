@@ -292,7 +292,7 @@ def on_subscription_update(doc, method):
 
 def _require_admin():
     """Cek apakah user adalah admin/superadmin."""
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
 
     if not is_admin_user():
         frappe.throw(_("Access denied. Admin privileges required."))

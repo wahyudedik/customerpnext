@@ -70,7 +70,7 @@ def _clear_customer_user_cache(customer_name):
         customer_name: Nama Customer
     """
     try:
-        from qalcuity.qalcuity.isolation import clear_isolation_cache
+        from qalcuity.isolation import clear_isolation_cache
 
         # Cari Portal User yang terkait customer ini
         portal_users = frappe.get_all(

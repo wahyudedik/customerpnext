@@ -9,7 +9,7 @@ Provides whitelisted methods for plan upgrade/downgrade operations.
 import frappe
 from frappe import _
 from frappe.utils import getdate, date_diff, today
-from qalcuity.qalcuity.input_validation import sanitize_text, validate_reason
+from qalcuity.input_validation import sanitize_text, validate_reason
 
 
 @frappe.whitelist()

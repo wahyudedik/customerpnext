@@ -8,8 +8,8 @@ Provides whitelisted methods for payment operations.
 
 import frappe
 from frappe import _
-from qalcuity.qalcuity.upload_security import validate_upload, sanitize_filename, get_max_file_size_mb
-from qalcuity.qalcuity.input_validation import validate_amount, validate_reference_number, sanitize_text
+from qalcuity.upload_security import validate_upload, sanitize_filename, get_max_file_size_mb
+from qalcuity.input_validation import validate_amount, validate_reference_number, sanitize_text
 
 
 @frappe.whitelist()

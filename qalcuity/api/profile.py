@@ -8,7 +8,7 @@ Provides whitelisted methods for customer profile management.
 
 import frappe
 from frappe import _
-from qalcuity.qalcuity.input_validation import (
+from qalcuity.input_validation import (
     sanitize_text, validate_email, validate_password, validate_phone, sanitize_html
 )
 

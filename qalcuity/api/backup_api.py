@@ -27,7 +27,7 @@ import json
 def _require_admin():
     """Cek apakah user adalah admin/superadmin."""
     try:
-        from qalcuity.qalcuity.isolation import is_admin_user
+        from qalcuity.isolation import is_admin_user
         if not is_admin_user():
             frappe.throw(_("Access denied. Admin privileges required."))
     except ImportError:
@@ -65,7 +65,7 @@ def trigger_backup(backup_type="Full"):
         )
 
     try:
-        from qalcuity.qalcuity.backup import run_backup
+        from qalcuity.backup import run_backup
 
         result = run_backup(
             backup_type=backup_type,
@@ -99,7 +99,7 @@ def get_backup_status():
         dict: Backup status information
     """
     try:
-        from qalcuity.qalcuity.backup import get_backup_status as _get_backup_status
+        from qalcuity.backup import get_backup_status as _get_backup_status
         return _get_backup_status()
 
     except Exception as e:
@@ -128,7 +128,7 @@ def get_backup_list(page=1, limit=20, filters=None):
     _require_admin()
 
     try:
-        from qalcuity.qalcuity.backup import get_backup_list as _get_backup_list
+        from qalcuity.backup import get_backup_list as _get_backup_list
 
         # Parse filters
         if filters and isinstance(filters, str):
@@ -167,7 +167,7 @@ def download_backup(backup_name):
     _require_admin()
 
     try:
-        from qalcuity.qalcuity.backup import download_backup as _download_backup
+        from qalcuity.backup import download_backup as _download_backup
         return _download_backup(backup_name)
 
     except Exception as e:
@@ -194,7 +194,7 @@ def delete_backup(backup_name):
     _require_admin()
 
     try:
-        from qalcuity.qalcuity.backup import delete_backup as _delete_backup
+        from qalcuity.backup import delete_backup as _delete_backup
         return _delete_backup(backup_name)
 
     except Exception as e:
@@ -218,7 +218,7 @@ def get_backup_stats():
     _require_admin()
 
     try:
-        from qalcuity.qalcuity.backup import get_backup_stats as _get_backup_stats
+        from qalcuity.backup import get_backup_stats as _get_backup_stats
         return _get_backup_stats()
 
     except Exception as e:
@@ -242,7 +242,7 @@ def trigger_cleanup():
     _require_admin()
 
     try:
-        from qalcuity.qalcuity.backup import cleanup_old_backups
+        from qalcuity.backup import cleanup_old_backups
         result = cleanup_old_backups()
 
         return {

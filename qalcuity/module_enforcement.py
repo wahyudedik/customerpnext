@@ -146,7 +146,7 @@ def get_user_enabled_modules(user=None):
         return None
 
     # Admin users bypass module restrictions
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if is_admin_user(user):
         return None
 
@@ -154,7 +154,7 @@ def get_user_enabled_modules(user=None):
     if "Customer" not in frappe.get_roles(user):
         return None
 
-    from qalcuity.qalcuity.isolation import get_customer_for_user
+    from qalcuity.isolation import get_customer_for_user
     customer = get_customer_for_user(user)
     if not customer:
         return None

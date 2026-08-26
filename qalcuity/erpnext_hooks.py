@@ -19,7 +19,7 @@ untuk ERPNext DocTypes.
 import frappe
 from frappe import _
 
-from qalcuity.qalcuity.isolation import (
+from qalcuity.isolation import (
     is_admin_user,
     get_customer_for_user,
     get_current_customer,
@@ -203,7 +203,7 @@ def _is_module_enabled_for_user(user, module_name):
         bool: True jika module diizinkan atau tidak ada pembatasan
     """
     try:
-        from qalcuity.qalcuity.module_enforcement import is_module_enabled_for_user
+        from qalcuity.module_enforcement import is_module_enabled_for_user
         return is_module_enabled_for_user(module_name, user)
     except ImportError:
         # Module enforcement belum tersedia — izinkan semua
@@ -222,7 +222,7 @@ def _is_doctype_module_enabled(user, doctype_name):
         bool: True jika DocType diizinkan atau tidak ada pembatasan
     """
     try:
-        from qalcuity.qalcuity.module_enforcement import is_doctype_enabled_for_user
+        from qalcuity.module_enforcement import is_doctype_enabled_for_user
         return is_doctype_enabled_for_user(doctype_name, user)
     except ImportError:
         return True
@@ -239,7 +239,7 @@ def _get_module_block_message(doctype_name):
         str: Block message
     """
     try:
-        from qalcuity.qalcuity.module_enforcement import get_module_block_message
+        from qalcuity.module_enforcement import get_module_block_message
         return get_module_block_message(doctype_name)
     except ImportError:
         return _("This module is not available in your current subscription plan.")

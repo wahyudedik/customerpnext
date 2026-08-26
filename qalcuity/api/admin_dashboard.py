@@ -30,7 +30,7 @@ def get_admin_dashboard_data(date_from=None, date_to=None):
         frappe.throw(_("Please login to access the admin dashboard."))
 
     # Check admin role
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
 
     if not is_admin_user():
         frappe.throw(_("You do not have permission to access the admin dashboard."))

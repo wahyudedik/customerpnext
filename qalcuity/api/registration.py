@@ -13,7 +13,7 @@ import time
 import hashlib
 import hmac
 from frappe.utils import now_datetime, add_to_date, get_url
-from qalcuity.qalcuity.input_validation import (
+from qalcuity.input_validation import (
     sanitize_text, validate_email, validate_password, validate_phone,
     validate_name, sanitize_html
 )

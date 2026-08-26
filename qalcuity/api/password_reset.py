@@ -14,7 +14,7 @@ import hashlib
 import hmac
 from frappe.utils import get_url
 from frappe.utils.password import update_password
-from qalcuity.qalcuity.input_validation import validate_email, validate_password
+from qalcuity.input_validation import validate_email, validate_password
 
 
 # =============================================================================

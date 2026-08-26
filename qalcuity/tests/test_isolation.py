@@ -14,7 +14,7 @@ Skenario test untuk memastikan:
 import frappe
 from frappe.tests import IntegrationTestCase
 
-from qalcuity.qalcuity.isolation import (
+from qalcuity.isolation import (
     is_admin_user,
     get_current_customer,
     get_current_tenant,

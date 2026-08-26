@@ -308,7 +308,7 @@ def _trigger_deprovision_on_expiry(tenant_name):
     try:
         tenant = frappe.get_doc("Qalcuity Tenant", tenant_name)
         if tenant.erp_provisioning_status == "Completed":
-            from qalcuity.qalcuity.provisioning import deprovision_tenant
+            from qalcuity.provisioning import deprovision_tenant
             result = deprovision_tenant(tenant_name)
             frappe.logger().info(
                 "Qalcuity Scheduler: Deprovisioned tenant {0} after expiry — {1}".format(
@@ -341,7 +341,7 @@ def run_scheduled_backup():
         3. Log hasil ke Frappe error log
     """
     try:
-        from qalcuity.qalcuity.backup import run_backup, cleanup_old_backups
+        from qalcuity.backup import run_backup, cleanup_old_backups
 
         # Step 1: Run backup
         frappe.logger().info("Qalcuity Scheduler: Starting scheduled backup")
@@ -388,7 +388,7 @@ def retry_failed_provisioning():
         3. Log results
     """
     try:
-        from qalcuity.qalcuity.provisioning import retry_failed_provisioning as do_retry
+        from qalcuity.provisioning import retry_failed_provisioning as do_retry
 
         frappe.logger().info(
             "Qalcuity Scheduler: Starting failed provisioning retry"
@@ -423,7 +423,7 @@ def check_renewal_reminders():
         3. Handles Grace Period subscriptions approaching final expiry
     """
     try:
-        from qalcuity.qalcuity.api.renewal import check_and_send_renewal_reminders
+        from qalcuity.api.renewal import check_and_send_renewal_reminders
 
         frappe.logger().info(
             "Qalcuity Scheduler: Starting renewal reminder check"

@@ -16,8 +16,8 @@ Pendekatan kami:
 
 Usage:
     Dari client, panggil endpoint seperti:
-    - frappe.call("qalcuity.qalcuity.api.v1.endpoints.get_plans")
-    - frappe.call("qalcuity.qalcuity.api.v1.endpoints.submit_payment", {...})
+    - frappe.call("qalcuity.api.v1.endpoints.get_plans")
+    - frappe.call("qalcuity.api.v1.endpoints.submit_payment", {...})
 
 Structure:
     qalcuity/qalcuity/api/v1/

@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate
 
-from qalcuity.qalcuity.isolation import is_admin_user
+from qalcuity.isolation import is_admin_user
 
 
 # =============================================================================

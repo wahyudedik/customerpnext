@@ -1,0 +1,16 @@
+{
+    "app": "qalcuity",
+    "creation": "2026-08-26 12:50:00.000000",
+    "docstatus": 0,
+    "doctype": "Workspace Sidebar",
+    "header_icon": "octicon octicon-package",
+    "idx": 0,
+    "items": [],
+    "modified": "2026-08-26 12:50:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity ERP Customer",
+    "owner": "Administrator",
+    "standard": 1,
+    "title": "Qalcuity ERP Customer"
+}

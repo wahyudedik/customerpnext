@@ -6,7 +6,7 @@ API Key Authentication Middleware for Qalcuity ERP.
 Provides authentication via API key/secret headers for external integrations.
 
 Usage in endpoint:
-    from qalcuity.qalcuity.api.api_key_auth import authenticate_api_key
+    from qalcuity.api.api_key_auth import authenticate_api_key
     customer = authenticate_api_key()
     if not customer:
         frappe.throw("Invalid API key", frappe.AuthenticationError)

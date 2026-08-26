@@ -31,7 +31,7 @@ class QalcuitySubscription(Document):
         )
         # Log subscription creation
         try:
-            from qalcuity.qalcuity.api.subscription_history import create_subscription_log
+            from qalcuity.api.subscription_history import create_subscription_log
             create_subscription_log(
                 subscription_name=self.name,
                 action="Created",
@@ -112,7 +112,7 @@ class QalcuitySubscription(Document):
     def _trigger_provision(self, tenant_name):
         """Trigger ERP provisioning for a tenant (async-safe)."""
         try:
-            from qalcuity.qalcuity.provisioning import provision_tenant
+            from qalcuity.provisioning import provision_tenant
             provision_tenant(tenant_name)
         except Exception as e:
             frappe.log_error(
@@ -123,7 +123,7 @@ class QalcuitySubscription(Document):
     def _trigger_deprovision(self, tenant_name):
         """Trigger ERP deprovisioning for a tenant (async-safe)."""
         try:
-            from qalcuity.qalcuity.provisioning import deprovision_tenant
+            from qalcuity.provisioning import deprovision_tenant
             deprovision_tenant(tenant_name)
         except Exception as e:
             frappe.log_error(
@@ -134,7 +134,7 @@ class QalcuitySubscription(Document):
     def _trigger_reactivate(self, tenant_name):
         """Trigger ERP reactivation for a tenant (async-safe)."""
         try:
-            from qalcuity.qalcuity.provisioning import reactivate_tenant
+            from qalcuity.provisioning import reactivate_tenant
             reactivate_tenant(tenant_name)
         except Exception as e:
             frappe.log_error(
@@ -230,7 +230,7 @@ class QalcuitySubscription(Document):
 
         # Log activation
         try:
-            from qalcuity.qalcuity.api.subscription_history import create_subscription_log
+            from qalcuity.api.subscription_history import create_subscription_log
             create_subscription_log(
                 subscription_name=self.name,
                 action="Activated",
@@ -263,7 +263,7 @@ class QalcuitySubscription(Document):
 
         # Log reactivation
         try:
-            from qalcuity.qalcuity.api.subscription_history import create_subscription_log
+            from qalcuity.api.subscription_history import create_subscription_log
             create_subscription_log(
                 subscription_name=self.name,
                 action="Reactivated",
@@ -294,7 +294,7 @@ class QalcuitySubscription(Document):
 
         # Log suspension
         try:
-            from qalcuity.qalcuity.api.subscription_history import create_subscription_log
+            from qalcuity.api.subscription_history import create_subscription_log
             create_subscription_log(
                 subscription_name=self.name,
                 action="Suspended",
@@ -323,7 +323,7 @@ class QalcuitySubscription(Document):
 
         # Log cancellation
         try:
-            from qalcuity.qalcuity.api.subscription_history import create_subscription_log
+            from qalcuity.api.subscription_history import create_subscription_log
             create_subscription_log(
                 subscription_name=self.name,
                 action="Cancelled",
@@ -395,7 +395,7 @@ class QalcuitySubscription(Document):
                 pass
 
         if self.status == "Grace Period" and self.end_date:
-            from qalcuity.qalcuity.tasks import GRACE_PERIOD_DAYS
+            from qalcuity.tasks import GRACE_PERIOD_DAYS
             grace_end_date = add_days(getdate(self.end_date), GRACE_PERIOD_DAYS)
             if getdate(nowdate()) > grace_end_date:
                 old_status = self.status
@@ -405,7 +405,7 @@ class QalcuitySubscription(Document):
 
                 # Log expiry
                 try:
-                    from qalcuity.qalcuity.api.subscription_history import create_subscription_log
+                    from qalcuity.api.subscription_history import create_subscription_log
                     create_subscription_log(
                         subscription_name=self.name,
                         action="Expired",

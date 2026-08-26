@@ -24,7 +24,7 @@ def get_context(context):
         raise frappe.Redirect
 
     # Check admin role
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
 
     if not is_admin_user():
         frappe.local.flags.redirect_location = "/dashboard"

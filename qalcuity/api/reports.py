@@ -27,7 +27,7 @@ def get_revenue_report(from_date=None, to_date=None):
     if user == "Guest":
         frappe.throw(_("Please login to access reports."))
 
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if not is_admin_user():
         frappe.throw(_("You do not have permission to access reports."))
 
@@ -89,7 +89,7 @@ def get_mrr_report(from_date=None, to_date=None):
     if user == "Guest":
         frappe.throw(_("Please login to access reports."))
 
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if not is_admin_user():
         frappe.throw(_("You do not have permission to access reports."))
 
@@ -155,7 +155,7 @@ def get_churn_report(from_date=None, to_date=None):
     if user == "Guest":
         frappe.throw(_("Please login to access reports."))
 
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if not is_admin_user():
         frappe.throw(_("You do not have permission to access reports."))
 
@@ -210,7 +210,7 @@ def get_plan_distribution():
     if user == "Guest":
         frappe.throw(_("Please login to access reports."))
 
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if not is_admin_user():
         frappe.throw(_("You do not have permission to access reports."))
 
@@ -247,7 +247,7 @@ def get_overview_stats():
     if user == "Guest":
         frappe.throw(_("Please login to access reports."))
 
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if not is_admin_user():
         frappe.throw(_("You do not have permission to access reports."))
 

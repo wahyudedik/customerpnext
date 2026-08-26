@@ -20,25 +20,25 @@ Endpoint Categories:
 
 Usage dari client:
     frappe.call({
-        "method": "qalcuity.qalcuity.api.v1.endpoints.get_plans",
+        "method": "qalcuity.api.v1.endpoints.get_plans",
         "callback": function(r) { ... }
     })
 
 Atau via API:
-    POST /api/method/qalcuity.qalcuity.api.v1.endpoints.get_plans
+    POST /api/method/qalcuity.api.v1.endpoints.get_plans
 """
 
 import frappe
 from frappe import _
 
-from qalcuity.qalcuity.api.v1.auth import (
+from qalcuity.api.v1.auth import (
     require_authentication,
     require_customer_role,
     require_admin_role,
     get_current_user_info,
     rate_limit_check,
 )
-from qalcuity.qalcuity.api.v1.responses import (
+from qalcuity.api.v1.responses import (
     success_response,
     error_response,
     ErrorCode,
@@ -117,7 +117,7 @@ def get_plans():
         dict: Standard success response dengan list plans
     """
     try:
-        from qalcuity.qalcuity.api.plans import get_active_plans as _get_active_plans
+        from qalcuity.api.plans import get_active_plans as _get_active_plans
 
         plans = _get_active_plans()
         return success_response(
@@ -148,7 +148,7 @@ def register(full_name, email, password, company_name, phone):
         dict: Standard success response dengan registration result
     """
     try:
-        from qalcuity.qalcuity.api.registration import register_customer as _register_customer
+        from qalcuity.api.registration import register_customer as _register_customer
 
         result = _register_customer(full_name, email, password, company_name, phone)
         return success_response(
@@ -186,7 +186,7 @@ def submit_payment(subscription, amount, payment_method, payment_date,
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.payment import submit_payment as _submit_payment
+        from qalcuity.api.payment import submit_payment as _submit_payment
 
         result = _submit_payment(
             subscription=subscription,
@@ -218,7 +218,7 @@ def get_my_payments():
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.payment import get_my_payments as _get_my_payments
+        from qalcuity.api.payment import get_my_payments as _get_my_payments
 
         result = _get_my_payments()
         return success_response(
@@ -246,7 +246,7 @@ def get_payment_status(payment_name):
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.payment import get_payment_status as _get_payment_status
+        from qalcuity.api.payment import get_payment_status as _get_payment_status
 
         result = _get_payment_status(payment_name)
         return success_response(
@@ -271,7 +271,7 @@ def get_profile():
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.profile import get_profile as _get_profile
+        from qalcuity.api.profile import get_profile as _get_profile
 
         result = _get_profile()
         return success_response(
@@ -299,7 +299,7 @@ def update_profile(data):
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.profile import update_profile as _update_profile
+        from qalcuity.api.profile import update_profile as _update_profile
 
         result = _update_profile(data)
         return success_response(
@@ -324,7 +324,7 @@ def get_dashboard():
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.dashboard import get_dashboard_data as _get_dashboard_data
+        from qalcuity.api.dashboard import get_dashboard_data as _get_dashboard_data
 
         result = _get_dashboard_data()
         return success_response(
@@ -349,7 +349,7 @@ def get_account_status():
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.account_status import get_account_status as _get_account_status
+        from qalcuity.api.account_status import get_account_status as _get_account_status
 
         result = _get_account_status()
         return success_response(
@@ -378,7 +378,7 @@ def get_my_subscription_history(limit_page_length=20, start=0):
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.subscription_history import (
+        from qalcuity.api.subscription_history import (
             get_my_subscription_history as _get_my_subscription_history,
         )
 
@@ -413,7 +413,7 @@ def get_my_audit_logs(limit_page_length=20, start=0):
         user_info = require_customer_role()
         rate_limit_check(user_info["user"])
 
-        from qalcuity.qalcuity.api.audit import get_my_audit_logs as _get_my_audit_logs
+        from qalcuity.api.audit import get_my_audit_logs as _get_my_audit_logs
 
         result = _get_my_audit_logs(
             limit_page_length=limit_page_length,
@@ -449,7 +449,7 @@ def get_pending_reviews(filters=None):
         user = require_admin_role()
         rate_limit_check(user)
 
-        from qalcuity.qalcuity.api.admin import get_pending_payments as _get_pending_payments
+        from qalcuity.api.admin import get_pending_payments as _get_pending_payments
 
         result = _get_pending_payments(filters=filters)
         return success_response(
@@ -478,7 +478,7 @@ def approve_payment(payment_name):
         user = require_admin_role()
         rate_limit_check(user)
 
-        from qalcuity.qalcuity.api.admin import approve_payment as _approve_payment
+        from qalcuity.api.admin import approve_payment as _approve_payment
 
         result = _approve_payment(payment_name)
         return success_response(
@@ -507,7 +507,7 @@ def reject_payment(payment_name, reason):
         user = require_admin_role()
         rate_limit_check(user)
 
-        from qalcuity.qalcuity.api.admin import reject_payment as _reject_payment
+        from qalcuity.api.admin import reject_payment as _reject_payment
 
         result = _reject_payment(payment_name, reason)
         return success_response(
@@ -535,7 +535,7 @@ def bulk_approve_payments(payment_names):
         user = require_admin_role()
         rate_limit_check(user)
 
-        from qalcuity.qalcuity.api.admin import bulk_approve_payments as _bulk_approve_payments
+        from qalcuity.api.admin import bulk_approve_payments as _bulk_approve_payments
 
         result = _bulk_approve_payments(payment_names)
         approved_count = len([r for r in result if r.get("status") == "success"]) if isinstance(result, list) else 0
@@ -566,7 +566,7 @@ def bulk_reject_payments(payment_names, reason):
         user = require_admin_role()
         rate_limit_check(user)
 
-        from qalcuity.qalcuity.api.admin import bulk_reject_payments as _bulk_reject_payments
+        from qalcuity.api.admin import bulk_reject_payments as _bulk_reject_payments
 
         result = _bulk_reject_payments(payment_names, reason)
         rejected_count = len([r for r in result if r.get("status") == "success"]) if isinstance(result, list) else 0
@@ -599,7 +599,7 @@ def get_audit_logs(filters=None, limit_page_length=20, start=0, order_by="timest
         user = require_admin_role()
         rate_limit_check(user)
 
-        from qalcuity.qalcuity.api.audit import get_audit_logs as _get_audit_logs
+        from qalcuity.api.audit import get_audit_logs as _get_audit_logs
 
         result = _get_audit_logs(
             filters=filters,
@@ -634,7 +634,7 @@ def get_all_subscription_history(limit_page_length=20, start=0):
         user = require_admin_role()
         rate_limit_check(user)
 
-        from qalcuity.qalcuity.api.subscription_history import (
+        from qalcuity.api.subscription_history import (
             get_my_subscription_history as _get_subscription_history,
         )
 
@@ -667,7 +667,7 @@ def get_settings():
         dict: Standard success response dengan settings data
     """
     try:
-        from qalcuity.qalcuity.qalcuity.doctype.qalcuity_settings.qalcuity_settings import (
+        from qalcuity.qalcuity.doctype.qalcuity_settings.qalcuity_settings import (
             get_settings as _get_settings,
         )
 

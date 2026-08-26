@@ -422,7 +422,7 @@ class QalcuityPayment(Document):
     def _notify_superadmin_in_app(self):
         """Buat in-app notification ke superadmin users."""
         try:
-            from qalcuity.qalcuity.api.notification import create_notification
+            from qalcuity.api.notification import create_notification
 
             # Ambil semua superadmin users
             superadmin_users = frappe.get_all(
@@ -465,7 +465,7 @@ class QalcuityPayment(Document):
     def _notify_customer_in_app(self, title, message, link=None):
         """Buat in-app notification ke customer."""
         try:
-            from qalcuity.qalcuity.api.notification import create_notification
+            from qalcuity.api.notification import create_notification
 
             # Ambil customer user
             customer_email = self.get_customer_email()

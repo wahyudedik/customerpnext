@@ -1,0 +1,89 @@
+{
+    "app": "qalcuity",
+    "creation": "2026-08-26 12:50:00.000000",
+    "docstatus": 0,
+    "doctype": "Workspace Sidebar",
+    "header_icon": "octicon octicon-zap",
+    "idx": 0,
+    "items": [
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-gear",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Dashboard",
+            "link_to": "Qalcuity",
+            "link_type": "Workspace",
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-tag",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Plans",
+            "link_to": "Qalcuity Plan",
+            "link_type": "DocType",
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-package",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Subscriptions",
+            "link_to": "Qalcuity Subscription",
+            "link_type": "DocType",
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-credit-card",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Payments",
+            "link_to": "Qalcuity Payment",
+            "link_type": "DocType",
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-organization",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Tenants",
+            "link_to": "Qalcuity Tenant",
+            "link_type": "DocType",
+            "show_arrow": 0,
+            "type": "Link"
+        },
+        {
+            "child": 0,
+            "collapsible": 1,
+            "icon": "octicon octicon-tools",
+            "indent": 0,
+            "keep_closed": 0,
+            "label": "Settings",
+            "link_to": "Qalcuity Settings",
+            "link_type": "DocType",
+            "show_arrow": 0,
+            "type": "Link"
+        }
+    ],
+    "modified": "2026-08-26 12:50:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity",
+    "owner": "Administrator",
+    "standard": 1,
+    "title": "Qalcuity"
+}

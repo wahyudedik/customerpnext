@@ -39,7 +39,7 @@ def get_system_health():
     if user == "Guest":
         frappe.throw(_("Please login to access system health."))
 
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if not is_admin_user():
         frappe.throw(_("You do not have permission to access system health."))
 

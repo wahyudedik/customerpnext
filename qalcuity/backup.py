@@ -138,7 +138,7 @@ def run_backup(backup_type="Full", performed_by="Scheduler", notes=None):
 
         # Log activity
         try:
-            from qalcuity.qalcuity.api.audit import log_action
+            from qalcuity.api.audit import log_action
             log_action(
                 action="Backup Complete",
                 doc_type="Qalcuity Backup",
@@ -197,7 +197,7 @@ def run_backup(backup_type="Full", performed_by="Scheduler", notes=None):
 
                 # Log failure
                 try:
-                    from qalcuity.qalcuity.api.audit import log_action
+                    from qalcuity.api.audit import log_action
                     log_action(
                         action="Backup Failed",
                         doc_type="Qalcuity Backup",

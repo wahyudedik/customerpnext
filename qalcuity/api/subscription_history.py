@@ -108,14 +108,14 @@ def get_my_subscription_history(limit_page_length=20, start=0):
     Returns:
         dict: {data: [...], total: int}
     """
-    from qalcuity.qalcuity.isolation import get_current_customer
+    from qalcuity.isolation import get_current_customer
 
     user = frappe.session.user
     if user in ("Guest", "Administrator"):
         frappe.throw(_("Access denied."))
 
     # Check if admin — they can see all
-    from qalcuity.qalcuity.isolation import is_admin_user
+    from qalcuity.isolation import is_admin_user
     if is_admin_user():
         # Admin sees all subscription logs
         total = frappe.db.sql(
@@ -175,7 +175,7 @@ def get_my_subscription_history(limit_page_length=20, start=0):
 
 def _check_subscription_access(subscription_name):
     """Cek apakah user memiliki akses ke subscription tertentu."""
-    from qalcuity.qalcuity.isolation import is_admin_user, get_current_customer
+    from qalcuity.isolation import is_admin_user, get_current_customer
 
     if is_admin_user():
         return True
