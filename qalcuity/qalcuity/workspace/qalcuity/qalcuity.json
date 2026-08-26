@@ -285,7 +285,7 @@
             "color": "Red",
             "label": "Payment Review",
             "link_to": "/admin-reviews",
-            "type": "Link"
+            "type": "URL"
         }
     ],
     "sidebar_items": [
