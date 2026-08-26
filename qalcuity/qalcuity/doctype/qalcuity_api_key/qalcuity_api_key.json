@@ -1,0 +1,167 @@
+{
+    "actions": [],
+    "autoname": "format:QKEY-{YYYYMMDD}-{####}",
+    "creation": "2026-08-26 10:00:00.000000",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "customer",
+        "key_name",
+        "is_active",
+        "column_break_main",
+        "api_key",
+        "api_secret",
+        "section_break_security",
+        "permissions_level",
+        "expires_at",
+        "column_break_security",
+        "allowed_ips",
+        "section_break_tracking",
+        "last_used"
+    ],
+    "fields": [
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Customer",
+            "options": "Customer",
+            "reqd": 1
+        },
+        {
+            "fieldname": "key_name",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Key Name",
+            "reqd": 1,
+            "description": "Nama identifikasi API key (misal: Production API, Testing)"
+        },
+        {
+            "default": "1",
+            "fieldname": "is_active",
+            "fieldtype": "Check",
+            "in_list_view": 1,
+            "label": "Active"
+        },
+        {
+            "fieldname": "column_break_main",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "api_key",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "API Key",
+            "read_only": 1,
+            "unique": 1,
+            "reqd": 1,
+            "description": "Auto-generated. Gunakan header X-Qalcuity-Key saat request."
+        },
+        {
+            "fieldname": "api_secret",
+            "fieldtype": "Password",
+            "label": "API Secret",
+            "read_only": 1,
+            "reqd": 0,
+            "description": "Hanya ditampilkan sekali saat pembuatan. Simpan di tempat aman."
+        },
+        {
+            "fieldname": "section_break_security",
+            "fieldtype": "Section Break",
+            "label": "Security Settings"
+        },
+        {
+            "default": "Read Only",
+            "fieldname": "permissions_level",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Permissions",
+            "options": "Read Only\nRead & Write",
+            "description": "Batasi aksi yang bisa dilakukan API key ini"
+        },
+        {
+            "fieldname": "expires_at",
+            "fieldtype": "Datetime",
+            "label": "Expires At",
+            "description": "Kosongkan jika tidak ingin set expiry"
+        },
+        {
+            "fieldname": "column_break_security",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "allowed_ips",
+            "fieldtype": "Small Text",
+            "label": "Allowed IPs",
+            "description": "Comma-separated IP whitelist. Kosongkan untuk allow all IPs."
+        },
+        {
+            "fieldname": "section_break_tracking",
+            "fieldtype": "Section Break",
+            "label": "Tracking"
+        },
+        {
+            "fieldname": "last_used",
+            "fieldtype": "Datetime",
+            "in_list_view": 1,
+            "label": "Last Used",
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 0,
+    "links": [],
+    "modified": "2026-08-26 10:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "Qalcuity",
+    "name": "Qalcuity Api Key",
+    "naming_rule": "Expression",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Superadmin",
+            "read": 1,
+            "write": 1,
+            "create": 1,
+            "delete": 1
+        },
+        {
+            "role": "Qalcuity Admin",
+            "read": 1,
+            "write": 1,
+            "create": 0,
+            "delete": 0
+        },
+        {
+            "role": "All",
+            "read": 0,
+            "write": 0,
+            "create": 0,
+            "delete": 0,
+            "user_permission": 1
+        }
+    ],
+    "search_fields": "customer,key_name,api_key",
+    "sort_field": "creation",
+    "sort_order": "DESC",
+    "states": [
+        {
+            "color": "green",
+            "title": "Active"
+        },
+        {
+            "color": "red",
+            "title": "Revoked"
+        }
+    ],
+    "title_field": "key_name",
+    "track_changes": 1
+}

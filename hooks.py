@@ -138,6 +138,18 @@ website_route_rules = [
         "from_route": "/subscription-history",
         "to_route": "subscription-history",
     },
+    {
+        "from_route": "/verify-email",
+        "to_route": "verify-email",
+    },
+    {
+        "from_route": "/forgot-password",
+        "to_route": "forgot-password",
+    },
+    {
+        "from_route": "/reset-password",
+        "to_route": "reset-password",
+    },
 ]
 
 # =============================================================================
