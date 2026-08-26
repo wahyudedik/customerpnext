@@ -517,6 +517,22 @@ Frappe / ERPNext
 | `trigger_backup` | POST | Trigger backup (admin) |
 | `get_backup_status` | GET | Get backup status (admin) |
 | `get_backup_list` | GET | Get backup list (admin) |
+| `change_plan` | POST | Change plan (upgrade/downgrade) with prorated billing |
+| `get_plan_changes` | GET | Get plan change history (admin) |
+| `get_my_plan_changes` | GET | Get user's plan change history |
+| `get_revenue_report` | GET | Get revenue report (admin) |
+| `get_mrr_report` | GET | Get MRR report (admin) |
+| `get_churn_report` | GET | Get churn rate report (admin) |
+| `get_plan_distribution` | GET | Get plan distribution report (admin) |
+| `get_export_data` | GET | Export data as CSV (admin) |
+| `create_api_key` | POST | Create new API key |
+| `list_api_keys` | GET | List user's API keys |
+| `revoke_api_key` | POST | Revoke an API key |
+| `get_login_logs` | GET | Get login audit trail (admin) |
+| `get_my_login_logs` | GET | Get user's own login logs |
+| `check_renewals` | Internal | Auto-check and trigger renewal reminders |
+| `renew_subscription` | POST | Renew subscription |
+| `get_renewal_status` | GET | Get renewal status for current subscription |
 
 #### Notification API
 
@@ -532,6 +548,8 @@ Frappe / ERPNext
 
 20 endpoints dengan auth check, rate limiting, standard response format.
 Lihat [`api/v1/`](qalcuity/qalcuity/api/v1/) untuk detail lengkap.
+
+**Total API:** 72 core API + 20 API v1 = **92 endpoints**
 
 Qalcuity API should eventually provide stable endpoints for:
 
@@ -1383,16 +1401,31 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Sessions Page (`/sessions`) — Active sessions management | ✅ |
 | Admin Health Page (`/admin-health`) — System health monitoring dashboard | ✅ |
 
-### Next Sprint — ERP Enhancement & Polish
+### Sprint 10 — ERP Enhancement, Reports & Security Hardening: ✅ DONE
 
-* [ ] Custom reports
-* [ ] Customer-level data export
-* [ ] Production deployment automation
-* [ ] API key management
-* [ ] Upload security audit
-* [ ] Input validation audit
-* [ ] Plan upgrade/downgrade flow
-* [ ] Prorated billing untuk upgrade
+| Item | Status |
+|------|--------|
+| Plan Upgrade/Downgrade Flow — Customer bisa upgrade/downgrade plan dengan prorated billing | ✅ |
+| Qalcuity Plan Change DocType — Track semua perubahan plan (`PC-{YYYYMMDD}-{####}`) | ✅ |
+| Custom Reports — Revenue, MRR, Churn Rate, Plan Distribution reports | ✅ |
+| API Key Management — Create, list, revoke API keys + auth middleware | ✅ |
+| Qalcuity Api Key DocType — API key storage dan management (`KEY-{YYYYMMDD}-{####}`) | ✅ |
+| Login Audit Trail — Track semua login attempts success/failure | ✅ |
+| Qalcuity Login Log DocType — Login log records (`LOG-{YYYYMMDD}-{####}`) | ✅ |
+| Subscription Renewal Automation — Auto-renewal reminder & renewal flow | ✅ |
+| Data Export (CSV) — Export payments, subscriptions, customers ke CSV | ✅ |
+| Upload Security Audit — File type validation, size limits, content-type check | ✅ |
+| Input Validation Audit — Server-side sanitasi semua user input | ✅ |
+| 7 new web pages — Plan Change, Reports, API Keys, Login Logs, Data Export, Renewal, Admin Reports | ✅ |
+
+### Next Sprint — Advanced Analytics & Integration
+
+* [ ] Advanced analytics dashboard
+* [ ] Webhook support (event-driven notifications)
+* [ ] Usage-based billing (metered billing)
+* [ ] Customer onboarding wizard
+* [ ] White-label customization options
+* [ ] Swagger/OpenAPI documentation
 
 ### Implemented DocTypes Summary
 
@@ -1410,8 +1443,11 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | Qalcuity Bank Account | (child table) | Multiple bank accounts per settings (`BANK-{####}`) |
 | Qalcuity Notification | [`qalcuity_notification/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_notification/) | In-app notifications (`NOTIF-{YYYYMMDD}-{####}`) |
 | Qalcuity Provisioning Log | [`qalcuity_provisioning_log/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_provisioning_log/) | ERP provisioning event tracking (`PROV-{YYYYMMDD}-{####}`) |
+| Qalcuity Plan Change | [`qalcuity_plan_change/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_plan_change/) | Plan upgrade/downgrade history (`PC-{YYYYMMDD}-{####}`) |
+| Qalcuity Api Key | [`qalcuity_api_key/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_api_key/) | API key management for external integrations (`KEY-{YYYYMMDD}-{####}`) |
+| Qalcuity Login Log | [`qalcuity_login_log/`](qalcuity/qalcuity/qalcuity/doctype/qalcuity_login_log/) | Login audit trail — success/failure tracking (`LOG-{YYYYMMDD}-{####}`) |
 
-### Implemented Web Pages (17 + Navigation)
+### Implemented Web Pages (24 + Navigation)
 
 | Page | Route | Purpose |
 |------|-------|---------|
@@ -1432,6 +1468,13 @@ Do not build advanced features before the basic SaaS lifecycle is stable.
 | 2FA Verify | `/2fa-verify` | 2FA verification during login |
 | Sessions | `/sessions` | Active sessions management page |
 | Admin Health | `/admin-health` | System health monitoring dashboard |
+| Plan Change | `/plan-change` | Upgrade/downgrade plan page |
+| Reports | `/reports` | Custom SaaS reports (revenue, MRR, churn, plan distribution) |
+| API Keys | `/api-keys` | API key management page |
+| Login Logs | `/login-logs` | Login audit trail page |
+| Data Export | `/data-export` | Export data ke CSV |
+| Renewal | `/renewal` | Subscription renewal page |
+| Admin Reports | `/admin-reports` | Superadmin reports dashboard |
 | Navigation | (included) | [`navigation.html`](qalcuity/qalcuity/templates/includes/navigation.html) — reusable header bar dengan hamburger menu mobile |
 
 ### Implemented Patches

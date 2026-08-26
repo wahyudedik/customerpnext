@@ -1,6 +1,6 @@
 # Qalcuity ERP — API Documentation
 
-> **Last Updated:** 2026-08-26
+> **Last Updated:** 2026-08-27
 
 ---
 
@@ -88,6 +88,12 @@ https://qalcuity.com
 13. [Session Management](#213-session-management)
 14. [System Health](#214-system-health)
 15. [API v1 — Versioned Endpoints](#215-api-v1--versioned-endpoints)
+16. [Plan Change](#216-plan-change)
+17. [Reports & Analytics](#217-reports--analytics)
+18. [API Key Management](#218-api-key-management)
+19. [Login Audit Trail](#219-login-audit-trail)
+20. [Subscription Renewal](#220-subscription-renewal)
+21. [Data Export](#221-data-export)
 
 ---
 
@@ -1711,9 +1717,401 @@ All API v1 endpoints use standard middleware:
 
 ---
 
+## 2.16 Plan Change
+
+Endpoints untuk upgrade/downgrade plan dengan prorated billing.
+
+### POST `/api/method/qalcuity.qalcuity.api.plan_change.change_plan`
+
+Change customer's subscription plan with prorated billing.
+
+**Auth:** Customer (Portal User)
+
+**Request:**
+
+```json
+{
+  "new_plan": "Professional",
+  "reason": "Need more storage"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Plan changed successfully",
+  "data": {
+    "plan_change_id": "PC-20260827-0001",
+    "old_plan": "Starter",
+    "new_plan": "Professional",
+    "change_type": "upgrade",
+    "proration_amount": 150000,
+    "effective_date": "2026-08-27"
+  }
+}
+```
+
+**Error Responses:**
+
+| Status | Error | Condition |
+|--------|-------|-----------|
+| 400 | `same_plan` | New plan is same as current plan |
+| 400 | `pending_payment` | Customer has pending payment |
+| 404 | `subscription_not_found` | No active subscription |
+
+### GET `/api/method/qalcuity.qalcuity.api.plan_change.get_plan_changes`
+
+Get plan change history (admin only).
+
+**Auth:** Admin/Superadmin
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "name": "PC-20260827-0001",
+      "customer": "Customer A",
+      "old_plan": "Starter",
+      "new_plan": "Professional",
+      "change_type": "upgrade",
+      "proration_amount": 150000,
+      "creation": "2026-08-27 10:00:00"
+    }
+  ]
+}
+```
+
+### GET `/api/method/qalcuity.qalcuity.api.plan_change.get_my_plan_changes`
+
+Get current user's plan change history.
+
+**Auth:** Customer (Portal User)
+
+---
+
+## 2.17 Reports & Analytics
+
+Custom SaaS reports untuk admin dashboard.
+
+### GET `/api/method/qalcuity.qalcuity.api.reports.get_revenue_report`
+
+Get revenue report with date range filtering.
+
+**Auth:** Admin/Superadmin
+
+**Request Params:**
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `start_date` | string | First day of current month | Report start date |
+| `end_date` | string | Today | Report end date |
+
+**Response:**
+
+```json
+{
+  "data": {
+    "total_revenue": 5000000,
+    "transaction_count": 25,
+    "average_payment": 200000,
+    "revenue_by_plan": [
+      {"plan": "Starter", "revenue": 1000000, "count": 10},
+      {"plan": "Professional", "revenue": 2500000, "count": 10},
+      {"plan": "Enterprise", "revenue": 1500000, "count": 5}
+    ]
+  }
+}
+```
+
+### GET `/api/method/qalcuity.qalcuity.api.reports.get_mrr_report`
+
+Get Monthly Recurring Revenue report.
+
+**Auth:** Admin/Superadmin
+
+**Response:**
+
+```json
+{
+  "data": {
+    "current_mrr": 3500000,
+    "mrr_by_plan": [
+      {"plan": "Starter", "mrr": 500000, "subscribers": 10},
+      {"plan": "Professional", "mrr": 2000000, "subscribers": 8},
+      {"plan": "Enterprise", "mrr": 1000000, "subscribers": 2}
+    ],
+    "mrr_trend": [
+      {"month": "2026-07", "mrr": 2800000},
+      {"month": "2026-08", "mrr": 3500000}
+    ]
+  }
+}
+```
+
+### GET `/api/method/qalcuity.qalcuity.api.reports.get_churn_report`
+
+Get churn rate report.
+
+**Auth:** Admin/Superadmin
+
+**Response:**
+
+```json
+{
+  "data": {
+    "churn_rate": 5.2,
+    "total_expired": 3,
+    "total_active": 55,
+    "churn_by_plan": [
+      {"plan": "Starter", "churn_rate": 8.0, "expired": 2, "active": 23},
+      {"plan": "Professional", "churn_rate": 3.0, "expired": 1, "active": 32}
+    ]
+  }
+}
+```
+
+### GET `/api/method/qalcuity.qalcuity.api.reports.get_plan_distribution`
+
+Get plan distribution report.
+
+**Auth:** Admin/Superadmin
+
+**Response:**
+
+```json
+{
+  "data": {
+    "total_subscribers": 58,
+    "distribution": [
+      {"plan": "Starter", "subscribers": 25, "percentage": 43.1},
+      {"plan": "Professional", "subscribers": 22, "percentage": 37.9},
+      {"plan": "Enterprise", "subscribers": 11, "percentage": 19.0}
+    ]
+  }
+}
+```
+
+---
+
+## 2.18 API Key Management
+
+Endpoints untuk membuat, melihat, dan mencabut API keys.
+
+### POST `/api/method/qalcuity.qalcuity.api.api_key_api.create_api_key`
+
+Create a new API key for external integrations.
+
+**Auth:** Customer (Portal User)
+
+**Request:**
+
+```json
+{
+  "key_name": "My Integration Key"
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "name": "KEY-20260827-0001",
+    "key_name": "My Integration Key",
+    "api_key": "qk_xxxxxxxxxxxxxxxxxxxxxxxx",
+    "created_at": "2026-08-27T10:00:00"
+  }
+}
+```
+
+> **⚠️ Important:** The `api_key` value is only shown once at creation time. Store it securely.
+
+### GET `/api/method/qalcuity.qalcuity.api.api_key_api.list_api_keys`
+
+List all API keys for the current user.
+
+**Auth:** Customer (Portal User)
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "name": "KEY-20260827-0001",
+      "key_name": "My Integration Key",
+      "is_active": 1,
+      "created_at": "2026-08-27T10:00:00",
+      "last_used": "2026-08-27T11:30:00"
+    }
+  ]
+}
+```
+
+### POST `/api/method/qalcuity.qalcuity.api.api_key_api.revoke_api_key`
+
+Revoke (deactivate) an API key.
+
+**Auth:** Customer (Portal User — must own the key)
+
+**Request:**
+
+```json
+{
+  "api_key_name": "KEY-20260827-0001"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "API key revoked successfully"
+}
+```
+
+---
+
+## 2.19 Login Audit Trail
+
+Endpoints untuk melihat log login attempts.
+
+### GET `/api/method/qalcuity.qalcuity.api.login_log.get_login_logs`
+
+Get all login audit logs (admin only).
+
+**Auth:** Admin/Superadmin
+
+**Request Params:**
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `limit` | int | 50 | Number of records to return |
+| `start` | int | 0 | Offset for pagination |
+| `status` | string | — | Filter by status (success/failed) |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "name": "LOG-20260827-0001",
+      "user": "user@example.com",
+      "status": "success",
+      "ip_address": "192.168.1.1",
+      "user_agent": "Mozilla/5.0...",
+      "timestamp": "2026-08-27 10:00:00"
+    }
+  ],
+  "total": 150
+}
+```
+
+### GET `/api/method/qalcuity.qalcuity.api.login_log.get_my_login_logs`
+
+Get current user's own login logs.
+
+**Auth:** Customer (Portal User)
+
+**Response:** Same format as `get_login_logs` but filtered to current user.
+
+---
+
+## 2.20 Subscription Renewal
+
+Endpoints untuk renewal subscription yang expired atau hampir expired.
+
+### POST `/api/method/qalcuity.qalcuity.api.renewal.renew_subscription`
+
+Renew an expired or expiring subscription.
+
+**Auth:** Customer (Portal User)
+
+**Request:**
+
+```json
+{
+  "plan": "Professional"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Subscription renewal initiated. Please complete payment.",
+  "data": {
+    "subscription_id": "QSUB-20260827-0001",
+    "plan": "Professional",
+    "status": "PENDING",
+    "payment_url": "/checkout?renewal=true"
+  }
+}
+```
+
+### GET `/api/method/qalcuity.qalcuity.api.renewal.get_renewal_status`
+
+Get renewal status for current subscription.
+
+**Auth:** Customer (Portal User)
+
+**Response:**
+
+```json
+{
+  "data": {
+    "subscription_status": "EXPIRED",
+    "days_since_expiry": 15,
+    "grace_period_remaining": 0,
+    "can_renew": true,
+    "available_plans": ["Starter", "Professional", "Enterprise"]
+  }
+}
+```
+
+### Internal: `check_renewals`
+
+Auto-check and trigger renewal reminders via scheduler. Not directly accessible via API.
+
+---
+
+## 2.21 Data Export
+
+Export data dalam format CSV.
+
+### GET `/api/method/qalcuity.qalcuity.api.reports.get_export_data`
+
+Export data as CSV file.
+
+**Auth:** Admin/Superadmin
+
+**Request Params:**
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `export_type` | string | — | `payments`, `subscriptions`, or `customers` |
+| `start_date` | string | — | Filter start date |
+| `end_date` | string | — | Filter end date |
+
+**Response:** CSV file download (Content-Type: text/csv)
+
+**Export Types:**
+
+| Type | Fields |
+|------|--------|
+| `payments` | ID, Customer, Amount, Status, Payment Date, Created |
+| `subscriptions` | ID, Customer, Plan, Status, Start Date, End Date |
+| `customers` | ID, Name, Email, Company, Created |
+
+---
+
 ## 3. Complete Endpoint Summary
 
-### Core API Endpoints (40 total)
+### Core API Endpoints (72 total)
 
 | Category | Count | Auth |
 |----------|-------|------|
@@ -1731,7 +2129,13 @@ All API v1 endpoints use standard middleware:
 | 2FA | 7 | Customer/Admin/`allow_guest` |
 | Session Management | 3 | Customer/Admin |
 | System Health | 1 | Admin |
-| **Total** | **53** | |
+| Plan Change | 3 | Customer/Admin |
+| Reports & Analytics | 5 | Admin |
+| API Key Management | 3 | Customer |
+| Login Audit Trail | 2 | Admin/Customer |
+| Subscription Renewal | 3 | Customer/Admin |
+| Data Export | 1 | Admin |
+| **Total** | **72** | |
 
 ### API v1 Endpoints (20 total)
 
@@ -1742,6 +2146,8 @@ All API v1 endpoints use standard middleware:
 | Admin | 7 | Admin |
 | Authenticated | 1 | Any |
 | **Total** | **20** | |
+
+### Grand Total: 72 Core API + 20 API v1 = **92 endpoints**
 
 ---
 
@@ -1763,6 +2169,9 @@ All API v1 endpoints use standard middleware:
 | Qalcuity Bank Account | `BANK-{####}` | bank_name, account_number, account_name |
 | Qalcuity Notification | `NOTIF-{YYYYMMDD}-{####}` | user, title, message, is_read, notification_type |
 | Qalcuity Provisioning Log | `PROV-{YYYYMMDD}-{####}` | tenant, action, status, details |
+| Qalcuity Plan Change | `PC-{YYYYMMDD}-{####}` | customer, old_plan, new_plan, change_type, proration_amount |
+| Qalcuity Api Key | `KEY-{YYYYMMDD}-{####}` | customer, key_name, api_key, is_active, last_used |
+| Qalcuity Login Log | `LOG-{YYYYMMDD}-{####}` | user, status, ip_address, user_agent, timestamp |
 
 ### Subscription Status Flow
 
@@ -1799,6 +2208,10 @@ PENDING → REJECTED
 | Password Reset | Token-based (1h TTL) |
 | 2FA | TOTP (RFC 6238) + backup codes |
 | Password Policy | Min 8 chars + letter + number |
+| API Key Auth | API key-based authentication for external integrations |
+| Upload Security | File type whitelist, size limits (5MB), content-type validation |
+| Input Validation | Server-side sanitasi untuk semua user input |
+| Login Audit Trail | Track semua login attempts dengan IP, user-agent, timestamp |
 
 ### Permission Matrix
 
@@ -1811,6 +2224,13 @@ PENDING → REJECTED
 | View Profile | — | ✅ | — | — |
 | Manage 2FA | — | ✅ | ✅ | ✅ |
 | Manage Sessions | — | ✅ | ✅ | ✅ |
+| Change Plan | — | ✅ | — | — |
+| View Plan Changes | — | ✅ | ✅ | ✅ |
+| Manage API Keys | — | ✅ | ✅ | ✅ |
+| View Reports | — | — | ✅ | ✅ |
+| Export Data (CSV) | — | — | ✅ | ✅ |
+| View Login Logs | — | ✅ | ✅ | ✅ |
+| Renew Subscription | — | ✅ | — | — |
 | Approve Payments | — | — | ✅ | ✅ |
 | Reject Payments | — | — | ✅ | ✅ |
 | View All Audit Logs | — | — | ✅ | ✅ |

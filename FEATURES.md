@@ -228,7 +228,7 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 
 ## Implementation Status
 
-> Last Updated: 2026-08-26
+> Last Updated: 2026-08-27
 
 | Feature | Status | Notes |
 |---------|--------|-------|
@@ -294,6 +294,14 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | System Health Monitoring | ✅ Done | System, application, activity stats + health checks (admin) |
 | ERP Module Config per Plan | ✅ Done | Module access controls per plan tier (plan_modules field) |
 | API Documentation | ✅ Done | Comprehensive API_DOCUMENTATION.md with all endpoints |
+| Plan Upgrade/Downgrade Flow | ✅ Done | Customer bisa upgrade/downgrade plan dengan prorated billing |
+| Custom Reports | ✅ Done | Revenue, MRR, Churn Rate, Plan Distribution reports |
+| API Key Management | ✅ Done | Create, list, revoke API keys + auth middleware |
+| Login Audit Trail | ✅ Done | Track semua login attempts (success/failure) |
+| Subscription Renewal Automation | ✅ Done | Auto-renewal reminder & renewal flow |
+| Data Export (CSV) | ✅ Done | Export payments, subscriptions, customers ke CSV |
+| Upload Security Audit | ✅ Done | File type validation, size limits, malware check |
+| Input Validation Audit | ✅ Done | Server-side sanitasi semua user input |
 
 ### Implemented DocTypes
 
@@ -311,6 +319,9 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | Qalcuity Bank Account | Child | Multiple bank accounts per settings (`BANK-{####}`) | ✅ Done |
 | Qalcuity Notification | Standard | In-app notifications (`NOTIF-{YYYYMMDD}-{####}`) | ✅ Done |
 | Qalcuity Provisioning Log | Standard | ERP provisioning event tracking (`PROV-{YYYYMMDD}-{####}`) | ✅ Done |
+| Qalcuity Plan Change | Standard | Plan upgrade/downgrade history (`PC-{YYYYMMDD}-{####}`) | ✅ Done |
+| Qalcuity Api Key | Standard | API key management for external integrations (`KEY-{YYYYMMDD}-{####}`) | ✅ Done |
+| Qalcuity Login Log | Standard | Login audit trail — success/failure tracking (`LOG-{YYYYMMDD}-{####}`) | ✅ Done |
 
 ### Implemented API Endpoints
 
@@ -368,6 +379,23 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | `api/admin_dashboard.py::get_admin_dashboard_data` | GET | Get admin dashboard with revenue/customer/subscription stats | ✅ Done |
 | `api/plans.py::submit_payment_with_subscription` | POST | Submit payment and create subscription | ✅ Done |
 | `api/plans.py::get_plan_by_name` | GET | Get specific plan by name (public) | ✅ Done |
+| `api/plan_change.py::change_plan` | POST | Change plan (upgrade/downgrade) with prorated billing | ✅ Done |
+| `api/plan_change.py::get_plan_changes` | GET | Get plan change history (admin) | ✅ Done |
+| `api/plan_change.py::get_my_plan_changes` | GET | Get user's plan change history | ✅ Done |
+| `api/reports.py::get_revenue_report` | GET | Get revenue report (admin) | ✅ Done |
+| `api/reports.py::get_mrr_report` | GET | Get Monthly Recurring Revenue report (admin) | ✅ Done |
+| `api/reports.py::get_churn_report` | GET | Get churn rate report (admin) | ✅ Done |
+| `api/reports.py::get_plan_distribution` | GET | Get plan distribution report (admin) | ✅ Done |
+| `api/reports.py::get_export_data` | GET | Export data (payments, subscriptions, customers) as CSV | ✅ Done |
+| `api/api_key_api.py::create_api_key` | POST | Create new API key | ✅ Done |
+| `api/api_key_api.py::list_api_keys` | GET | List user's API keys | ✅ Done |
+| `api/api_key_api.py::revoke_api_key` | POST | Revoke an API key | ✅ Done |
+| `api/api_key_api.py::validate_api_key` | Internal | Validate API key (auth middleware) | ✅ Done |
+| `api/login_log.py::get_login_logs` | GET | Get login audit trail (admin) | ✅ Done |
+| `api/login_log.py::get_my_login_logs` | GET | Get user's own login logs | ✅ Done |
+| `api/renewal.py::check_renewals` | Internal | Auto-check and trigger renewal reminders | ✅ Done |
+| `api/renewal.py::renew_subscription` | POST | Renew subscription | ✅ Done |
+| `api/renewal.py::get_renewal_status` | GET | Get renewal status for current subscription | ✅ Done |
 
 #### Notification API
 
@@ -426,6 +454,13 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | 2FA Verify | `/2fa-verify` | 2FA verification during login | ✅ Done |
 | Sessions | `/sessions` | Active sessions management page | ✅ Done |
 | Admin Health | `/admin-health` | System health monitoring dashboard | ✅ Done |
+| Plan Change | `/plan-change` | Upgrade/downgrade plan page | ✅ Done |
+| Reports | `/reports` | Custom SaaS reports (revenue, MRR, churn, plan distribution) | ✅ Done |
+| API Keys | `/api-keys` | API key management page | ✅ Done |
+| Login Logs | `/login-logs` | Login audit trail page | ✅ Done |
+| Data Export | `/data-export` | Export data ke CSV | ✅ Done |
+| Subscription Renewal | `/renewal` | Subscription renewal page | ✅ Done |
+| Admin Reports | `/admin-reports` | Superadmin reports dashboard | ✅ Done |
 
 ### Implemented Patches
 
@@ -435,6 +470,15 @@ Custom App (Qalcuity) ──uses──→ Frappe Framework API
 | `seed_bank_accounts` | Seed 4 bank accounts default (BRI, JAGO, BTN, BSI) ke Qalcuity Settings | ✅ Done |
 | `seed_erp_user_role` | Seed "Qalcuity ERP User" role for tenant users | ✅ Done |
 | `set_website_branding` | Set Website Settings branding (favicon, splash_image, app_logo) ke Qalcuity | ✅ Done |
+
+### Implemented Security Features (Sprint 10 Updates)
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Upload Security | ✅ Done | File type whitelist, size limits (5MB), content-type validation |
+| Input Validation | ✅ Done | Server-side sanitasi untuk semua user input (XSS, SQL injection prevention) |
+| API Key Authentication | ✅ Done | API key generation, validation, middleware auth |
+| Login Audit Trail | ✅ Done | Track semua login attempts dengan IP, user-agent, timestamp |
 
 ### Implemented Email Notifications
 

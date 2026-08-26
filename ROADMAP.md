@@ -246,6 +246,23 @@ qalcuity.com — Single-site multi-tenant
 - [x] Email Verification — HMAC-SHA256 token, TTL 24 jam, resend rate limit
 - [x] Password Reset — Token-based, TTL 1 jam, rate limited
 
+### Sprint 10 — ERP Enhancement, Reports & Security Hardening ✅
+
+> Completed: 2026-08-27
+
+- [x] Plan Upgrade/Downgrade Flow — Customer bisa upgrade/downgrade plan dengan prorated billing ([`plan_change.py`](qalcuity/qalcuity/api/plan_change.py))
+- [x] Qalcuity Plan Change DocType — Track semua perubahan plan (`PC-{YYYYMMDD}-{####}`)
+- [x] Custom Reports — Revenue, MRR, Churn Rate, Plan Distribution reports ([`reports.py`](qalcuity/qalcuity/api/reports.py))
+- [x] API Key Management — Create, list, revoke API keys + auth middleware ([`api_key_api.py`](qalcuity/qalcuity/api/api_key_api.py))
+- [x] Qalcuity Api Key DocType — API key storage dan management (`KEY-{YYYYMMDD}-{####}`)
+- [x] Login Audit Trail — Track semua login attempts success/failure ([`login_log.py`](qalcuity/qalcuity/api/login_log.py))
+- [x] Qalcuity Login Log DocType — Login log records (`LOG-{YYYYMMDD}-{####}`)
+- [x] Subscription Renewal Automation — Auto-renewal reminder & renewal flow ([`renewal.py`](qalcuity/qalcuity/api/renewal.py))
+- [x] Data Export (CSV) — Export payments, subscriptions, customers ke CSV
+- [x] Upload Security Audit — File type validation, size limits, content-type check
+- [x] Input Validation Audit — Server-side sanitasi semua user input
+- [x] 7 new web pages — Plan Change, Reports, API Keys, Login Logs, Data Export, Renewal, Admin Reports
+
 ---
 
 ## 3. Current Status
@@ -283,8 +300,16 @@ qalcuity.com — Single-site multi-tenant
 | System Health | ✅ Working | System, application, activity stats |
 | ERP Module Config | ✅ Working | Module access controls per plan |
 | API Documentation | ✅ Working | Comprehensive API docs (53 + 20 endpoints) |
+| Plan Upgrade/Downgrade | ✅ Working | Prorated billing untuk upgrade/downgrade |
+| Custom Reports | ✅ Working | Revenue, MRR, churn, plan distribution |
+| API Key Management | ✅ Working | Create, list, revoke API keys |
+| Login Audit Trail | ✅ Working | Track semua login attempts |
+| Subscription Renewal | ✅ Working | Auto-renewal reminder & flow |
+| Data Export | ✅ Working | CSV export untuk payments, subscriptions, customers |
+| Upload Security | ✅ Working | File type validation, size limits |
+| Input Validation | ✅ Working | Server-side sanitasi |
 
-### Implemented DocTypes (12)
+### Implemented DocTypes (15)
 
 | # | DocType | Type | Purpose |
 |---|---------|------|---------|
@@ -300,8 +325,11 @@ qalcuity.com — Single-site multi-tenant
 | 10 | Qalcuity Bank Account | Child | Multiple bank accounts (`BANK-{####}`) |
 | 11 | Qalcuity Notification | Standard | In-app notifications (`NOTIF-{YYYYMMDD}-{####}`) |
 | 12 | Qalcuity Provisioning Log | Standard | ERP provisioning tracking (`PROV-{YYYYMMDD}-{####}`) |
+| 13 | Qalcuity Plan Change | Standard | Plan upgrade/downgrade history (`PC-{YYYYMMDD}-{####}`) |
+| 14 | Qalcuity Api Key | Standard | API key management (`KEY-{YYYYMMDD}-{####}`) |
+| 15 | Qalcuity Login Log | Standard | Login audit trail (`LOG-{YYYYMMDD}-{####}`) |
 
-### Implemented Web Pages (13 + Navigation)
+### Implemented Web Pages (24 + Navigation)
 
 | # | Page | Route | Purpose |
 |---|------|-------|---------|
@@ -322,16 +350,20 @@ qalcuity.com — Single-site multi-tenant
 | 15 | 2FA Verify | `/2fa-verify` | 2FA verification during login |
 | 16 | Sessions | `/sessions` | Active sessions management |
 | 17 | Admin Health | `/admin-health` | System health monitoring dashboard |
+| 18 | Plan Change | `/plan-change` | Upgrade/downgrade plan page |
+| 19 | Reports | `/reports` | Custom SaaS reports |
+| 20 | API Keys | `/api-keys` | API key management page |
+| 21 | Login Logs | `/login-logs` | Login audit trail page |
+| 22 | Data Export | `/data-export` | Export data ke CSV |
+| 23 | Renewal | `/renewal` | Subscription renewal page |
+| 24 | Admin Reports | `/admin-reports` | Superadmin reports dashboard |
 
 ### What Needs Attention
 
 - [ ] Production deployment reproducible from Git (VPS Docker + AAPanel)
 - [ ] Reverse proxy, HTTPS, domain configuration (Phase 1 remaining)
-- [ ] Custom reports
-- [ ] Customer-level data export
 - [ ] Responsive behavior testing di berbagai device
 - [ ] Custom login page responsive testing
-- [ ] API documentation (Swagger/OpenAPI format)
 - [ ] Session management hardening
 
 ---
@@ -381,7 +413,7 @@ graph TD
 
 > **Priority:** P1 — High
 > **Complexity:** L
-> **Status:** 🔄 In Progress (Sprint 9 partial — module config per plan done)
+> **Status:** 🔄 Partially Done (Sprint 9 + Sprint 10)
 
 **Goal:** Tingkatkan pengalaman ERP untuk customer berdasarkan plan tier mereka.
 
@@ -390,9 +422,9 @@ graph TD
 - [x] ERP module configuration per plan — Setiap plan mendapatkan modul ERP yang berbeda ✅ Sprint 9
 - [ ] Company creation automation during provisioning — Lebih robust, handle edge cases
 - [ ] ERP workspace customization per plan tier — Starter beda dengan Enterprise
-- [ ] Customer-level data export — Export data dalam format CSV/Excel
-- [ ] Plan upgrade/downgrade flow — Customer bisa upgrade/downgrade plan
-- [ ] Prorated billing untuk upgrade — Hitung selisih harga secara proporsional
+- [x] Customer-level data export — Export data dalam format CSV ✅ Sprint 10
+- [x] Plan upgrade/downgrade flow — Customer bisa upgrade/downgrade plan ✅ Sprint 10
+- [x] Prorated billing untuk upgrade — Hitung selisih harga secara proporsional ✅ Sprint 10
 
 #### ERP Module Access by Plan
 
@@ -417,7 +449,7 @@ graph TD
 
 > **Priority:** P1 — High
 > **Complexity:** M
-> **Status:** ✅ Done (Sprint 8 + Sprint 9)
+> **Status:** ✅ Done (Sprint 8 + Sprint 9 + Sprint 10)
 
 **Goal:** Perkuat keamanan untuk production readiness.
 
@@ -428,9 +460,9 @@ graph TD
 - [x] CSRF protection review — Pastikan semua form terlindungi ✅ Sprint 8
 - [x] Two-factor authentication — TOTP-based 2FA (RFC 6238) ✅ Sprint 9
 - [x] Session management — Active sessions list, force logout ✅ Sprint 9
-- [ ] API key management — Untuk integrasi external
-- [ ] Upload security audit — Validasi file type, size, malware check
-- [ ] Input validation audit — Sanitasi semua user input
+- [x] API key management — Untuk integrasi external ✅ Sprint 10
+- [x] Upload security audit — Validasi file type, size, malware check ✅ Sprint 10
+- [x] Input validation audit — Sanitasi semua user input ✅ Sprint 10
 
 ---
 
