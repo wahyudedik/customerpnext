@@ -7,3 +7,4 @@ qalcuity.qalcuity.patches.seed_erp_user_role
 qalcuity.qalcuity.patches.set_website_branding
 qalcuity.qalcuity.patches.seed_plan_modules
 qalcuity.qalcuity.patches.fix_email_account_smtp
+qalcuity.qalcuity.patches.cleanup_workspace_sidebar
